@@ -196,11 +196,10 @@
     }
   }
 
-  // Spawn exactly 2 cats!
+  // Spawn exactly 1 cat for testing
   let lastFrameTimestamp;
   function init() {
     new Neko("cat1", "cat");
-    new Neko("cat2", "cat");
 
     window.requestAnimationFrame(onAnimationFrame);
   }
