@@ -1,0 +1,44 @@
+name: Portfolio CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Docker Compose Build
+        run: docker compose build
+        # Mục đích của bước này là để đảm bảo code không bị lỗi compile (do build Docker image thất bại) trước khi tiến hành deploy lên server thật.
+
+  deploy:
+    name: Deploy to VPS
+    needs: build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Execute SSH Commands
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # Di chuyển vào thư mục chứa code trên server (Bạn cần đổi đường dẫn này cho đúng với VPS của bạn)
+            cd /path/to/your/portfolio
+            
+            # Kéo code mới nhất từ nhánh main
+            git pull origin main
+            
+            # Build lại image và khởi động lại các container dưới nền
+            docker compose up --build -d
+            
+            # Dọn dẹp các images lơ lửng (dangling) cũ để giải phóng dung lượng đĩa
+            docker image prune -f
