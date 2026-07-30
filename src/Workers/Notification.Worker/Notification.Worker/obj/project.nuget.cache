@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "dgSpecHash": "HRPe8KUqEbk=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\khoi\\Desktop\\Portfolio\\src\\Workers\\Notification.Worker\\Notification.Worker\\Notification.Worker.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\khoi\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\confluent.kafka\\2.5.0\\confluent.kafka.2.5.0.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\librdkafka.redist\\2.5.0\\librdkafka.redist.2.5.0.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\mailkit\\4.7.1.1\\mailkit.4.7.1.1.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\mimekit\\4.7.1\\mimekit.4.7.1.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\system.formats.asn1\\8.0.1\\system.formats.asn1.8.0.1.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\system.memory\\4.5.0\\system.memory.4.5.0.nupkg.sha512",
+    "C:\\Users\\khoi\\.nuget\\packages\\system.security.cryptography.pkcs\\8.0.0\\system.security.cryptography.pkcs.8.0.0.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "NU1902",
+      "level": "Warning",
+      "message": "Package 'MailKit' 4.7.1.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-9j88-vvj5-vhgr",
+      "projectPath": "C:\\Users\\khoi\\Desktop\\Portfolio\\src\\Workers\\Notification.Worker\\Notification.Worker\\Notification.Worker.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\khoi\\Desktop\\Portfolio\\src\\Workers\\Notification.Worker\\Notification.Worker\\Notification.Worker.csproj",
+      "libraryId": "MailKit",
+      "targetGraphs": [
+        "net9.0"
+      ]
+    }
+  ]
+}

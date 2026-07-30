@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  /* Typography */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Urbanist', sans-serif;
+
+  /* Colors */
+  --color-obsidian: #050505;
+  --color-surface: #0a0a0a;
+  --color-border: #1f1f22;
+  --color-primary: #FF5C00;      /* Sunset Orange */
+  --color-primary-hover: #E04E00;
+  --color-text-main: #FFFFFF;
+  --color-text-muted: #8E8E93;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .geo-line-v {
+    @apply absolute w-[1px] bg-border top-0 bottom-0 z-0 pointer-events-none;
+  }
+  .geo-line-h {
+    @apply absolute h-[1px] bg-border left-0 right-0 z-0 pointer-events-none;
+  }
+  .text-outline-primary {
+    -webkit-text-stroke: 1px var(--color-primary);
+    color: transparent;
+  }
+}
