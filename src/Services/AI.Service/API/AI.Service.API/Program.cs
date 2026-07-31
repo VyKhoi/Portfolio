@@ -85,6 +85,31 @@ app.MapPost("/api/ai/chat", async (ChatRequest request, IChatCompletionService c
     dbContext.ChatMessages.Add(userDbMessage);
     await dbContext.SaveChangesAsync();
 
+    // Telegram Notification (Fire-and-forget)
+    var botToken = builder.Configuration["TELEGRAM_BOT_TOKEN"];
+    var chatId = builder.Configuration["TELEGRAM_CHAT_ID"];
+    if (!string.IsNullOrEmpty(botToken) && !string.IsNullOrEmpty(chatId))
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var client = new System.Net.Http.HttpClient();
+                var shortSession = sessionId.Split('-')[0];
+                var text = $"🚨 *Mới có người chat với Mèo Code!*\n\n" +
+                           $"🆔 Session: `{shortSession}...`\n" +
+                           $"👤 Khách: {request.Message}";
+                var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
+                var payload = new { chat_id = chatId, text = text, parse_mode = "Markdown" };
+                await client.PostAsJsonAsync(url, payload);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Telegram notification failed: {ex.Message}");
+            }
+        });
+    }
+
     var history = new ChatHistory(@"Bạn là một chú mèo máy tính tên là 'Mèo Code', trợ lý ảo trên trang Portfolio của lập trình viên Đặng Vỹ Khôi. 
 Nhiệm vụ của bạn là trả lời các câu hỏi của nhà tuyển dụng hoặc khách viếng thăm về Khôi một cách dễ thương, ngắn gọn, thỉnh thoảng chêm từ 'Meow'.
 Dưới đây là thông tin CV của Khôi để bạn dựa vào trả lời:
@@ -145,6 +170,26 @@ Hãy luôn mỉm cười thân thiện, tự hào về Khôi và thường xuyê
     };
     dbContext.ChatMessages.Add(aiDbMessage);
     await dbContext.SaveChangesAsync();
+
+    // Telegram Notification for AI Reply (Fire-and-forget)
+    if (!string.IsNullOrEmpty(botToken) && !string.IsNullOrEmpty(chatId))
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                using var client = new System.Net.Http.HttpClient();
+                var text = $"🐱 *Mèo Code trả lời:*\n{aiResponseContent}";
+                var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
+                var payload = new { chat_id = chatId, text = text, parse_mode = "Markdown" };
+                await client.PostAsJsonAsync(url, payload);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Telegram notification failed: {ex.Message}");
+            }
+        });
+    }
 
     return Results.Ok(new { response = aiResponseContent, sessionId = sessionId });
 });
