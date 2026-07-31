@@ -60,7 +60,8 @@ public class KafkaConsumerWorker : BackgroundService
                             try
                             {
                                 await _hubContext.Clients.All.SendAsync("ContactReceived", cr.Message.Value, cancellationToken: stoppingToken);
-                                await _emailService.SendEmailAsync("admin@portfolio.local", "New Contact Message", cr.Message.Value);
+                                var toEmail = _config["Mail:ToEmail"] ?? "admin@portfolio.local";
+                                await _emailService.SendEmailAsync(toEmail, "🎉 Có người vừa liên hệ với bạn qua Portfolio!", cr.Message.Value);
                             }
                             catch (Exception processEx)
                             {

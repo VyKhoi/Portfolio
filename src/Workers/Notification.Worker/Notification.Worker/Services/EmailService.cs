@@ -32,7 +32,17 @@ public class EmailService
         {
             var host = _config["Mail:Host"] ?? "localhost";
             var port = int.Parse(_config["Mail:Port"] ?? "1025");
-            await client.ConnectAsync(host, port, false);
+            var username = _config["Mail:Username"];
+            var password = _config["Mail:Password"];
+            
+            // Cấu hình TLS bắt buộc cho Gmail
+            await client.ConnectAsync(host, port, MailKit.Security.SecureSocketOptions.StartTls);
+            
+            if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+            {
+                await client.AuthenticateAsync(username, password);
+            }
+            
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
             _logger.LogInformation("Email sent to {ToEmail}", toEmail);

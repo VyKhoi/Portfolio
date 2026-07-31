@@ -180,6 +180,12 @@ services:
     environment:
       - ConnectionStrings__HangfireConnection=Host=postgres;Database=HangfireDb;Username=postgres;Password=${POSTGRES_PASSWORD}
       - Kafka__BootstrapServers=kafka:9092
+      - Mail__Host=smtp.gmail.com
+      - Mail__Port=587
+      - Mail__Username=dangvykhoi@gmail.com
+      - Mail__Password=${MAIL_APP_PASSWORD}
+      - Mail__From=dangvykhoi@gmail.com
+      - Mail__ToEmail=dangvykhoi@gmail.com
     depends_on:
       postgres:
         condition: service_healthy
