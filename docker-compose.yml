@@ -201,6 +201,10 @@ services:
     environment:
       - ASPNETCORE_HTTP_PORTS=8080
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=AIDb;Username=postgres;Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   gateway_api:
     build:

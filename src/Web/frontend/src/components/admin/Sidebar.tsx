@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom"
 import { useAuthStore } from "../../store/authStore"
-import { Terminal, Inbox, FolderGit2, LogOut, User, Briefcase, Code } from "lucide-react"
+import { Terminal, Inbox, FolderGit2, LogOut, User, Briefcase, Code, BotMessageSquare } from "lucide-react"
 
 export function Sidebar() {
   const { logout, user } = useAuthStore()
@@ -13,6 +13,7 @@ export function Sidebar() {
     { name: "Skills", path: "/dashboard/skills", icon: Code, exact: false },
     { name: "Projects", path: "/dashboard/projects", icon: FolderGit2, exact: false },
     { name: "Inbox", path: "/dashboard/inbox", icon: Inbox, exact: false },
+    { name: "AI Logs", path: "/dashboard/ai-logs", icon: BotMessageSquare, exact: false },
   ]
 
   return (

@@ -7,6 +7,7 @@ interface ChatMessage {
 }
 
 export const CatChatbot: React.FC = () => {
+  const [sessionId, setSessionId] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -17,6 +18,14 @@ export const CatChatbot: React.FC = () => {
 
   // Track the neko position and attach click listener
   useEffect(() => {
+    // Initialize Session ID
+    let currentSessionId = localStorage.getItem('ai_chat_session_id');
+    if (!currentSessionId) {
+      currentSessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('ai_chat_session_id', currentSessionId);
+    }
+    setSessionId(currentSessionId);
+
     let nekoEl: HTMLElement | null = null;
     let frameId: number;
 
@@ -90,6 +99,7 @@ export const CatChatbot: React.FC = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          sessionId: sessionId,
           message: input,
           history: messages
         })

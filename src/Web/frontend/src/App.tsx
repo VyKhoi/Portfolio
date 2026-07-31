@@ -11,6 +11,7 @@ import { DashboardOverview } from './components/admin/DashboardOverview'
 import { ProfileSettings } from './components/admin/ProfileSettings'
 import { ExperienceCRUD } from './components/admin/ExperienceCRUD'
 import { SkillCRUD } from './components/admin/SkillCRUD'
+import { AIChatLogs } from './components/admin/AIChatLogs'
 import { CatChatbot } from './components/CatChatbot'
 import { useNavigate } from 'react-router-dom'
 
@@ -125,6 +126,7 @@ function App() {
             <Route path="profile" element={<ProfileSettings />} />
             <Route path="experiences" element={<ExperienceCRUD />} />
             <Route path="skills" element={<SkillCRUD />} />
+            <Route path="ai-logs" element={<AIChatLogs />} />
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>

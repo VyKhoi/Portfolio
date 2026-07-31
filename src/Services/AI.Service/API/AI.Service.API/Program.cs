@@ -4,8 +4,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Collections.Generic;
+using System;
+using System.Linq;
+using AI.Service.API.Data;
+using AI.Service.API.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +26,11 @@ if (string.IsNullOrEmpty(apiKey))
     throw new Exception("GEMINI_API_KEY environment variable is missing.");
 }
 
+builder.Services.AddDbContext<AIDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
 #pragma warning disable SKEXP0070
 builder.Services.AddKernel()
     .AddGoogleAIGeminiChatCompletion(
@@ -31,10 +41,50 @@ builder.Services.AddKernel()
 
 var app = builder.Build();
 
+// Auto-migrate Database
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AIDbContext>();
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database migration failed: {ex.Message}");
+    }
+}
+
 app.UseCors("CorsPolicy");
 
-app.MapPost("/api/ai/chat", async (ChatRequest request, IChatCompletionService chat) =>
+app.MapPost("/api/ai/chat", async (ChatRequest request, IChatCompletionService chat, AIDbContext dbContext) =>
 {
+    // Make sure we have a session ID
+    var sessionId = string.IsNullOrWhiteSpace(request.SessionId) ? Guid.NewGuid().ToString() : request.SessionId;
+
+    // Check if session exists, otherwise create
+    var session = await dbContext.ChatSessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+    if (session == null)
+    {
+        session = new ChatSession { SessionId = sessionId, StartedAt = DateTime.UtcNow, LastMessageAt = DateTime.UtcNow };
+        dbContext.ChatSessions.Add(session);
+    }
+    else
+    {
+        session.LastMessageAt = DateTime.UtcNow;
+    }
+
+    // Save user message to DB
+    var userDbMessage = new ChatMessage
+    {
+        SessionId = sessionId,
+        Role = "user",
+        Content = request.Message,
+        CreatedAt = DateTime.UtcNow
+    };
+    dbContext.ChatMessages.Add(userDbMessage);
+    await dbContext.SaveChangesAsync();
+
     var history = new ChatHistory(@"Bạn là một chú mèo máy tính tên là 'Mèo Code', trợ lý ảo trên trang Portfolio của lập trình viên Đặng Vỹ Khôi. 
 Nhiệm vụ của bạn là trả lời các câu hỏi của nhà tuyển dụng hoặc khách viếng thăm về Khôi một cách dễ thương, ngắn gọn, thỉnh thoảng chêm từ 'Meow'.
 Dưới đây là thông tin CV của Khôi để bạn dựa vào trả lời:
@@ -65,10 +115,11 @@ Hãy luôn mỉm cười thân thiện, tự hào về Khôi và thường xuyê
 
     history.AddUserMessage(request.Message);
 
+    string aiResponseContent = "";
     try
     {
         var response = await chat.GetChatMessageContentAsync(history);
-        return Results.Ok(new { response = response.Content });
+        aiResponseContent = response.Content ?? "";
     }
     catch (Exception ex)
     {
@@ -81,22 +132,50 @@ Hãy luôn mỉm cười thân thiện, tự hào về Khôi và thường xuyê
             "Ngoaooo! Bạn cứ thử đưa một dự án khó cho Khôi xem, Khôi xử lý cực kỳ gọn gàng luôn! 😻"
         };
         var random = new Random();
-        var index = random.Next(fallbackResponses.Length);
-        
-        // Return a successful 200 OK with the fallback message so the UI still works
-        return Results.Ok(new { response = fallbackResponses[index] });
+        aiResponseContent = fallbackResponses[random.Next(fallbackResponses.Length)];
     }
+
+    // Save AI message to DB
+    var aiDbMessage = new ChatMessage
+    {
+        SessionId = sessionId,
+        Role = "assistant",
+        Content = aiResponseContent,
+        CreatedAt = DateTime.UtcNow
+    };
+    dbContext.ChatMessages.Add(aiDbMessage);
+    await dbContext.SaveChangesAsync();
+
+    return Results.Ok(new { response = aiResponseContent, sessionId = sessionId });
+});
+
+app.MapGet("/api/ai/sessions", async (AIDbContext dbContext) =>
+{
+    var sessions = await dbContext.ChatSessions
+        .OrderByDescending(s => s.LastMessageAt)
+        .ToListAsync();
+    return Results.Ok(sessions);
+});
+
+app.MapGet("/api/ai/sessions/{id}/messages", async (string id, AIDbContext dbContext) =>
+{
+    var messages = await dbContext.ChatMessages
+        .Where(m => m.SessionId == id)
+        .OrderBy(m => m.CreatedAt)
+        .ToListAsync();
+    return Results.Ok(messages);
 });
 
 app.Run();
 
 public class ChatRequest
 {
+    public string SessionId { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
-    public List<ChatMessage> History { get; set; } = new();
+    public List<ChatRequestMessage> History { get; set; } = new();
 }
 
-public class ChatMessage
+public class ChatRequestMessage
 {
     public string Role { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
