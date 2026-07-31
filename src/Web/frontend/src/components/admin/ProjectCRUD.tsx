@@ -17,7 +17,7 @@ export function ProjectCRUD() {
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const res = await fetch("http://171.233.238.34:5000/api/content/projects");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects`);
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     }
@@ -25,7 +25,7 @@ export function ProjectCRUD() {
 
   const deleteProject = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`http://171.233.238.34:5000/api/content/projects/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error("Failed to delete");
       return res.json();
     },
@@ -38,8 +38,8 @@ export function ProjectCRUD() {
     mutationFn: async (data: any) => {
       const isEdit = !!editingProject;
       const url = isEdit 
-        ? `http://171.233.238.34:5000/api/content/projects/${editingProject.id}`
-        : `http://171.233.238.34:5000/api/content/projects`;
+        ? `${import.meta.env.VITE_API_URL}/api/content/projects/${editingProject.id}`
+        : `${import.meta.env.VITE_API_URL}/api/content/projects`;
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -5,7 +5,7 @@ export function DashboardOverview() {
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],
     queryFn: async () => {
-      const res = await fetch("http://171.233.238.34:5000/api/contact/messages")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages`)
       if (!res.ok) throw new Error("Failed")
       return res.json()
     }
@@ -14,7 +14,7 @@ export function DashboardOverview() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const res = await fetch("http://171.233.238.34:5000/api/content/projects")
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects`)
       if (!res.ok) throw new Error("Failed")
       return res.json()
     }

@@ -33,7 +33,7 @@ export function SkillCRUD() {
 
   const fetchSkills = async () => {
     try {
-      const res = await fetch('http://171.233.238.34:5000/api/content/skills')
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/skills`)
       const data = await res.json()
       setSkills(data)
     } catch (err) {
@@ -65,8 +65,8 @@ export function SkillCRUD() {
     try {
       const isEdit = !!editingSkill
       const url = isEdit 
-        ? `http://171.233.238.34:5000/api/content/skills/${editingSkill.id}`
-        : 'http://171.233.238.34:5000/api/content/skills'
+        ? `${import.meta.env.VITE_API_URL}/api/content/skills/${editingSkill.id}`
+        : `${import.meta.env.VITE_API_URL}/api/content/skills`
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -89,7 +89,7 @@ export function SkillCRUD() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this skill?')) return
     try {
-      const res = await fetch(`http://171.233.238.34:5000/api/content/skills/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/skills/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -9,7 +9,7 @@ export function InboxTable() {
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['messages'],
     queryFn: async () => {
-      const res = await fetch("http://171.233.238.34:5000/api/contact/messages");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages`);
       if (!res.ok) throw new Error("Failed to fetch messages");
       return res.json();
     }
@@ -17,7 +17,7 @@ export function InboxTable() {
 
   const markAsRead = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`http://171.233.238.34:5000/api/contact/messages/${id}/status`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'Read' })
@@ -32,7 +32,7 @@ export function InboxTable() {
 
   const deleteMessage = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`http://171.233.238.34:5000/api/contact/messages/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages/${id}`, {
         method: 'DELETE'
       });
       if (!res.ok) throw new Error("Failed to delete message");

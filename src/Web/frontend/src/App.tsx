@@ -41,7 +41,7 @@ function Login() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch("http://171.233.238.34:5000/identity/api/auth/login", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/identity/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })
