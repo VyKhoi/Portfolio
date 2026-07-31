@@ -5,6 +5,13 @@ Chào mừng bạn đến với repository chứa mã nguồn trang web Portfoli
 Đây không chỉ là một chiếc Portfolio tĩnh dùng để trưng bày CV thông thường, mà còn là **"phòng thí nghiệm" (lab) cá nhân** của mình. Mình xây dựng dự án này với mục đích vừa làm một sản phẩm thực tế để phục vụ công việc, vừa làm sân chơi để thoải mái **vọc vạch, tập luyện và thử nghiệm** những công nghệ backend / frontend mới nhất.
 
 ## 🛠️ Có gì vui trong repo này?
+
+Dưới đây là một số hình ảnh demo sơ lược về dự án:
+
+| Trang Chủ | Trợ Lý AI Mèo Code | Admin Dashboard |
+| :---: | :---: | :---: |
+| ![Home](docs/images/home.png) | ![Chat](docs/images/chat.png) | ![Admin](docs/images/admin.png) |
+
 Dù chỉ là Portfolio cá nhân, nhưng mình đã "chơi lớn" setup hẳn một kiến trúc rất gì và này nọ để học tập:
 - **Frontend:** Giao diện tương tác mượt mà, thiết kế hiện đại, có tích hợp AI Chatbot (Mèo Code) siêu cute để trò chuyện với nhà tuyển dụng.
 - **Backend:** Xây dựng theo hướng Microservices siêu nhỏ gọn với `.NET Core`, có sử dụng cơ sở dữ liệu `PostgreSQL`.
