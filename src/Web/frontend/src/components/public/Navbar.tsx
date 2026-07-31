@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X } from "lucide-react"
 
 export function Navbar() {
@@ -51,32 +50,27 @@ export function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden border-t border-border bg-obsidian overflow-hidden"
-          >
-            <div className="flex flex-col">
-              {links.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
-                  onClick={() => setIsOpen(false)}
-                  className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-text-muted hover:text-primary hover:bg-surface transition-all border-b border-border"
-                >
-                  {link.name}
-                </a>
-              ))}
-              <a href="/cv.pdf" target="_blank" className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-primary hover:bg-surface transition-all">
-                DOWNLOAD_CV
-              </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div 
+        className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out border-border bg-obsidian ${
+          isOpen ? 'max-h-96 border-t opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="flex flex-col">
+          {links.map((link) => (
+            <a 
+              key={link.name} 
+              href={link.href} 
+              onClick={() => setIsOpen(false)}
+              className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-text-muted hover:text-primary hover:bg-surface transition-all border-b border-border block"
+            >
+              {link.name}
+            </a>
+          ))}
+          <a href="/cv.pdf" target="_blank" className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-primary hover:bg-surface transition-all block">
+            DOWNLOAD_CV
+          </a>
+        </div>
+      </div>
     </nav>
   )
 }
