@@ -11,6 +11,7 @@ import { DashboardOverview } from './components/admin/DashboardOverview'
 import { ProfileSettings } from './components/admin/ProfileSettings'
 import { ExperienceCRUD } from './components/admin/ExperienceCRUD'
 import { SkillCRUD } from './components/admin/SkillCRUD'
+import { CatChatbot } from './components/CatChatbot'
 import { useNavigate } from 'react-router-dom'
 
 const queryClient = new QueryClient()
@@ -127,6 +128,7 @@ function App() {
           </Route>
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
+        <CatChatbot />
       </Router>
     </QueryClientProvider>
   )

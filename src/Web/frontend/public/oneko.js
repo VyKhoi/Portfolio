@@ -34,7 +34,8 @@
       this.el.style.width = "32px";
       this.el.style.height = "32px";
       this.el.style.position = "fixed";
-      this.el.style.pointerEvents = "none";
+      this.el.style.pointerEvents = "auto";
+      this.el.style.cursor = "pointer";
       this.el.style.imageRendering = "pixelated";
       this.el.style.zIndex = 2147483647;
       this.el.style.backgroundImage = `url(/oneko.gif)`;

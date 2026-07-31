@@ -192,6 +192,16 @@ services:
       kafka:
         condition: service_started
 
+  ai_api:
+    build:
+      context: .
+      dockerfile: src/Services/AI.Service/API/AI.Service.API/Dockerfile
+    container_name: portfolio_ai_api
+    networks: [portfolio_net]
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8080
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+
   gateway_api:
     build:
       context: .
