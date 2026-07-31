@@ -6,20 +6,25 @@ using System;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
+using Serilog;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(r => r.AddService("Gateway.API"))
     .WithTracing(t => t
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317")))
+        .AddOtlpExporter(o => o.Endpoint = new Uri("http://otel_collector:4317")))
     .WithMetrics(m => m
         .AddAspNetCoreInstrumentation()
         .AddRuntimeInstrumentation()
         .AddPrometheusExporter()
-        .AddOtlpExporter(o => o.Endpoint = new Uri("http://localhost:4317")));
+        .AddOtlpExporter(o => o.Endpoint = new Uri("http://otel_collector:4317")));
 
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));

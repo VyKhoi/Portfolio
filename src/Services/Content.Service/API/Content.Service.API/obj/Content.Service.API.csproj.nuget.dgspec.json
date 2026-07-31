@@ -101,6 +101,14 @@
               "target": "Package",
               "version": "[1.17.0, )"
             },
+            "Serilog.AspNetCore": {
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
+            "Serilog.Sinks.Seq": {
+              "target": "Package",
+              "version": "[9.1.0, )"
+            },
             "StackExchange.Redis": {
               "target": "Package",
               "version": "[2.8.24, )"
