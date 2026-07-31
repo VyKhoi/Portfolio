@@ -50,8 +50,12 @@
 
       document.body.appendChild(this.el);
 
-      this.posX = Math.random() * (window.innerWidth - 64) + 32;
-      this.posY = Math.random() * (window.innerHeight - 64) + 32;
+      const w = window.innerWidth || document.documentElement.clientWidth || 800;
+      const h = window.innerHeight || document.documentElement.clientHeight || 600;
+      
+      // Always spawn exactly in the center of the screen
+      this.posX = w / 2;
+      this.posY = h / 2;
       this.targetX = this.posX;
       this.targetY = this.posY;
       
@@ -90,8 +94,10 @@
            return;
         }
       }
-      this.targetX = Math.random() * (window.innerWidth - 64) + 32;
-      this.targetY = Math.random() * (window.innerHeight - 64) + 32;
+      const w = window.innerWidth || document.documentElement.clientWidth || 800;
+      const h = window.innerHeight || document.documentElement.clientHeight || 600;
+      this.targetX = Math.random() * (w - 64) + 32;
+      this.targetY = Math.random() * (h - 64) + 32;
       this.state = 'roam';
       this.resetIdle();
     }
@@ -190,8 +196,15 @@
       }
 
       // Constrain to screen
-      this.posX = Math.min(Math.max(16, this.posX), window.innerWidth - 16);
-      this.posY = Math.min(Math.max(16, this.posY), window.innerHeight - 16);
+      const w = window.innerWidth || document.documentElement.clientWidth || 800;
+      const h = window.innerHeight || document.documentElement.clientHeight || 600;
+      
+      // Ensure NaN doesn't break everything
+      if (isNaN(this.posX)) this.posX = w / 2;
+      if (isNaN(this.posY)) this.posY = h / 2;
+
+      this.posX = Math.min(Math.max(16, this.posX), w - 16);
+      this.posY = Math.min(Math.max(16, this.posY), h - 16);
       this.el.style.left = `${this.posX - 16}px`;
       this.el.style.top = `${this.posY - 16}px`;
     }
