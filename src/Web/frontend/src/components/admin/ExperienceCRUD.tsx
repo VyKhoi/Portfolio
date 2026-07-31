@@ -37,7 +37,7 @@ export function ExperienceCRUD() {
 
   const fetchExperiences = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/content/experience')
+      const res = await fetch('http://171.233.238.34:5000/api/content/experience')
       const data = await res.json()
       setExperiences(data)
     } catch (err) {
@@ -71,8 +71,8 @@ export function ExperienceCRUD() {
     try {
       const isEdit = !!editingExp
       const url = isEdit 
-        ? `http://localhost:5000/api/content/experience/${editingExp.id}`
-        : 'http://localhost:5000/api/content/experience'
+        ? `http://171.233.238.34:5000/api/content/experience/${editingExp.id}`
+        : 'http://171.233.238.34:5000/api/content/experience'
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -95,7 +95,7 @@ export function ExperienceCRUD() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this experience?')) return
     try {
-      const res = await fetch(`http://localhost:5000/api/content/experience/${id}`, {
+      const res = await fetch(`http://171.233.238.34:5000/api/content/experience/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

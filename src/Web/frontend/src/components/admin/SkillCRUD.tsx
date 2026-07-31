@@ -33,7 +33,7 @@ export function SkillCRUD() {
 
   const fetchSkills = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/content/skills')
+      const res = await fetch('http://171.233.238.34:5000/api/content/skills')
       const data = await res.json()
       setSkills(data)
     } catch (err) {
@@ -65,8 +65,8 @@ export function SkillCRUD() {
     try {
       const isEdit = !!editingSkill
       const url = isEdit 
-        ? `http://localhost:5000/api/content/skills/${editingSkill.id}`
-        : 'http://localhost:5000/api/content/skills'
+        ? `http://171.233.238.34:5000/api/content/skills/${editingSkill.id}`
+        : 'http://171.233.238.34:5000/api/content/skills'
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -89,7 +89,7 @@ export function SkillCRUD() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this skill?')) return
     try {
-      const res = await fetch(`http://localhost:5000/api/content/skills/${id}`, {
+      const res = await fetch(`http://171.233.238.34:5000/api/content/skills/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

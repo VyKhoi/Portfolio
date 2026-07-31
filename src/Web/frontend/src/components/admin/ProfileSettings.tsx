@@ -24,7 +24,7 @@ export function ProfileSettings() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/content/profile')
+      const res = await fetch('http://171.233.238.34:5000/api/content/profile')
       if (res.ok) {
         const data = await res.json()
         setProfile(data)
@@ -41,7 +41,7 @@ export function ProfileSettings() {
     setSaving(true)
     setMessage('')
     try {
-      const res = await fetch('http://localhost:5000/api/content/profile', {
+      const res = await fetch('http://171.233.238.34:5000/api/content/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

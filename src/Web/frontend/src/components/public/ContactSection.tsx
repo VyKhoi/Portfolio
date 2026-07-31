@@ -11,7 +11,7 @@ export function ContactSection() {
 
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5000/hubs/notification")
+      .withUrl("http://171.233.238.34:5000/hubs/notification")
       .withAutomaticReconnect()
       .build();
 
