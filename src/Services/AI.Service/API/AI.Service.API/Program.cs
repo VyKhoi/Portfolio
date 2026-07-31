@@ -100,8 +100,13 @@ app.MapPost("/api/ai/chat", async (ChatRequest request, IChatCompletionService c
                            $"🆔 Session: `{shortSession}...`\n" +
                            $"👤 Khách: {request.Message}";
                 var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
-                var payload = new { chat_id = chatId, text = text, parse_mode = "Markdown" };
-                await client.PostAsJsonAsync(url, payload);
+                var payload = new { chat_id = chatId, text = text };
+                var responseMsg = await client.PostAsJsonAsync(url, payload);
+                if (!responseMsg.IsSuccessStatusCode)
+                {
+                    var error = await responseMsg.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Telegram API Error: {error}");
+                }
             }
             catch (Exception ex)
             {
@@ -181,8 +186,13 @@ Hãy luôn mỉm cười thân thiện, tự hào về Khôi và thường xuyê
                 using var client = new System.Net.Http.HttpClient();
                 var text = $"🐱 *Mèo Code trả lời:*\n{aiResponseContent}";
                 var url = $"https://api.telegram.org/bot{botToken}/sendMessage";
-                var payload = new { chat_id = chatId, text = text, parse_mode = "Markdown" };
-                await client.PostAsJsonAsync(url, payload);
+                var payload = new { chat_id = chatId, text = text };
+                var responseMsg = await client.PostAsJsonAsync(url, payload);
+                if (!responseMsg.IsSuccessStatusCode)
+                {
+                    var error = await responseMsg.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Telegram API Error: {error}");
+                }
             }
             catch (Exception ex)
             {
