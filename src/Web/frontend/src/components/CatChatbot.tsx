@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ChatMessage {
@@ -11,34 +11,44 @@ export const CatChatbot: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const [catPos, setCatPos] = useState({ x: 0, y: 0 });
   const [showBubble, setShowBubble] = useState(true);
+
+  const bubbleRef = useRef<HTMLDivElement>(null);
 
   // Track the neko position and attach click listener
   useEffect(() => {
     let nekoEl: HTMLElement | null = null;
     let frameId: number;
 
-    const clickHandler = () => {
+    const clickHandler = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
       setIsOpen(true);
       setShowBubble(false);
     };
 
     const trackCat = () => {
       if (!nekoEl) {
-        nekoEl = document.getElementById('neko-0');
+        nekoEl = document.getElementById('neko-cat1');
         if (nekoEl) {
+          nekoEl.style.pointerEvents = 'auto'; // Ensure it's clickable
+          nekoEl.style.cursor = 'pointer';
           nekoEl.addEventListener('click', clickHandler);
         }
       }
 
-      if (nekoEl) {
+      if (nekoEl && bubbleRef.current) {
         const left = parseInt(nekoEl.style.left || '0', 10);
         const top = parseInt(nekoEl.style.top || '0', 10);
-        // Only update if it actually moved significantly to avoid re-renders?
-        // Let's just update normally, React batches it nicely.
-        setCatPos({ x: left, y: top });
+        
+        // Update DOM directly to avoid 60fps React re-renders
+        if (left > 0) {
+          bubbleRef.current.style.left = `${left - 70}px`;
+          bubbleRef.current.style.top = `${top - 45}px`;
+          bubbleRef.current.style.opacity = '1';
+        } else {
+          bubbleRef.current.style.opacity = '0';
+        }
       }
 
       frameId = requestAnimationFrame(trackCat);
@@ -48,10 +58,13 @@ export const CatChatbot: React.FC = () => {
 
     // Randomly show bubble every 15 seconds for 5 seconds
     const interval = setInterval(() => {
-      if (!isOpen) {
-        setShowBubble(true);
-        setTimeout(() => setShowBubble(false), 5000);
-      }
+      setIsOpen((currentIsOpen) => {
+        if (!currentIsOpen) {
+          setShowBubble(true);
+          setTimeout(() => setShowBubble(false), 5000);
+        }
+        return currentIsOpen;
+      });
     }, 15000);
 
     return () => {
@@ -61,7 +74,7 @@ export const CatChatbot: React.FC = () => {
         nekoEl.removeEventListener('click', clickHandler);
       }
     };
-  }, [isOpen]);
+  }, []);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,17 +110,19 @@ export const CatChatbot: React.FC = () => {
   return (
     <>
       <AnimatePresence>
-        {!isOpen && showBubble && catPos.x > 0 && (
+        {!isOpen && showBubble && (
           <motion.div
+            ref={bubbleRef}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             style={{
               position: 'fixed',
-              left: catPos.x - 70,
-              top: catPos.y - 45,
+              left: -999,
+              top: -999,
               zIndex: 2147483646,
-              pointerEvents: 'none'
+              pointerEvents: 'none',
+              opacity: 0
             }}
             className="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg shadow-lg max-w-[150px] text-center"
           >
@@ -155,13 +170,17 @@ export const CatChatbot: React.FC = () => {
               {messages.map((m, idx) => (
                 <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div 
-                    className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm ${
+                    className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
                       m.role === 'user' 
                         ? 'bg-[#DEFF9A] text-black rounded-2xl rounded-tr-sm font-medium' 
                         : 'bg-[#27272A] text-zinc-200 rounded-2xl rounded-tl-sm'
                     }`}
+                    dangerouslySetInnerHTML={{
+                      __html: m.content
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    }}
                   >
-                    {m.content}
                   </div>
                 </div>
               ))}
