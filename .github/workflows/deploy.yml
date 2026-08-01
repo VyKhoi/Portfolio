@@ -32,3 +32,5 @@ jobs:
           docker compose down
           # Build and start new containers
           docker compose up --build -d
+          # Clean up old dangling images to save disk space
+          docker image prune -f
