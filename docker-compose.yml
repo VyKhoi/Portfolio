@@ -30,6 +30,11 @@ services:
       timeout: 10s
       retries: 15
       start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -62,6 +67,12 @@ services:
       - KAFKA_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
       - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_JVM_PERFORMANCE_OPTS=-Xmx256m -Xms256m
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   kafka_ui:
     image: provectuslabs/kafka-ui:latest
@@ -126,6 +137,11 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SEQ_FIRSTRUN_ADMINPASSWORD=${GRAFANA_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   # ─── MICROSERVICES ─────────────────────────────────────────
   identity_api:
@@ -137,6 +153,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=IdentityDb;Username=postgres;Password=${POSTGRES_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET_KEY}
+      - DOTNET_gcServer=0
     depends_on:
       postgres:
         condition: service_healthy
@@ -150,6 +167,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=ContentDb;Username=postgres;Password=${POSTGRES_PASSWORD}
       - Redis__ConnectionString=redis:6379
+      - DOTNET_gcServer=0
     depends_on:
       postgres:
         condition: service_healthy
@@ -165,6 +183,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=ContactDb;Username=postgres;Password=${POSTGRES_PASSWORD}
       - Kafka__BootstrapServers=kafka:9092
+      - DOTNET_gcServer=0
     depends_on:
       postgres:
         condition: service_healthy
@@ -186,6 +205,7 @@ services:
       - Mail__Password=${MAIL_APP_PASSWORD}
       - Mail__From=dangvykhoi@gmail.com
       - Mail__ToEmail=dangvykhoi@gmail.com
+      - DOTNET_gcServer=0
     depends_on:
       postgres:
         condition: service_healthy
@@ -204,6 +224,7 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Database=AIDb;Username=postgres;Password=${POSTGRES_PASSWORD}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - DOTNET_gcServer=0
     depends_on:
       postgres:
         condition: service_healthy
@@ -214,6 +235,8 @@ services:
       dockerfile: src/Services/Gateway.API/Gateway.API/Dockerfile
     container_name: portfolio_gateway_api
     networks: [portfolio_net]
+    environment:
+      - DOTNET_gcServer=0
     ports:
       - "5000:8080"
     depends_on:
