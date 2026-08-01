@@ -37,7 +37,8 @@ public class KafkaConsumerWorker : BackgroundService
                 {
                     GroupId = "notification-group",
                     BootstrapServers = _config["Kafka:BootstrapServers"] ?? "localhost:9092",
-                    AutoOffsetReset = AutoOffsetReset.Earliest
+                    AutoOffsetReset = AutoOffsetReset.Earliest,
+                    AllowAutoCreateTopics = true
                 };
 
                 using var c = new ConsumerBuilder<string, string>(conf)
@@ -106,6 +107,8 @@ public class KafkaConsumerWorker : BackgroundService
                         catch (ConsumeException e)
                         {
                             _logger.LogError(e, "Consume error: {Reason}", e.Error.Reason);
+                            // Add delay to prevent CPU-burning infinite loop if Kafka is down or topic missing
+                            Thread.Sleep(5000);
                         }
                     }
                 }
