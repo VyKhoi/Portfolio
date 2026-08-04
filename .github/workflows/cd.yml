@@ -1,0 +1,110 @@
+name: CD - Build, Push and Deploy (Main)
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        include:
+          - service: identity-api
+            context: .
+            dockerfile: src/Services/Identity.Service/API/Identity.Service.API/Dockerfile
+          - service: content-api
+            context: .
+            dockerfile: src/Services/Content.Service/API/Content.Service.API/Dockerfile
+          - service: contact-api
+            context: .
+            dockerfile: src/Services/Contact.Service/API/Contact.Service.API/Dockerfile
+          - service: notification-worker
+            context: .
+            dockerfile: src/Workers/Notification.Worker/Notification.Worker/Dockerfile
+          - service: ai-api
+            context: .
+            dockerfile: src/Services/AI.Service/API/AI.Service.API/Dockerfile
+          - service: gateway-api
+            context: .
+            dockerfile: src/Services/Gateway.API/Gateway.API/Dockerfile
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.service }}
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/portfolio-${{ matrix.service }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: src/Web/frontend
+          file: src/Web/frontend/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/portfolio-frontend:latest
+          build-args: |
+            VITE_API_URL=https://api.ten-mien-cua-ban.com
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: [build-and-push, build-and-push-frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /path/to/your/project
+            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
