@@ -100,6 +100,19 @@ jobs:
       contents: read
       packages: read
     steps:
+      - name: Tạo file .env từ Github Secrets
+        run: |
+          cat <<EOF > /home/quang/Desktop/server-deployments/portfolio-system/.env
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+          KAFKA_BOOTSTRAP_SERVERS=kafka-shared:9092
+          REDIS_CONNECTION_STRING=redis-shared:6379
+          MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
+          EOF
+
       - name: Deploy Portfolio Application
         run: |
           cd /home/quang/Desktop/server-deployments/portfolio-system
