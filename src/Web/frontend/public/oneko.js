@@ -1,8 +1,6 @@
 // advanced_oneko.js - A multi-cat interactive playground
 
 (function oneko() {
-  const isReducedMotion = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
-  if (isReducedMotion) return;
 
   const spriteSets = {
     idle: [[-3, -3]], alert: [[-7, -3]],
