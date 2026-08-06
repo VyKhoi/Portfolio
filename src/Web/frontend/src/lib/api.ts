@@ -10,9 +10,18 @@ export const apiClient = axios.create({
 });
 
 export const ContentApi = {
-  getProfile: () => apiClient.get('/content/profile').then(res => res.data),
-  getExperiences: () => apiClient.get('/content/experience').then(res => res.data),
-  getSkills: () => apiClient.get('/content/skills').then(res => res.data),
+  getProfile: () => apiClient.get('/content/profile').then(res => {
+    if (typeof res.data !== 'object' || !res.data) throw new Error('Invalid response');
+    return res.data;
+  }),
+  getExperiences: () => apiClient.get('/content/experience').then(res => {
+    if (typeof res.data !== 'object' || !res.data) throw new Error('Invalid response');
+    return res.data;
+  }),
+  getSkills: () => apiClient.get('/content/skills').then(res => {
+    if (typeof res.data !== 'object' || !res.data) throw new Error('Invalid response');
+    return res.data;
+  }),
 };
 
 export const ContactApi = {

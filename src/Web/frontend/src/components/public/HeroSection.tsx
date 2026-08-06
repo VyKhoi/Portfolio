@@ -11,7 +11,7 @@ export function HeroSection() {
     ContentApi.getProfile().then(setProfile).catch(console.error);
   }, []);
 
-  if (!profile) return <div className="min-h-screen flex items-center justify-center text-primary font-mono animate-pulse">SYSTEM BOOTING...</div>;
+  if (!profile || typeof profile !== 'object' || !profile.fullName) return <div className="min-h-screen flex items-center justify-center text-primary font-mono animate-pulse">SYSTEM BOOTING...</div>;
 
   return (
     <section className="relative min-h-screen pt-20 flex items-center bg-obsidian overflow-hidden border-b border-border">
