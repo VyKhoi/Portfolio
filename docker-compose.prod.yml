@@ -136,3 +136,6 @@ services:
     networks: [portfolio_net]
     ports:
       - "18122:80"
+    depends_on:
+      - gateway_api
+
