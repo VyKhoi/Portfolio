@@ -31,7 +31,7 @@ public class ContentController : ControllerBase
         
         if (profile == null)
         {
-            profile = await _dbContext.Profiles.FirstOrDefaultAsync();
+            profile = await _dbContext.Profiles.OrderBy(p => p.Id).FirstOrDefaultAsync();
             if (profile != null)
             {
                 await _cache.SetAsync(cacheKey, profile);
@@ -45,7 +45,7 @@ public class ContentController : ControllerBase
     [HttpPut("profile")]
     public async Task<IActionResult> UpdateProfile([FromBody] Profile updatedProfile)
     {
-        var profile = await _dbContext.Profiles.FirstOrDefaultAsync();
+        var profile = await _dbContext.Profiles.OrderBy(p => p.Id).FirstOrDefaultAsync();
         if (profile == null)
         {
             // If no profile exists, create it

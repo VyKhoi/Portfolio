@@ -26,16 +26,26 @@ if (string.IsNullOrEmpty(apiKey))
     throw new Exception("GEMINI_API_KEY environment variable is missing.");
 }
 
+// 1. Đọc model từ Environment/Config, mặc định gemini-2.5-flash
+var modelId = builder.Configuration["GEMINI_MODEL"] ?? "gemini-2.5-flash";
+
 builder.Services.AddDbContext<AIDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+// 2. Cấu hình HttpClient Timeout 20s cho Semantic Kernel
+var httpClient = new HttpClient
+{
+    Timeout = TimeSpan.FromSeconds(20)
+};
+
 #pragma warning disable SKEXP0070
 builder.Services.AddKernel()
     .AddGoogleAIGeminiChatCompletion(
-        modelId: "gemini-flash-latest",
-        apiKey: apiKey
+        modelId: modelId,
+        apiKey: apiKey,
+        httpClient: httpClient
     );
 #pragma warning restore SKEXP0070
 
