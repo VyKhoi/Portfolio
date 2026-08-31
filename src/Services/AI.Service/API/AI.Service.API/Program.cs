@@ -26,8 +26,8 @@ if (string.IsNullOrEmpty(apiKey))
     throw new Exception("GEMINI_API_KEY environment variable is missing.");
 }
 
-// 1. Đọc model từ Environment/Config, mặc định gemini-2.5-flash
-var modelId = builder.Configuration["GEMINI_MODEL"] ?? "gemini-2.5-flash";
+// 1. Đọc model từ Environment/Config, mặc định gemini-3.5-flash-lite
+var modelId = builder.Configuration["GEMINI_MODEL"] ?? "gemini-3.5-flash-lite";
 
 builder.Services.AddDbContext<AIDbContext>(options =>
 {
