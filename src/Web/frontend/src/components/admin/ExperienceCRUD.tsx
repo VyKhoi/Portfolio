@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Save, Briefcase } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { API_BASE_URL } from '../../lib/api'
 
 interface Experience {
   id: string
@@ -37,7 +38,7 @@ export function ExperienceCRUD() {
 
   const fetchExperiences = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/experience`)
+      const res = await fetch(`${API_BASE_URL}/content/experience`)
       const data = await res.json()
       setExperiences(data)
     } catch (err) {
@@ -71,8 +72,8 @@ export function ExperienceCRUD() {
     try {
       const isEdit = !!editingExp
       const url = isEdit 
-        ? `${import.meta.env.VITE_API_URL}/api/content/experience/${editingExp.id}`
-        : `${import.meta.env.VITE_API_URL}/api/content/experience`
+        ? `${API_BASE_URL}/content/experience/${editingExp.id}`
+        : `${API_BASE_URL}/content/experience`
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -95,7 +96,7 @@ export function ExperienceCRUD() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this experience?')) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/experience/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/content/experience/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Save, User } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { API_BASE_URL } from '../../lib/api'
 
 export function ProfileSettings() {
   const token = useAuthStore(state => state.token)
@@ -24,7 +25,7 @@ export function ProfileSettings() {
 
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/profile`)
+      const res = await fetch(`${API_BASE_URL}/content/profile`)
       if (res.ok) {
         const data = await res.json()
         setProfile(data)
@@ -41,7 +42,7 @@ export function ProfileSettings() {
     setSaving(true)
     setMessage('')
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/profile`, {
+      const res = await fetch(`${API_BASE_URL}/content/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

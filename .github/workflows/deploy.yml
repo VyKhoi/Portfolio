@@ -18,11 +18,7 @@ jobs:
           $envContent = @"
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-          GRAFANA_PASSWORD=${{ secrets.GRAFANA_PASSWORD }}
-          MINIO_ROOT_USER=${{ secrets.MINIO_ROOT_USER }}
-          MINIO_ROOT_PASSWORD=${{ secrets.MINIO_ROOT_PASSWORD }}
           MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}
-          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
           VITE_API_URL=http://171.233.238.34:5000

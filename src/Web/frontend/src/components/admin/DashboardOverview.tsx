@@ -1,11 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { Mail, Briefcase, Activity, CheckCircle2 } from "lucide-react"
+import { API_BASE_URL } from "../../lib/api"
+import { useAuthStore } from "../../store/authStore"
 
 export function DashboardOverview() {
+  const token = useAuthStore(state => state.token);
+
   const { data: messages = [] } = useQuery({
     queryKey: ['messages'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages`)
+      const res = await fetch(`${API_BASE_URL}/contact/messages`, {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      })
       if (!res.ok) throw new Error("Failed")
       return res.json()
     }
@@ -14,7 +20,9 @@ export function DashboardOverview() {
   const { data: projects = [] } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects`)
+      const res = await fetch(`${API_BASE_URL}/content/projects`, {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      })
       if (!res.ok) throw new Error("Failed")
       return res.json()
     }

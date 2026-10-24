@@ -4,9 +4,12 @@ import { Plus, Edit2, Trash2, X } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { Input } from "../ui/Input"
+import { useAuthStore } from "../../store/authStore"
+import { API_BASE_URL } from "../../lib/api"
 
 export function ProjectCRUD() {
   const queryClient = useQueryClient();
+  const token = useAuthStore(state => state.token);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -17,7 +20,7 @@ export function ProjectCRUD() {
   const { data: projects = [], isLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects`);
+      const res = await fetch(`${API_BASE_URL}/content/projects`);
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     }
@@ -25,7 +28,10 @@ export function ProjectCRUD() {
 
   const deleteProject = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/projects/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE_URL}/content/projects/${id}`, { 
+        method: 'DELETE',
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       if (!res.ok) throw new Error("Failed to delete");
       return res.json();
     },
@@ -38,11 +44,14 @@ export function ProjectCRUD() {
     mutationFn: async (data: any) => {
       const isEdit = !!editingProject;
       const url = isEdit 
-        ? `${import.meta.env.VITE_API_URL}/api/content/projects/${editingProject.id}`
-        : `${import.meta.env.VITE_API_URL}/api/content/projects`;
+        ? `${API_BASE_URL}/content/projects/${editingProject.id}`
+        : `${API_BASE_URL}/content/projects`;
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(data)
       });
       if (!res.ok) throw new Error("Failed to save project");

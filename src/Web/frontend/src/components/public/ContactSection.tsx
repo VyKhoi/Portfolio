@@ -1,42 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from "../ui/Button"
-import { Input } from "../ui/Input"
+import React, { useState } from 'react';
+import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 import { ContactApi } from '../../lib/api';
-import * as signalR from '@microsoft/signalr';
 
 export function ContactSection() {
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [companyTrap, setCompanyTrap] = useState('');
 
-  useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${import.meta.env.VITE_API_URL}/hubs/notification`)
-      .withAutomaticReconnect()
-      .build();
-
-    connection.on("ContactReceived", () => {
-      setLoading(false);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+    
+    setLoading(true);
+    try {
+      await ContactApi.submitMessage({
+        ...formData,
+        companyTrap
+      });
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 5000);
       setFormData({ name: '', email: '', message: '' });
-    });
-
-    connection.start().catch(err => console.error("SignalR Connection Error: ", err));
-
-    return () => {
-      connection.stop();
-    };
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    ContactApi.submitMessage(formData).catch(err => {
-      console.error(err);
+      setCompanyTrap('');
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err: any) {
+      console.error("Failed to submit contact message:", err);
+      if (err?.response?.status === 429) {
+        alert("Bạn đã gửi tin nhắn rồi! Vui lòng đợi một lát trước khi gửi tiếp.");
+      } else {
+        alert("Gửi tin nhắn thất bại. Vui lòng thử lại sau hoặc liên hệ trực tiếp qua email!");
+      }
+    } finally {
       setLoading(false);
-    });
-  }
+    }
+  };
 
   return (
     <section id="contact" className="relative bg-surface overflow-hidden border-t border-border">
@@ -69,7 +66,7 @@ export function ContactSection() {
               </div>
               <div className="flex flex-col space-y-2">
                 <span className="text-primary font-bold tracking-widest uppercase">LinkedIn</span>
-                <a href="https://linkedin.com/in/vykhoi" target="_blank" className="text-text-main hover:text-primary transition-colors">/in/vykhoi</a>
+                <a href="https://linkedin.com/in/vykhoi" target="_blank" rel="noreferrer" className="text-text-main hover:text-primary transition-colors">/in/vykhoi</a>
               </div>
               <div className="flex flex-col space-y-2">
                 <span className="text-primary font-bold tracking-widest uppercase">Địa chỉ</span>
@@ -87,11 +84,24 @@ export function ContactSection() {
           </h3>
           
           <form onSubmit={handleSubmit} className="space-y-8">
+            {/* Anti-bot Honeypot field (hidden from real users) */}
+            <input
+              type="text"
+              name="company_trap"
+              value={companyTrap}
+              onChange={(e) => setCompanyTrap(e.target.value)}
+              style={{ display: 'none' }}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
+
             <div className="relative">
               <Input 
                 placeholder=" " 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
+                maxLength={100}
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
@@ -106,6 +116,7 @@ export function ContactSection() {
                 placeholder=" " 
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
+                maxLength={100}
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
@@ -120,6 +131,7 @@ export function ContactSection() {
                 placeholder=" "
                 value={formData.message}
                 onChange={(e) => setFormData({...formData, message: e.target.value})}
+                maxLength={1000}
                 required
               />
               <label className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
@@ -139,5 +151,7 @@ export function ContactSection() {
 
       </div>
     </section>
-  )
+  );
 }
+
+

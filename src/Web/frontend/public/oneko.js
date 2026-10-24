@@ -1,4 +1,4 @@
-// advanced_oneko.js - A multi-cat interactive playground
+// advanced_oneko.js - A polite, non-intrusive desktop cat companion
 
 (function oneko() {
   const isReducedMotion = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
@@ -16,11 +16,14 @@
     W: [[-4, -2], [-4, -3]], NW: [[-1, 0], [-1, -1]],
   };
 
-  let mousePosX = 0;
-  let mousePosY = 0;
+  let mousePosX = -9999;
+  let mousePosY = -9999;
+  let mouseHasMoved = false;
+
   document.addEventListener("mousemove", (e) => {
     mousePosX = e.clientX;
     mousePosY = e.clientY;
+    mouseHasMoved = true;
   });
 
   const allNekos = [];
@@ -28,7 +31,7 @@
   class Neko {
     constructor(id, type) {
       this.id = id;
-      this.type = type; // 'cat' or 'dog' (we simulate dog with color filter for now)
+      this.type = type;
       this.el = document.createElement("div");
       this.el.id = "neko-" + id;
       this.el.style.width = "32px";
@@ -40,7 +43,6 @@
       this.el.style.zIndex = 2147483647;
       this.el.style.backgroundImage = `url(/oneko.gif)`;
       
-      // Give them unique colors
       const hue = Math.floor(Math.random() * 360);
       if (type === 'dog') {
         this.el.style.filter = `sepia(1) hue-rotate(${hue}deg) saturate(3)`;
@@ -53,21 +55,18 @@
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
       
-      // Always spawn exactly in the center of the screen
       this.posX = w / 2;
       this.posY = h / 2;
       this.targetX = this.posX;
       this.targetY = this.posY;
       
-      this.speed = 8 + Math.random() * 4;
+      this.speed = 5; // Tốc độ di chuyển nhẹ nhàng, tự nhiên
       this.state = 'idle'; // idle, roam, chase, socialize
       
       this.frameCount = 0;
       this.idleTime = 0;
       this.idleAnimation = null;
       this.idleAnimationFrame = 0;
-      
-      this.chaseTimeout = 0;
       
       allNekos.push(this);
     }
@@ -83,33 +82,23 @@
     }
 
     pickRandomTarget() {
-      // 30% chance to go find the other cat to play
-      if (Math.random() < 0.3 && allNekos.length > 1) {
-        const other = allNekos.find(n => n !== this);
-        if (other) {
-           this.targetX = other.posX + (Math.random() * 40 - 20);
-           this.targetY = other.posY + (Math.random() * 40 - 20);
-           this.state = 'roam';
-           this.resetIdle();
-           return;
-        }
-      }
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
-      this.targetX = Math.random() * (w - 64) + 32;
-      this.targetY = Math.random() * (h - 64) + 32;
+      // Đi dạo trong phạm vi gần xung quanh, không phóng xa khắp màn hình
+      this.targetX = Math.min(Math.max(48, this.posX + (Math.random() * 160 - 80)), w - 48);
+      this.targetY = Math.min(Math.max(48, this.posY + (Math.random() * 160 - 80)), h - 48);
       this.state = 'roam';
       this.resetIdle();
     }
 
     doIdle() {
       this.idleTime += 1;
-      if (this.idleTime > 10 && Math.floor(Math.random() * 100) === 0 && !this.idleAnimation) {
+      if (this.idleTime > 10 && Math.floor(Math.random() * 80) === 0 && !this.idleAnimation) {
         let anims = ["sleeping", "scratchSelf"];
-        if (this.posX < 32) anims.push("scratchWallW");
-        if (this.posY < 32) anims.push("scratchWallN");
-        if (this.posX > window.innerWidth - 32) anims.push("scratchWallE");
-        if (this.posY > window.innerHeight - 32) anims.push("scratchWallS");
+        if (this.posX < 40) anims.push("scratchWallW");
+        if (this.posY < 40) anims.push("scratchWallN");
+        if (this.posX > window.innerWidth - 40) anims.push("scratchWallE");
+        if (this.posY > window.innerHeight - 40) anims.push("scratchWallS");
         this.idleAnimation = anims[Math.floor(Math.random() * anims.length)];
       }
 
@@ -129,8 +118,8 @@
       }
       this.idleAnimationFrame += 1;
 
-      // Randomly decide to roam again
-      if (Math.random() < 0.01 && this.idleAnimation === null) {
+      // Thỉnh thoảng đi dạo chậm rãi
+      if (Math.random() < 0.008 && this.idleAnimation === null) {
         this.pickRandomTarget();
       }
     }
@@ -138,43 +127,42 @@
     update() {
       this.frameCount += 1;
       
-      // Check distance to mouse
-      const distToMouse = Math.sqrt((this.posX - mousePosX)**2 + (this.posY - mousePosY)**2);
-      
-      // Wake up and chase if mouse is close!
-      if (distToMouse < 100) {
-        this.state = 'chase';
-        this.chaseTimeout = 100; // frames to keep chasing even if mouse moves away slightly
-      }
+      const MAX_CHASE_DISTANCE = 220; // Nếu chuột xa hơn 220px: KHÔNG đuổi theo!
+      const COMFORT_OFFSET = 75;     // Luôn giữ khoảng cách an toàn 75px, KHÔNG BAO GIỜ đè lên chuột!
 
-      if (this.state === 'chase') {
-        this.targetX = mousePosX;
-        this.targetY = mousePosY;
-        this.chaseTimeout -= 1;
-        if (this.chaseTimeout <= 0) {
-          this.state = 'idle';
-        }
-      }
+      if (mouseHasMoved) {
+        const diffMouseX = this.posX - mousePosX;
+        const diffMouseY = this.posY - mousePosY;
+        const distToMouse = Math.hypot(diffMouseX, diffMouseY);
 
-      // Check socializing (interacting with other nekos)
-      if (this.state === 'roam' || this.state === 'idle') {
-        for (let other of allNekos) {
-          if (other !== this && (other.state === 'idle' || other.state === 'socialize' || other.state === 'roam')) {
-            const distToOther = Math.sqrt((this.posX - other.posX)**2 + (this.posY - other.posY)**2);
-            if (distToOther < 60 && Math.random() < 0.05) {
-              this.state = 'socialize';
-              this.targetX = other.posX + (Math.random() * 20 - 10);
-              this.targetY = other.posY + (Math.random() * 20 - 10);
-              other.state = 'socialize'; // Make them play together
-            }
+        if (distToMouse > MAX_CHASE_DISTANCE) {
+          // Chuột quá xa: Dừng đuổi ngay, ngồi yên hoặc nghỉ ngơi
+          if (this.state === 'chase') {
+            this.state = 'idle';
+            this.targetX = this.posX;
+            this.targetY = this.posY;
+            this.resetIdle();
+          }
+        } else if (distToMouse > COMFORT_OFFSET + 10) {
+          // Chuột ở khoảng vừa phải (85px - 220px): Tiến lại gần nhưng chỉ dừng ở bán kính 75px
+          this.state = 'chase';
+          const angle = Math.atan2(diffMouseY, diffMouseX);
+          this.targetX = mousePosX + Math.cos(angle) * COMFORT_OFFSET;
+          this.targetY = mousePosY + Math.sin(angle) * COMFORT_OFFSET;
+        } else {
+          // Đã ở cự ly an toàn (<= 85px): Dừng lại, ngồi yên, không đè lên chuột gây vướng thao tác
+          if (this.state === 'chase') {
+            this.state = 'idle';
+            this.targetX = this.posX;
+            this.targetY = this.posY;
           }
         }
       }
 
-      // Movement logic
+      // Xử lý di chuyển
       const diffX = this.posX - this.targetX;
       const diffY = this.posY - this.targetY;
-      const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
+      const distance = Math.hypot(diffX, diffY);
 
       if (distance < this.speed) {
         if (this.state === 'roam' || this.state === 'socialize' || this.state === 'chase') {
@@ -195,11 +183,10 @@
         this.posY -= (diffY / distance) * this.speed;
       }
 
-      // Constrain to screen
+      // Giữ mèo trong khung nhìn màn hình
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
       
-      // Ensure NaN doesn't break everything
       if (isNaN(this.posX)) this.posX = w / 2;
       if (isNaN(this.posY)) this.posY = h / 2;
 
@@ -210,11 +197,9 @@
     }
   }
 
-  // Spawn exactly 1 cat for testing
   let lastFrameTimestamp;
   function init() {
     new Neko("cat1", "cat");
-
     window.requestAnimationFrame(onAnimationFrame);
   }
 

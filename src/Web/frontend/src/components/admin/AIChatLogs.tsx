@@ -16,14 +16,20 @@ interface ChatMessage {
   createdAt: string;
 }
 
+import { useAuthStore } from '../../store/authStore';
+import { API_BASE_URL } from '../../lib/api';
+
 export function AIChatLogs() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const token = useAuthStore(state => state.token);
 
   // Fetch all sessions
   const { data: sessions = [], isLoading: isLoadingSessions } = useQuery<ChatSession[]>({
     queryKey: ['ai-sessions'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/sessions`);
+      const res = await fetch(`${API_BASE_URL}/ai/sessions`, {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       if (!res.ok) throw new Error('Failed to fetch sessions');
       return res.json();
     },
@@ -35,7 +41,9 @@ export function AIChatLogs() {
     queryKey: ['ai-messages', selectedSessionId],
     queryFn: async () => {
       if (!selectedSessionId) return [];
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/sessions/${selectedSessionId}/messages`);
+      const res = await fetch(`${API_BASE_URL}/ai/sessions/${selectedSessionId}/messages`, {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       if (!res.ok) throw new Error('Failed to fetch messages');
       return res.json();
     },
@@ -49,7 +57,7 @@ export function AIChatLogs() {
       <div className="w-1/3 bg-[#121215] border border-[#27272A] rounded-lg shadow-lg flex flex-col overflow-hidden">
         <div className="p-4 border-b border-[#27272A] bg-[#18181C]">
           <h2 className="text-[#DEFF9A] font-bold">🤖 AI SESSIONS</h2>
-          <p className="text-xs text-zinc-500">Live chat history with Mèo Code</p>
+          <p className="text-xs text-zinc-500">Live chat history with Sigma Cat 😼</p>
         </div>
         
         <div className="flex-1 overflow-y-auto p-2 space-y-2 scrollbar-thin scrollbar-thumb-[#27272A]">

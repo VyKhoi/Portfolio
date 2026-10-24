@@ -16,9 +16,16 @@ export function Navbar() {
         
         {/* Logo - 3 cols */}
         <div className="lg:col-span-3 flex items-center px-4 lg:px-8 border-r border-border h-full">
-          <span className="font-heading font-bold text-xl md:text-2xl tracking-tighter text-text-main">
-            KHOI<span className="text-primary">.</span>DEV
-          </span>
+          <a href="#" className="flex items-center gap-3 group">
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-9 h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm"
+            />
+            <span className="font-heading font-bold text-xl md:text-2xl tracking-tighter text-text-main">
+              KHOI<span className="text-primary">.</span>DEV
+            </span>
+          </a>
         </div>
 
         {/* Desktop Nav - 6 cols */}

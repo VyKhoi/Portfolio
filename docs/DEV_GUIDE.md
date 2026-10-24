@@ -1,13 +1,23 @@
 # Developer Guide
 
-Welcome to the Portfolio project! This guide will help AI agents and human developers spin up and contribute to the repository.
+Welcome to the Portfolio project! This guide will help developers spin up, develop, and contribute to the streamlined architecture.
 
 ## 1. Prerequisites
 - Docker & Docker Compose
 - .NET 9 SDK
 - Node.js v20+
 
-## 2. Running the System Locally
+## 2. Architecture Overview
+The system runs lightweight Docker containers:
+1. **Frontend**: React 19 + TypeScript + Vite + Tailwind CSS (`portfolio_frontend`, port `18122 -> 80`)
+2. **Backend**: .NET 9 Modular Monolith Web API (`portfolio_backend`, port `5000 -> 8080`)
+3. **Database**: PostgreSQL 16 Alpine (`portfolio_postgres`, port `5432 -> 5432`)
+4. **Database UI**: pgAdmin 4 (`portfolio_pgadmin`, port `5050 -> 80`)
+5. **Local AI**: Ollama running custom `sigma-cat` model (`portfolio_ollama`, internal network only, CPU-optimized)
+
+Total memory footprint: ~1.5 GB RAM.
+
+## 3. Running the System Locally
 
 The easiest way to run the entire system is via Docker Compose:
 
@@ -15,32 +25,45 @@ The easiest way to run the entire system is via Docker Compose:
 # Ensure .env is present
 cp .env.example .env
 
-# Build and start all services in detached mode
+# Build and start services in detached mode
 docker compose up --build -d
 ```
 
 ### Access Points
-- **Frontend**: `http://localhost:80`
-- **Gateway API**: `http://localhost:5000`
-- **PostgreSQL**: `localhost:5432`
-- **Redis**: `localhost:6379`
-- **Kafka UI**: `http://localhost:8080`
-- **Jaeger (Tracing)**: `http://localhost:16686`
-- **Seq (Logs)**: `http://localhost:8082`
-- **Prometheus**: `http://localhost:9090`
-- **Grafana**: `http://localhost:3001` (admin / admin)
-- **Mailpit (Local Email)**: `http://localhost:8025`
+- **Frontend**: `http://localhost:18122`
+- **Backend API**: `http://localhost:5000/swagger`
+- **pgAdmin 4**: `http://localhost:5050`
+- **PostgreSQL**: `localhost:5432` (db: `portfolio_db`, user: `postgres`)
 
-## 3. Development Workflow (AI Agents)
+## 4. Development Workflow
 
-When an AI agent is tasked with adding a new feature, follow this flow:
-1. **Understand Context**: Read `docs/ARCHITECTURE.md` and `plan.md`.
-2. **Backend Changes**: 
-   - Navigate to the specific service in `src/Services/`.
-   - Update Entities and apply EF Core Migrations using `dotnet ef migrations add ...`.
-   - Use MediatR for new commands/queries.
-3. **Frontend Changes**:
-   - Navigate to `src/Web/frontend`.
-   - Use `npm run dev` to test locally outside of Docker for faster HMR (Hot Module Replacement).
-4. **Testing**: Add or update tests in `src/Services/.../Tests/`. Run `dotnet test`.
-5. **Re-deploy**: If infrastructure or Dockerfiles change, run `docker compose up --build -d` to refresh the stack.
+### Backend (`src/Portfolio.API`)
+- Run outside Docker during development:
+  ```bash
+  cd src/Portfolio.API
+  dotnet run
+  ```
+- EF Core Migrations:
+  ```bash
+  dotnet ef migrations add <MigrationName> --project src/Portfolio.API
+  dotnet ef database update --project src/Portfolio.API
+  ```
+
+### Frontend (`src/Web/frontend`)
+- Run with fast Hot Module Replacement (HMR):
+  ```bash
+  cd src/Web/frontend
+  npm install
+  npm run dev
+  ```
+- Build production bundle:
+  ```bash
+  npm run build
+  ```
+
+### Local AI Model (Ollama)
+- The Ollama container is internal-only to prevent public spam and abuse.
+- In development, pulling or updating the model:
+  ```bash
+  docker exec -it portfolio_ollama ollama pull qwen2.5:1.5b
+  ```

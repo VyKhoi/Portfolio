@@ -1,6 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
+// When running in development (via Vite proxy) or in production (via Nginx proxy),
+// relative '/api' seamlessly routes to the .NET backend without any hardcoded IPs or ports.
+export const API_BASE_URL = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '')
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -16,6 +20,7 @@ export const ContentApi = {
 };
 
 export const ContactApi = {
-  submitMessage: (data: { name: string; email: string; message: string }) =>
+  submitMessage: (data: { name: string; email: string; message: string; companyTrap?: string }) =>
     apiClient.post('/contact/messages', data).then(res => res.data),
 };
+

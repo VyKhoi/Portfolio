@@ -1,31 +1,88 @@
 # 🚀 Khoi's Portfolio & Tech Playground
 
-Chào mừng bạn đến với repository chứa mã nguồn trang web Portfolio cá nhân của mình - **Đặng Vỹ Khôi**! 👋
+Chào mừng bạn đến với mã nguồn Portfolio cá nhân của mình — **Đặng Vỹ Khôi**! 👋
 
-Đây không chỉ là một chiếc Portfolio tĩnh dùng để trưng bày CV thông thường, mà còn là **"phòng thí nghiệm" (lab) cá nhân** của mình. Mình xây dựng dự án này với mục đích vừa làm một sản phẩm thực tế để phục vụ công việc, vừa làm sân chơi để thoải mái **vọc vạch, tập luyện và thử nghiệm** những công nghệ backend / frontend mới nhất.
+Dự án này là trang cá nhân kết hợp lab nhỏ để mình vừa làm sản phẩm phục vụ công việc, vừa vọc vạch và thực hành các công nghệ backend / frontend mình yêu thích.
 
-## 🛠️ Có gì vui trong repo này?
+---
 
-Dưới đây là một số hình ảnh demo sơ lược về dự án:
+## 📸 Demo
 
-| Trang Chủ | Trợ Lý AI Mèo Code | Admin Dashboard |
+| Trang Chủ | Trợ Lý AI Sigma Cat | Admin Dashboard |
 | :---: | :---: | :---: |
 | ![Home](docs/images/home.png) | ![Chat](docs/images/chat.png) | ![Admin](docs/images/admin.png) |
 
-Dù chỉ là Portfolio cá nhân, nhưng mình đã "chơi lớn" setup hẳn một kiến trúc rất gì và này nọ để học tập:
-- **Frontend:** Giao diện tương tác mượt mà, thiết kế hiện đại, có tích hợp AI Chatbot (Mèo Code) siêu cute để trò chuyện với nhà tuyển dụng.
-- **Backend:** Xây dựng theo hướng Microservices siêu nhỏ gọn với `.NET Core`, có sử dụng cơ sở dữ liệu `PostgreSQL`.
-- **Đồ chơi xịn xò:** Tích hợp `Docker`, `Telegram Bot` (báo tin nhắn realtime khi có khách chat), tích hợp `Gemini AI`...
+---
 
-## 🌱 Dành cho những ai ghé thăm
-Nếu bạn vô tình đi ngang qua repo này, thấy hứng thú thì **cứ thoải mái clone về, tải về xem code, chạy thử hoặc vọc vạch tùy thích nhé!** 
+## 🛠️ Tech Stack & Tính Năng
 
-Code trong này có thể không phải là những dòng code hoàn hảo nhất thế giới, nhưng nó là quá trình mình học hỏi, sai và sửa mỗi ngày. Hy vọng nó có thể giúp ích được chút gì đó cho hành trình học tập của bạn, hoặc đơn giản là mang lại cho bạn một chút niềm vui khi khám phá! 😸
-
-## 📬 Kết nối với mình
-Nếu bạn muốn trao đổi về code, hoặc có nhã ý muốn mời mình về team:
-- **Email:** dangvykhoi@gmail.com
-- **Điện thoại:** 0931 31 47 92
+- **Frontend:** React 19 + TypeScript + Vite + Tailwind CSS.
+  - Tích hợp chatbox trợ lý AI (Sigma Cat) stream câu trả lời theo thời gian thực (SSE).
+  - Easter egg: Mèo Oneko tương tác nhẹ nhàng theo chuột.
+- **Backend:** .NET 9 Web API (cấu trúc Modular Monolith).
+  - Tích hợp Entity Framework Core & Dapper.
+  - Xử lý gửi email bất đồng bộ qua Background Worker (`System.Threading.Channels`).
+  - Gửi thông báo về Telegram khi có khách nhắn tin hoặc chat với AI.
+- **Cơ sở dữ liệu:** PostgreSQL 16 + pgAdmin 4 tích hợp sẵn (port 5050).
+- **AI Cục Bộ (Ollama):** Chạy model `Qwen2.5:1.5B` trong Docker nội bộ.
+  - System prompt định danh chú mèo trợ lý Sigma Cat (luôn nói về mình ở ngôi thứ 3, match đúng ngôn ngữ người hỏi, không chém gió ngoài dữ liệu).
+- **Bảo mật cơ bản:**
+  - Nginx rate-limiting chống spam request.
+  - Bẫy ngầm Honeypot chặn bot tự điền form mà không làm phiền người dùng bằng CAPTCHA.
 
 ---
-*Code with ❤️ and lots of ☕ by Khoi Dang*
+
+## 🌐 Các Cổng Dịch Vụ
+
+| Dịch vụ | Địa chỉ | Ghi chú |
+| :--- | :--- | :--- |
+| **Frontend** | `http://localhost:18122` | Giao diện chính |
+| **Backend API** | `http://localhost:5000/swagger` | API Swagger Docs |
+| **pgAdmin 4** | `http://localhost:5050` | Quản lý PostgreSQL (`admin@khoi.dev` / `admin`) |
+
+---
+
+## ⚡ Chạy Thử Dự Án
+
+### 1. Chuẩn bị môi trường
+```bash
+git clone https://github.com/vykhoi/Portfolio.git
+cd Portfolio
+
+cp .env.example .env
+```
+
+### 2. Khởi động Docker
+```bash
+# Tạo volume chứa model Ollama (chỉ cần làm lần đầu)
+docker volume create ollama_models
+
+# Build và chạy tất cả dịch vụ
+docker compose up -d --build
+```
+
+### 3. Tạo model AI Sigma Cat (lần đầu chạy)
+```bash
+# Trên Windows PowerShell:
+.\src\Portfolio.AI\scripts\build-model.ps1
+
+# Hoặc trên Linux / macOS:
+chmod +x src/Portfolio.AI/scripts/build-model.sh
+./src/Portfolio.AI/scripts/build-model.sh
+```
+
+---
+
+## 🌱 Dành Cho Khách Ghé Thăm
+
+Bạn cứ thoải mái clone về xem code, chạy thử hoặc lấy ý tưởng để vọc vạch nhé. Code là quá trình mình học hỏi và hoàn thiện mỗi ngày, hy vọng mang lại chút niềm vui hoặc gợi ý hữu ích cho bạn! 😸
+
+## 📬 Liên Hệ
+
+- **Email:** [dangvykhoi@gmail.com](mailto:dangvykhoi@gmail.com)
+- **Điện thoại:** 0931 314 792
+- **LinkedIn:** [/in/vykhoi](https://linkedin.com/in/vykhoi)
+- **GitHub:** [/vykhoi](https://github.com/vykhoi)
+
+---
+*Code with ❤️ and coffee by Khoi Dang.*

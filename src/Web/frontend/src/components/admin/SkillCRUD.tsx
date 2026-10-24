@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Edit2, Trash2, X, Save, Code } from 'lucide-react'
 import { useAuthStore } from '../../store/authStore'
+import { API_BASE_URL } from '../../lib/api'
 
 interface Skill {
   id: string
@@ -33,7 +34,7 @@ export function SkillCRUD() {
 
   const fetchSkills = async () => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/skills`)
+      const res = await fetch(`${API_BASE_URL}/content/skills`)
       const data = await res.json()
       setSkills(data)
     } catch (err) {
@@ -65,8 +66,8 @@ export function SkillCRUD() {
     try {
       const isEdit = !!editingSkill
       const url = isEdit 
-        ? `${import.meta.env.VITE_API_URL}/api/content/skills/${editingSkill.id}`
-        : `${import.meta.env.VITE_API_URL}/api/content/skills`
+        ? `${API_BASE_URL}/content/skills/${editingSkill.id}`
+        : `${API_BASE_URL}/content/skills`
         
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
@@ -89,7 +90,7 @@ export function SkillCRUD() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this skill?')) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/content/skills/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/content/skills/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

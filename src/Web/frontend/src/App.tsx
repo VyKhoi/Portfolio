@@ -27,8 +27,8 @@ function Login() {
   const setToken = useAuthStore(state => state.setToken)
   const token = useAuthStore(state => state.token)
   const navigate = useNavigate()
-  const [username, setUsername] = React.useState('admin')
-  const [password, setPassword] = React.useState('Admin@123')
+  const [username, setUsername] = React.useState('')
+  const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
 
@@ -43,7 +43,10 @@ function Login() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/identity/api/auth/login`, {
+      const baseUrl = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '')
+        ? `${import.meta.env.VITE_API_URL}/api`
+        : '/api';
+      const res = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password })

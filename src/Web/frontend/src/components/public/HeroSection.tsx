@@ -1,17 +1,38 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from "../ui/Badge"
-import { Download } from "lucide-react"
-import { ContentApi } from "../../lib/api"
+import { Badge } from "../ui/Badge";
+import { Download } from "lucide-react";
+import { ContentApi } from "../../lib/api";
+
+const DEFAULT_PROFILE = {
+  fullName: "DANG VY KHOI",
+  title: "Software Engineer | .NET Core",
+  bio: "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS, tập trung vào quy trình nghiệp vụ (business workflows) và tính ổn định của hệ thống.",
+  avatarKey: "/profile.jpg",
+  cvPdfKey: "/cv.pdf",
+  githubLink: "https://github.com/vykhoi",
+  linkedinLink: "https://linkedin.com/in/vykhoi"
+};
 
 export function HeroSection() {
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(DEFAULT_PROFILE);
 
   useEffect(() => {
-    ContentApi.getProfile().then(setProfile).catch(console.error);
+    ContentApi.getProfile()
+      .then(data => {
+        if (data && data.fullName) {
+          setProfile(data);
+        }
+      })
+      .catch(err => {
+        console.warn("Using offline fallback profile:", err);
+      });
   }, []);
 
-  if (!profile) return <div className="min-h-screen flex items-center justify-center text-primary font-mono animate-pulse">SYSTEM BOOTING...</div>;
+  const nameParts = (profile?.fullName || "DANG VY KHOI").trim().split(' ');
+  const firstName = nameParts[0] || "DANG";
+  const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts[1] || "");
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
 
   return (
     <section className="relative min-h-screen pt-20 flex items-center bg-obsidian overflow-hidden border-b border-border">
@@ -34,8 +55,8 @@ export function HeroSection() {
             <Badge className="mb-4">SYSTEM ARCHITECT</Badge>
             
             <h1 className="text-5xl sm:text-[4rem] md:text-[5rem] lg:text-[6.5rem] font-bold font-heading leading-[0.9] tracking-tighter text-text-main uppercase break-words">
-              {profile.fullName.split(' ')[0]} {profile.fullName.split(' ')[1]} <br />
-              <span className="text-outline-primary">{profile.fullName.split(' ')[2]}</span>
+              {firstName} {middleName} <br />
+              <span className="text-outline-primary">{lastName}</span>
             </h1>
             <h2 className="text-lg md:text-2xl font-mono text-primary tracking-widest uppercase mt-4">
               {profile.title}
@@ -85,5 +106,5 @@ export function HeroSection() {
 
       </div>
     </section>
-  )
+  );
 }

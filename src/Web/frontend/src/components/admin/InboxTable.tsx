@@ -3,13 +3,19 @@ import { Button } from "../ui/Button"
 import { Mail, CheckCircle2, Trash2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
+import { useAuthStore } from "../../store/authStore"
+import { API_BASE_URL } from "../../lib/api"
+
 export function InboxTable() {
   const queryClient = useQueryClient();
+  const token = useAuthStore(state => state.token);
 
   const { data: messages = [], isLoading } = useQuery({
     queryKey: ['messages'],
     queryFn: async () => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages`);
+      const res = await fetch(`${API_BASE_URL}/contact/messages`, {
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      });
       if (!res.ok) throw new Error("Failed to fetch messages");
       return res.json();
     }
@@ -17,9 +23,12 @@ export function InboxTable() {
 
   const markAsRead = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/contact/messages/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({ status: 'Read' })
       });
       if (!res.ok) throw new Error("Failed to update status");
@@ -32,8 +41,9 @@ export function InboxTable() {
 
   const deleteMessage = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/contact/messages/${id}`, {
-        method: 'DELETE'
+      const res = await fetch(`${API_BASE_URL}/contact/messages/${id}`, {
+        method: 'DELETE',
+        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });
       if (!res.ok) throw new Error("Failed to delete message");
       return res.json();
