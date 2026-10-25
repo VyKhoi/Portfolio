@@ -43,9 +43,7 @@ function Login() {
     setLoading(true)
     setError('')
     try {
-      const baseUrl = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '')
-        ? `${import.meta.env.VITE_API_URL}/api`
-        : '/api';
+      const baseUrl = '/api';
       const res = await fetch(`${baseUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

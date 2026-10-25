@@ -38,9 +38,7 @@ export const CatChatbot: React.FC = () => {
     setSessionId(currentSessionId);
 
     // Fetch conversation history from backend DB for this session
-    const baseUrl = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '')
-      ? `${import.meta.env.VITE_API_URL}/api`
-      : '/api';
+    const baseUrl = '/api';
 
     fetch(`${baseUrl}/ai/history/${currentSessionId}`)
       .then((res) => (res.ok ? res.json() : []))
@@ -128,9 +126,7 @@ export const CatChatbot: React.FC = () => {
     setCooldown(true);
     setTimeout(() => setCooldown(false), 3000);
 
-    const baseUrl = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim() !== '')
-      ? `${import.meta.env.VITE_API_URL}/api`
-      : '/api';
+    const baseUrl = '/api';
 
     try {
       const res = await fetch(`${baseUrl}/ai/chat/stream`, {

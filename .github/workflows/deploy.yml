@@ -21,7 +21,6 @@ jobs:
           MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          VITE_API_URL=${{ secrets.VITE_API_URL }}
           EOF
 
       - name: Ensure Docker volume for Ollama
