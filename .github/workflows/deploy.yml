@@ -15,21 +15,27 @@ jobs:
 
       - name: Create .env file
         run: |
-          $envContent = @"
+          cat << 'EOF' > .env
           POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
           JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
           MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          VITE_API_URL=http://171.233.238.34:5000
-          "@
-          Set-Content -Path .env -Value $envContent -Encoding UTF8
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          EOF
+
+      - name: Ensure Docker volume for Ollama
+        run: |
+          docker volume create ollama_models || true
 
       - name: Build and Deploy via Docker Compose
         run: |
-          # Stop old containers
           docker compose down
-          # Build and start new containers
           docker compose up --build -d
-          # Clean up old dangling images to save disk space
           docker image prune -f
+
+      - name: Initialize or Update AI Model (sigma-cat)
+        run: |
+          sleep 5
+          docker exec -i portfolio_ollama ollama pull qwen2.5:1.5b
+          docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
