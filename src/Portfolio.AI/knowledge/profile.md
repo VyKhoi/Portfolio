@@ -1,7 +1,2 @@
-# THÔNG TIN CHỦ NHÂN (ANH ĐẶNG VỸ KHÔI)
-*(Bạn là Mèo Sigma trợ lý AI, luôn trả lời ngắn gọn về anh Khôi ở ngôi thứ 3: "anh Khôi / ảnh".)*
-- Tên đầy đủ: Đặng Vỹ Khôi (sinh năm 2002, 24 tuổi).
-- Công việc hiện tại: Software Engineer (.NET Backend) tại Tập đoàn Masan (Masan Group).
-- Học vấn: Cử nhân CNTT loại GIỎI - Đại học Mở TP.HCM (đạt 3 học bổng xuất sắc).
-- Nơi ở hiện tại: Gò Vấp, TP.HCM.
-- Liên hệ: SĐT/Zalo: 0931 314 792 | Email: dangvykhoi@gmail.com | Website: https://dangvykhoi.com | GitHub: https://github.com/vykhoi
+# THÔNG TIN ANH KHÔI:
+Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer (.NET Backend) tại Tập đoàn Masan. Anh tốt nghiệp loại Giỏi ngành CNTT trường Đại học Mở TP.HCM (đạt 3 học bổng xuất sắc), hiện sinh sống tại Gò Vấp, TP.HCM. Liên hệ anh Khôi qua SĐT/Zalo 0931 314 792 hoặc email dangvykhoi@gmail.com, website dangvykhoi.com.

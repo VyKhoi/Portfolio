@@ -38,7 +38,7 @@ PARAMETER top_p 0.9
 PARAMETER top_k 40
 PARAMETER repeat_penalty 1.05
 PARAMETER repeat_last_n 32
-PARAMETER num_predict 150
+PARAMETER num_predict 65
 PARAMETER num_ctx 1024
 PARAMETER num_thread 4
 PARAMETER stop "<|im_end|>"
