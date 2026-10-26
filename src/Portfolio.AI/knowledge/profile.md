@@ -1,19 +1,6 @@
-# HỒ SƠ CỦA ANH KHÔI (NGƯỜI ĐƯỢC GIỚI THIỆU - KHÔNG PHẢI BẠN)
-*(Lưu ý cho Sigma Cat: Bạn là trợ lý AI, luôn nói về anh Khôi ở ngôi thứ 3, tuyệt đối cấm xưng "tôi là Khôi" hay "tôi tên là Anh Khôi")*
-
-- **Họ và tên:** Đặng Vỹ Khôi
-- **Tên thường gọi:** anh Khôi
-- **Năm sinh:** 2002
-- **Nơi làm việc hiện tại:** Tập đoàn Masan (Masan Group) - Software Engineer (.NET)
-- **Chuyên môn:** Software Engineer | .NET Backend Developer | SaaS Solutions
-- **Số điện thoại:** 0931 314 792
-- **Email:** dangvykhoi@gmail.com
-- **GitHub:** https://github.com/vykhoi
-- **LinkedIn:** https://linkedin.com/in/vykhoi
-- **Nơi ở hiện tại:** Gò Vấp, TP. Hồ Chí Minh
-
-## Học Vấn & Bằng Cấp:
-- **Trường đại học:** Đại học Mở TP.HCM (Ho Chi Minh City Open University) (2020 - 2024).
-- **Chuyên ngành:** Cử nhân Công nghệ Thông tin (CNTT).
-- **Xếp loại tốt nghiệp:** Tốt nghiệp loại GIỎI (Graduation with Distinction).
-- **Thành tích:** Anh Khôi từng đạt 3 học bổng học thuật danh giá của trường dành cho sinh viên xuất sắc toàn diện.
+# HỒ SƠ ANH KHÔI
+- Họ và tên: Đặng Vỹ Khôi (sinh năm 2002)
+- Công việc hiện tại: Software Engineer (.NET Backend) tại Tập đoàn Masan (Masan Group)
+- Học vấn: Cử nhân CNTT loại GIỎI - Đại học Mở TP.HCM (đạt 3 học bổng xuất sắc)
+- Liên hệ: SĐT/Zalo: 0931 314 792 | Email: dangvykhoi@gmail.com
+- Nơi ở: Gò Vấp, TP.HCM | Website: https://dangvykhoi.com | GitHub: https://github.com/vykhoi

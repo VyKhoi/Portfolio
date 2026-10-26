@@ -32,13 +32,15 @@ $systemContent = $systemContent.Trim()
 $modelfileContent = @"
 FROM qwen2.5:3b
 
-# Parameters optimized for ultra-concise, fast, punchy inference without cutting off
+# Parameters optimized for ultra-fast, punchy CPU inference without cutting off
 PARAMETER temperature 0.4
 PARAMETER top_p 0.9
 PARAMETER top_k 40
 PARAMETER repeat_penalty 1.2
 PARAMETER repeat_last_n 64
-PARAMETER num_predict 120
+PARAMETER num_predict 80
+PARAMETER num_ctx 1024
+PARAMETER num_thread 4
 PARAMETER stop "<|im_end|>"
 PARAMETER stop "<|endoftext|>"
 
