@@ -22,8 +22,8 @@ export function Navbar() {
               alt="Logo" 
               className="w-9 h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm"
             />
-            <span className="font-heading font-bold text-xl md:text-2xl tracking-tighter text-text-main">
-              KHOI<span className="text-primary">.</span>DEV
+            <span className="font-mono font-bold text-lg md:text-xl tracking-tight text-text-main">
+              dangvykhoi<span className="text-primary">.com</span>
             </span>
           </a>
         </div>
