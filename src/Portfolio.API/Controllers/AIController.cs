@@ -134,6 +134,29 @@ public class AIController : ControllerBase
             await _telegram.SendMessageAsync(alertText);
         });
 
+        // 5.1 Fast Intent Cache: Instant response (<50ms) for common standard questions
+        var fastReply = TryGetFastIntentReply(request.Message);
+        if (!string.IsNullOrEmpty(fastReply))
+        {
+            var fastAiMessage = new ChatMessage
+            {
+                SessionId = sessionId,
+                Role = "assistant",
+                Content = fastReply,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.ChatMessages.Add(fastAiMessage);
+            await _db.SaveChangesAsync();
+
+            _ = Task.Run(async () =>
+            {
+                var replyText = $"😼 *Sigma Cat trả lời (Fast):*\n{fastReply}";
+                await _telegram.SendMessageAsync(replyText);
+            });
+
+            return Ok(new { response = fastReply, sessionId = sessionId });
+        }
+
         // 6. Retrieve recent session history (last 6 messages before this current user message)
         var historyMessages = await _db.ChatMessages
             .Where(m => m.SessionId == sessionId && m.Id != userDbMessage.Id)
@@ -281,6 +304,39 @@ public class AIController : ControllerBase
                             $"👤 Khách: {request.Message}";
             await _telegram.SendMessageAsync(alertText);
         });
+
+        // 4.1 Fast Intent Cache: Stream smooth typing animation (<0.4s) for standard questions
+        var fastStreamReply = TryGetFastIntentReply(request.Message);
+        if (!string.IsNullOrEmpty(fastStreamReply))
+        {
+            var words = fastStreamReply.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                var wordChunk = (i == 0 ? "" : " ") + words[i];
+                await WriteSseAsync(wordChunk);
+                await Task.Delay(20, cancellationToken);
+            }
+
+            await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("data: [DONE]\n\n"), cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+
+            var fastAiMessage = new ChatMessage
+            {
+                SessionId = sessionId,
+                Role = "assistant",
+                Content = fastStreamReply,
+                CreatedAt = DateTime.UtcNow
+            };
+            _db.ChatMessages.Add(fastAiMessage);
+            await _db.SaveChangesAsync(cancellationToken);
+
+            _ = Task.Run(async () =>
+            {
+                var replyText = $"😼 *Sigma Cat trả lời (Fast Stream):*\n{fastStreamReply}";
+                await _telegram.SendMessageAsync(replyText);
+            });
+            return;
+        }
 
         // 5. Retrieve recent history for context memory
         var historyMessages = await _db.ChatMessages
@@ -478,6 +534,81 @@ public class AIController : ControllerBase
             || clean.StartsWith("xin chào! tôi là")
             || clean.StartsWith("xin chào, tôi là")
             || clean.StartsWith("chào bạn! tôi là");
+    }
+
+    private static string? TryGetFastIntentReply(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message)) return null;
+        var clean = message.ToLowerInvariant().Trim();
+
+        // 1. Chào hỏi
+        if (clean == "hello" || clean == "hi" || clean == "alo" || clean == "chào" 
+            || clean == "chào em" || clean == "hello em" || clean == "chào bạn"
+            || clean.Contains("hello sigma cat") || clean.Contains("chào mèo") || clean.Contains("hello mèo")
+            || clean.Contains("hello em , sigma cat") || clean.Contains("hello em, sigma cat"))
+        {
+            return "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
+        }
+
+        // 2. Thông tin tổng quan / Khôi là ai
+        if (clean.Contains("thông tin về khôi") || clean.Contains("thong tin ve khoi")
+            || clean.Contains("thông tin khôi") || clean.Contains("thong tin khoi")
+            || clean.Contains("khôi là ai") || clean.Contains("khoi la ai")
+            || clean.Contains("giới thiệu về khôi") || clean.Contains("gioi thieu ve khoi")
+            || clean.Contains("giới thiệu khôi") || clean.Contains("gioi thieu khoi")
+            || clean.Contains("khôi tên gì") || clean.Contains("khoi ten gi")
+            || clean.Contains("tên đầy đủ") || clean.Contains("ten day du"))
+        {
+            return "Anh Khôi (Đặng Vỹ Khôi, sinh 2002) là Software Engineer (.NET) tại Tập đoàn Masan nha bạn 😼! Bạn muốn tìm hiểu gì về ảnh hong?";
+        }
+
+        // 3. Liên hệ / SĐT / Email / Zalo
+        if (clean.Contains("liên hệ") || clean.Contains("lien he")
+            || clean.Contains("sđt") || clean.Contains("sdt") || clean.Contains("số điện thoại") || clean.Contains("so dien thoai")
+            || clean.Contains("email") || clean.Contains("zalo") || clean.Contains("tuyển dụng") || clean.Contains("tuyen dung"))
+        {
+            return "Bạn liên hệ anh Khôi qua SĐT/Zalo 0931 314 792 hoặc email dangvykhoi@gmail.com nha 😼!";
+        }
+
+        // 4. Kỹ năng / Tech stack
+        if (clean.Contains("kỹ năng") || clean.Contains("ky nang")
+            || clean.Contains("tech stack") || clean.Contains("stack")
+            || clean.Contains("chuyên môn") || clean.Contains("chuyen mon")
+            || clean.Contains("sở trường") || clean.Contains("so truong"))
+        {
+            return "Sở trường của anh Khôi là C#/.NET 9, PostgreSQL, Docker và tối ưu hệ thống SaaS 🚀.";
+        }
+
+        // 5. Kinh nghiệm làm việc
+        if (clean.Contains("kinh nghiệm") || clean.Contains("kinh nghiem")
+            || clean.Contains("làm ở đâu") || clean.Contains("lam o dau")
+            || clean.Contains("công ty nào") || clean.Contains("cong ty nao"))
+        {
+            return "Anh Khôi có hơn 2 năm kinh nghiệm backend .NET, từng làm SaaS và hiện làm ở Masan Group 😼.";
+        }
+
+        // 6. Học vấn / Trường học
+        if (clean.Contains("học vấn") || clean.Contains("hoc van")
+            || clean.Contains("học trường nào") || clean.Contains("hoc truong nao")
+            || clean.Contains("đại học mở") || clean.Contains("bằng cấp"))
+        {
+            return "Anh Khôi tốt nghiệp loại Giỏi CNTT Đại học Mở TP.HCM với 3 học bổng xuất sắc lận đó 😼🎓!";
+        }
+
+        // 7. Bạn là ai / Mèo là ai
+        if (clean == "bạn là ai" || clean == "ban la ai" || clean == "em là ai" || clean == "em la ai"
+            || clean.Contains("mày là ai") || clean.Contains("sigma cat là ai"))
+        {
+            return "Em là chú mèo AI Sigma Cat 😼🐾, trợ lý tiếp khách của anh Khôi nè!";
+        }
+
+        // 8. Rủ chơi / cafe / nhậu
+        if (clean.Contains("cafe") || clean.Contains("cà phê") || clean.Contains("nhậu") || clean.Contains("đi chơi") || clean.Contains("game"))
+        {
+            return "Ảnh đang cắm mặt code rồi sen ơi 😼, nhắn Zalo 0931 314 792 rủ thử xem ảnh chịu đi hong nha!";
+        }
+
+        return null;
     }
 
     [HttpGet("history/{sessionId}")]

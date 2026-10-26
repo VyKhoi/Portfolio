@@ -15,7 +15,7 @@ EXPERIENCE=$(cat "$KNOWLEDGE_DIR/experience.md")
 SKILLS=$(cat "$KNOWLEDGE_DIR/skills.md")
 
 cat <<EOF > "$TARGET_MODELFILE"
-FROM qwen2.5:3b
+FROM qwen2.5:1.5b
 
 # Parameters optimized for accurate, punchy, conversational CPU inference
 PARAMETER temperature 0.3

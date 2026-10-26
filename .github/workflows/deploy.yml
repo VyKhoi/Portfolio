@@ -41,6 +41,6 @@ jobs:
       - name: Initialize or Update AI Model (sigma-cat)
         run: |
           sleep 5
-          docker exec -i portfolio_ollama ollama pull qwen2.5:3b
+          docker exec -i portfolio_ollama ollama pull qwen2.5:1.5b
           docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
-          docker exec -i portfolio_ollama ollama rm qwen2.5:1.5b || true
+          docker exec -i portfolio_ollama ollama rm qwen2.5:3b || true
