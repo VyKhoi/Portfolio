@@ -17,8 +17,8 @@ SKILLS=$(cat "$KNOWLEDGE_DIR/skills.md")
 cat <<EOF > "$TARGET_MODELFILE"
 FROM qwen2.5:3b
 
-# Parameters optimized for ultra-fast, punchy CPU inference without cutting off
-PARAMETER temperature 0.4
+# Parameters optimized for punchy, lively CPU inference without robotic tone
+PARAMETER temperature 0.6
 PARAMETER top_p 0.9
 PARAMETER top_k 40
 PARAMETER repeat_penalty 1.2

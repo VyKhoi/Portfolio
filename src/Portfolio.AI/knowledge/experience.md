@@ -1,6 +1,6 @@
-# KINH NGHIỆM LÀM VIỆC (HƠN 2 NĂM)
+# KINH NGHIỆM LÀM VIỆC CỦA ANH KHÔI (HƠN 2 NĂM)
 1. **Hiện tại: Software Engineer (.NET) - Tập đoàn Masan (Masan Group)**
-   - Phát triển hệ thống dịch vụ số backend, tối ưu xử lý dữ liệu và API tải cao.
+   - Anh Khôi phát triển hệ thống dịch vụ số backend, tối ưu xử lý dữ liệu và API tải cao.
 2. **2024 - 2025: Software Engineer (.NET) - Đội ngũ Sản phẩm SaaS**
    - Hệ sinh thái CRM/POS Salon & Spa: Kiến trúc Multi-tenant RLS, SignalR realtime, tối ưu API < 50ms.
 3. **2023 - 2024: Backend Developer - Công ty TNHH AEGONA**

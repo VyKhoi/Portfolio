@@ -152,7 +152,7 @@ public class AIController : ControllerBase
         {
             if (h.Role == "assistant" && IsForbiddenImpersonation(h.Content))
             {
-                h.Content = "Dạ anh Khôi là Software Engineer chuyên sâu về backend .NET. Em là chú mèo Sigma Cat trợ lý của anh Khôi nè 😼!";
+                h.Content = "Meow chào bạn 😼! Em là Sigma Cat - trợ lý AI tiếp khách của anh Khôi nè!";
             }
         }
 
@@ -161,8 +161,8 @@ public class AIController : ControllerBase
         if (IsEnglishRefusal(replyContent) || IsForbiddenImpersonation(replyContent))
         {
             replyContent = IsEnglishQuery(request.Message)
-                ? "Mr. Khoi is a Software Engineer specializing in .NET backend systems and SaaS platforms with over 2 years of experience. I am Sigma Cat 😼🐾, his AI assistant! Feel free to ask me anything about his skills or projects!"
-                : "Dạ anh Khôi là Software Engineer chuyên sâu về backend .NET và kiến trúc SaaS với hơn 2 năm kinh nghiệm thực chiến. Em là Sigma Cat 😼🐾 - chú mèo AI trợ lý của anh Khôi nè! Bạn muốn tìm hiểu gì về kỹ năng hay dự án của anh Khôi hong?";
+                ? "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. How can I help you explore his projects or skills?"
+                : "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
         }
 
         // 9. Save AI reply to database
@@ -291,7 +291,7 @@ public class AIController : ControllerBase
         {
             if (h.Role == "assistant" && IsForbiddenImpersonation(h.Content))
             {
-                h.Content = "Dạ anh Khôi là Software Engineer chuyên sâu về backend .NET. Em là chú mèo Sigma Cat trợ lý của anh Khôi nè 😼!";
+                h.Content = "Meow chào bạn 😼! Em là Sigma Cat - trợ lý AI tiếp khách của anh Khôi nè!";
             }
         }
 
@@ -337,8 +337,8 @@ public class AIController : ControllerBase
         if (isRefusalOrImpersonation)
         {
             var fallback = IsEnglishQuery(request.Message)
-                ? "Mr. Khoi is a Software Engineer specializing in .NET backend systems and SaaS platforms with over 2 years of experience. I am Sigma Cat 😼🐾, his AI assistant! Feel free to ask me anything about his skills or projects!"
-                : "Dạ anh Khôi là Software Engineer chuyên sâu về backend .NET và kiến trúc SaaS với hơn 2 năm kinh nghiệm thực chiến. Em là Sigma Cat 😼🐾 - chú mèo AI trợ lý của anh Khôi nè! Bạn muốn tìm hiểu gì về kỹ năng hay dự án của anh Khôi hong?";
+                ? "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. How can I help you explore his projects or skills?"
+                : "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
 
             fullReplyBuilder.Clear();
             fullReplyBuilder.Append(fallback);
@@ -408,22 +408,33 @@ public class AIController : ControllerBase
     private static bool IsForbiddenImpersonation(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return false;
-        var clean = text.ToLowerInvariant();
-        return clean.Contains("tôi tên là anh khôi")
-            || clean.Contains("tôi tên là khôi")
-            || clean.Contains("tôi tên là đặng vỹ khôi")
+        var clean = text.ToLowerInvariant().Trim();
+        return clean.Contains("tôi tên là")
+            || clean.Contains("tôi là vykhoi")
+            || clean.Contains("tôi là vy khôi")
             || clean.Contains("tôi là anh khôi")
             || clean.Contains("tôi là khôi")
             || clean.Contains("tôi là đặng vỹ khôi")
-            || clean.Contains("mình tên là anh khôi")
+            || clean.Contains("mình là vykhoi")
+            || clean.Contains("mình là vy khôi")
+            || clean.Contains("mình tên là")
             || clean.Contains("mình là anh khôi")
             || clean.Contains("mình là khôi")
-            || clean.Contains("tôi chính là khôi")
-            || clean.Contains("tôi chính là anh khôi")
-            || clean.Contains("tôi đây chính là anh khôi")
-            || clean.Contains("tôi đây chính là bạn khôi")
-            || clean.Contains("tôi đây chính là khôi")
-            || clean.Contains("tên là anh khôi");
+            || clean.Contains("tôi chính là")
+            || clean.Contains("tôi đây chính là")
+            || clean.Contains("tôi là một software engineer")
+            || clean.Contains("tôi là software engineer")
+            || clean.Contains("tôi là một lập trình viên")
+            || clean.Contains("tôi là lập trình viên")
+            || clean.Contains("kinh nghiệm của tôi")
+            || clean.Contains("kỹ năng của tôi")
+            || clean.Contains("dự án mà tôi")
+            || clean.Contains("chuyên môn của mình")
+            || clean.Contains("tôi hiện đang làm việc")
+            || clean.StartsWith("tôi là")
+            || clean.StartsWith("xin chào! tôi là")
+            || clean.StartsWith("xin chào, tôi là")
+            || clean.StartsWith("chào bạn! tôi là");
     }
 
     [HttpGet("history/{sessionId}")]
