@@ -269,17 +269,17 @@ export const CatChatbot: React.FC = () => {
               setIsOpen(true);
               setShowBubble(false);
             }}
-            className="fixed bottom-6 right-6 z-[99999] flex items-center gap-2.5 bg-[#121215] border border-[#DEFF9A]/40 hover:border-[#DEFF9A] text-white pl-2 pr-4 py-2 rounded-full shadow-[0_0_20px_rgba(222,255,154,0.15)] font-mono text-xs transition-all group"
+            className="fixed bottom-6 right-6 z-[99999] p-1 bg-[#121215] border-2 border-[#DEFF9A]/60 hover:border-[#DEFF9A] text-white rounded-full shadow-[0_0_25px_rgba(222,255,154,0.3)] transition-all group flex items-center justify-center cursor-pointer"
+            aria-label="Mở chat với Sigma Cat"
           >
             <div className="relative">
               <img 
                 src="/sigma-cat.png" 
                 alt="Sigma Cat" 
-                className="w-7 h-7 rounded-full object-cover border border-[#DEFF9A]"
+                className="w-11 h-11 rounded-full object-cover border border-[#DEFF9A]"
               />
-              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#DEFF9A] animate-pulse"></span>
+              <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#DEFF9A] border-2 border-[#121215] animate-pulse"></span>
             </div>
-            <span className="font-bold text-[#DEFF9A] group-hover:underline">Chat với Sigma Cat 😼</span>
           </motion.button>
         )}
       </AnimatePresence>
