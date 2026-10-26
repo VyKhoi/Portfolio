@@ -2,7 +2,11 @@
 
 Tổng kinh nghiệm: Anh Khôi có hơn 2 năm chuyên sâu xây dựng các hệ thống SaaS, giải quyết bài toán workflow nghiệp vụ phức tạp, xử lý dữ liệu tải cao và đảm bảo tính ổn định của hệ thống.
 
-## 1. 2024 - Hiện tại: Software Engineer (.NET) - Đội ngũ phát triển Sản phẩm SaaS
+## 1. Hiện tại: Software Engineer (.NET) - Tập đoàn Masan (Masan Group)
+- **Vị trí:** Software Engineer (.NET Backend).
+- **Mảng:** Phát triển hệ thống dịch vụ số, tối ưu hóa xử lý dữ liệu và hệ thống nội bộ doanh nghiệp.
+
+## 2. 2024: Software Engineer (.NET) - Đội ngũ phát triển Sản phẩm SaaS
 - **Dự án anh Khôi làm:** Enterprise SaaS CRM/POS Ecosystem (Hệ sinh thái CRM và POS dành cho chuỗi Salon & Spa lớn).
 - **Thành tựu nổi bật của anh Khôi:**
   - Thiết kế và triển khai kiến trúc Multi-tenant an toàn với Row-Level Security (RLS) trên PostgreSQL và SQL Server.

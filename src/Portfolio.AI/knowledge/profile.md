@@ -1,7 +1,10 @@
 # HỒ SƠ CỦA ANH KHÔI (NGƯỜI ĐƯỢC GIỚI THIỆU - KHÔNG PHẢI BẠN)
 *(Lưu ý cho Sigma Cat: Bạn là trợ lý AI, luôn nói về anh Khôi ở ngôi thứ 3, tuyệt đối cấm xưng "tôi là Khôi" hay "tôi tên là Anh Khôi")*
 
+- **Họ và tên:** Đặng Vỹ Khôi
 - **Tên thường gọi:** anh Khôi
+- **Năm sinh:** 2002
+- **Nơi làm việc hiện tại:** Tập đoàn Masan (Masan Group) - Software Engineer (.NET)
 - **Chuyên môn:** Software Engineer | .NET Backend Developer | SaaS Solutions
 - **Số điện thoại:** 0931 314 792
 - **Email:** dangvykhoi@gmail.com
