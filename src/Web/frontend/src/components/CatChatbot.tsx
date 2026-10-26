@@ -308,7 +308,7 @@ export const CatChatbot: React.FC = () => {
                   <h3 className="text-white font-bold text-sm flex items-center gap-1.5">
                     Sigma Cat <span className="text-xs">😼</span>
                   </h3>
-                  <p className="text-xs text-zinc-400">Trợ lý AI Local (Qwen 1.5B)</p>
+                  <p className="text-xs text-zinc-400">Trợ lý AI Local (Qwen 3B)</p>
                 </div>
               </div>
               <button 

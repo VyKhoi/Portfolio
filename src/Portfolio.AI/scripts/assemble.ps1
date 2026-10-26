@@ -30,15 +30,15 @@ $skills
 $systemContent = $systemContent.Trim()
 
 $modelfileContent = @"
-FROM qwen2.5:1.5b
+FROM qwen2.5:3b
 
-# Parameters optimized for lively, concise inference without repetition
-PARAMETER temperature 0.6
+# Parameters optimized for ultra-concise, fast, punchy inference without cutting off
+PARAMETER temperature 0.4
 PARAMETER top_p 0.9
 PARAMETER top_k 40
-PARAMETER repeat_penalty 1.15
+PARAMETER repeat_penalty 1.2
 PARAMETER repeat_last_n 64
-PARAMETER num_predict 200
+PARAMETER num_predict 120
 PARAMETER stop "<|im_end|>"
 PARAMETER stop "<|endoftext|>"
 
