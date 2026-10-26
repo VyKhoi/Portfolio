@@ -50,7 +50,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3G
+          memory: 5G
 
   # ─── 3. BACKEND (.NET 9 MODULAR MONOLITH) ───────────────────
   backend:
