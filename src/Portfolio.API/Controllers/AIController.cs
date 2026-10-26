@@ -160,9 +160,18 @@ public class AIController : ControllerBase
         var replyContent = await _ollama.GenerateReplyAsync(historyMessages, request.Message);
         if (IsEnglishRefusal(replyContent) || IsForbiddenImpersonation(replyContent))
         {
-            replyContent = IsEnglishQuery(request.Message)
-                ? "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. How can I help you explore his projects or skills?"
-                : "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
+            if (IsEnglishQuery(request.Message))
+            {
+                replyContent = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer at Masan Group. How can I help you explore his projects or skills?";
+            }
+            else if (IsGreeting(request.Message))
+            {
+                replyContent = "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
+            }
+            else
+            {
+                replyContent = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer (.NET Backend) tại Tập đoàn Masan nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
+            }
         }
 
         // 9. Save AI reply to database
@@ -336,9 +345,19 @@ public class AIController : ControllerBase
 
         if (isRefusalOrImpersonation)
         {
-            var fallback = IsEnglishQuery(request.Message)
-                ? "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. How can I help you explore his projects or skills?"
-                : "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
+            string fallback;
+            if (IsEnglishQuery(request.Message))
+            {
+                fallback = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer at Masan Group. How can I help you explore his projects or skills?";
+            }
+            else if (IsGreeting(request.Message))
+            {
+                fallback = "Meow chào bạn 😼! Em là Sigma Cat, trợ lý tiếp khách của anh Khôi nè. Bạn ghé thăm portal cần em hỗ trợ tìm hiểu gì về anh Khôi hong?";
+            }
+            else
+            {
+                fallback = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer (.NET Backend) tại Tập đoàn Masan nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
+            }
 
             fullReplyBuilder.Clear();
             fullReplyBuilder.Append(fallback);
@@ -405,6 +424,18 @@ public class AIController : ControllerBase
             || clean.StartsWith("as an ai");
     }
 
+    private static bool IsGreeting(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message)) return false;
+        var clean = message.ToLowerInvariant().Trim();
+        return clean.StartsWith("hello")
+            || clean.StartsWith("hi")
+            || clean.StartsWith("alo")
+            || clean.StartsWith("chào")
+            || clean.Contains("chào em")
+            || clean.Contains("hello em");
+    }
+
     private static bool IsForbiddenImpersonation(string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return false;
@@ -431,6 +462,10 @@ public class AIController : ControllerBase
             || clean.Contains("dự án mà tôi")
             || clean.Contains("chuyên môn của mình")
             || clean.Contains("tôi hiện đang làm việc")
+            || clean.Contains("đỗ văn")
+            || clean.Contains("kiều hồi")
+            || clean.Contains("dưới đây là một số thông tin cơ bản")
+            || clean.Contains("dưới đây là một số thông tin")
             || clean.StartsWith("tôi là")
             || clean.StartsWith("xin chào! tôi là")
             || clean.StartsWith("xin chào, tôi là")

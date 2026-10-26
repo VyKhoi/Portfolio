@@ -32,13 +32,13 @@ $systemContent = $systemContent.Trim()
 $modelfileContent = @"
 FROM qwen2.5:3b
 
-# Parameters optimized for punchy, lively CPU inference without robotic tone
-PARAMETER temperature 0.6
+# Parameters optimized for accurate, punchy, conversational CPU inference
+PARAMETER temperature 0.3
 PARAMETER top_p 0.9
 PARAMETER top_k 40
-PARAMETER repeat_penalty 1.2
-PARAMETER repeat_last_n 64
-PARAMETER num_predict 80
+PARAMETER repeat_penalty 1.05
+PARAMETER repeat_last_n 32
+PARAMETER num_predict 150
 PARAMETER num_ctx 1024
 PARAMETER num_thread 4
 PARAMETER stop "<|im_end|>"
@@ -50,5 +50,6 @@ $systemContent
 """
 "@
 
-[System.IO.File]::WriteAllText($targetModelfile, $modelfileContent, [System.Text.Encoding]::UTF8)
-Write-Host "Successfully generated UTF-8 Modelfile for Sigma Cat at: $targetModelfile"
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($targetModelfile, $modelfileContent, $utf8NoBom)
+Write-Host "Successfully generated UTF-8 (No BOM) Modelfile for Sigma Cat at: $targetModelfile"
