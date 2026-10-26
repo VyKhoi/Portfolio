@@ -54,6 +54,7 @@ services:
 
   # ─── 3. BACKEND (.NET 9 MODULAR MONOLITH) ───────────────────
   backend:
+    image: portfolio_backend:latest
     build:
       context: .
       dockerfile: src/Portfolio.API/Dockerfile
@@ -83,6 +84,7 @@ services:
 
   # ─── 4. FRONTEND (REACT 19 + VITE) ──────────────────────────
   frontend:
+    image: portfolio_frontend:latest
     build:
       context: src/Web/frontend
       dockerfile: Dockerfile
