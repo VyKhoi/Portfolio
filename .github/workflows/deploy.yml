@@ -29,15 +29,14 @@ jobs:
 
       - name: Build and Deploy via Docker Compose
         run: |
-          echo "Dọn dẹp sạch sẽ container cũ và mồ côi..."
+          echo "Dọn dẹp container cũ..."
           docker compose down --remove-orphans || true
           echo "Build bản mới tinh 100% không dùng cache cũ..."
           docker compose build --no-cache
           echo "Khởi động container mới..."
           docker compose up -d --force-recreate --remove-orphans
-          echo "Dọn sạch toàn bộ image cũ và rác hệ thống..."
+          echo "Xóa các image build cũ (<none>)..."
           docker image prune -f
-          docker container prune -f
 
       - name: Initialize or Update AI Model (sigma-cat)
         run: |
