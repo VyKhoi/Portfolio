@@ -2,11 +2,35 @@ import { useEffect, useState } from 'react';
 import { motion } from "framer-motion"
 import { ContentApi } from '../../lib/api';
 
+const DEFAULT_SKILLS = [
+  { category: "Backend", name: "C#" },
+  { category: "Backend", name: ".NET 9 / Core" },
+  { category: "Backend", name: "ASP.NET Core Web API" },
+  { category: "Backend", name: "Entity Framework Core" },
+  { category: "Backend", name: "Dapper" },
+  { category: "Database", name: "PostgreSQL" },
+  { category: "Database", name: "SQL Server" },
+  { category: "Database", name: "Redis" },
+  { category: "DevOps & System", name: "Docker & Compose" },
+  { category: "DevOps & System", name: "Nginx" },
+  { category: "DevOps & System", name: "CI/CD & GitHub Actions" },
+  { category: "DevOps & System", name: "Linux / Home Lab" },
+  { category: "Architecture & AI", name: "Modular Monolith" },
+  { category: "Architecture & AI", name: "RESTful API" },
+  { category: "Architecture & AI", name: "Ollama / Local LLM" }
+];
+
 export function AboutSection() {
-  const [skills, setSkills] = useState<any[]>([]);
+  const [skills, setSkills] = useState<any[]>(DEFAULT_SKILLS);
 
   useEffect(() => {
-    ContentApi.getSkills().then(setSkills).catch(console.error);
+    ContentApi.getSkills()
+      .then(data => {
+        if (data && data.length > 0) {
+          setSkills(data);
+        }
+      })
+      .catch(console.error);
   }, []);
 
   // Group skills by category

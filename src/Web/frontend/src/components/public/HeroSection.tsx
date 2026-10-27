@@ -5,9 +5,9 @@ import { Download } from "lucide-react";
 import { ContentApi } from "../../lib/api";
 
 const DEFAULT_PROFILE = {
-  fullName: "DANG VY KHOI",
-  title: "Software Engineer | .NET Core",
-  bio: "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS, tập trung vào quy trình nghiệp vụ (business workflows) và tính ổn định của hệ thống.",
+  fullName: "ĐẶNG VỸ KHÔI",
+  title: "Software Engineer | .NET Backend",
+  bio: "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.",
   avatarKey: "/profile.jpg",
   cvPdfKey: "/cv.pdf",
   githubLink: "https://github.com/vykhoi",
@@ -29,10 +29,10 @@ export function HeroSection() {
       });
   }, []);
 
-  const nameParts = (profile?.fullName || "DANG VY KHOI").trim().split(' ');
-  const firstName = nameParts[0] || "DANG";
-  const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts[1] || "");
-  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+  const nameParts = (profile?.fullName || "ĐẶNG VỸ KHÔI").trim().split(' ');
+  const firstName = nameParts[0] || "ĐẶNG";
+  const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts[1] || "VỸ");
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "KHÔI";
 
   return (
     <section className="relative min-h-screen pt-20 flex items-center bg-obsidian overflow-hidden border-b border-border">

@@ -98,13 +98,124 @@
             "@id": "https://dangvykhoi.com/#person"
           },
           "inLanguage": "vi-VN"
+        },
+        {
+          "@type": "ProfilePage",
+          "@id": "https://dangvykhoi.com/#profilepage",
+          "url": "https://dangvykhoi.com/",
+          "name": "Hồ sơ Kỹ sư Đặng Vỹ Khôi (Vy Khôi)",
+          "mainEntity": {
+            "@id": "https://dangvykhoi.com/#person"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://dangvykhoi.com/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Đặng Vỹ Khôi là ai?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Đặng Vỹ Khôi (Vy Khôi) là Software Engineer chuyên sâu về .NET Backend và kiến trúc SaaS tại Tập đoàn Masan (Masan Group), tốt nghiệp loại Giỏi ngành Công nghệ Thông tin tại Trường Đại học Mở TP.HCM."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Đặng Vỹ Khôi có những kỹ năng chuyên môn gì?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Đặng Vỹ Khôi thành thạo lập trình C#, .NET 9, ASP.NET Core Web API, Entity Framework Core, Dapper, PostgreSQL, SQL Server, Docker, Nginx, kiến trúc Modular Monolith và triển khai Local AI."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Làm thế nào để liên hệ và xem CV của Đặng Vỹ Khôi?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Bạn có thể liên hệ Đặng Vỹ Khôi qua email dangvykhoi@gmail.com, số điện thoại 0931314792, xem profile tại linkedin.com/in/vykhoi hoặc tải CV trực tiếp tại website dangvykhoi.com."
+              }
+            }
+          ]
         }
       ]
     }
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Semantic Static Fallback for Search Engine Crawlers (Replaced on React Mount) -->
+      <header>
+        <h1>Đặng Vỹ Khôi (Vy Khôi) | Software Engineer (.NET Backend)</h1>
+        <p>Kỹ sư phần mềm chuyên sâu về kiến trúc SaaS, .NET 9, C#, PostgreSQL và Docker tại Tập đoàn Masan (Masan Group).</p>
+        <nav aria-label="Điều hướng chính">
+          <ul>
+            <li><a href="#about">Giới thiệu & Học vấn</a></li>
+            <li><a href="#skills">Kỹ năng kỹ thuật</a></li>
+            <li><a href="#experience">Kinh nghiệm làm việc</a></li>
+            <li><a href="#projects">Dự án tiêu biểu</a></li>
+            <li><a href="#contact">Liên hệ</a></li>
+            <li><a href="/cv.pdf">Tải CV (PDF)</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main>
+        <section id="about">
+          <h2>Giới Thiệu & Học Vấn</h2>
+          <p>Tôi là <strong>Đặng Vỹ Khôi</strong> (tên thường gọi: <strong>Vy Khôi</strong>), Software Engineer tại <strong>Tập đoàn Masan (Masan Group)</strong>. Tốt nghiệp loại Giỏi ngành Công nghệ Thông tin tại Trường Đại học Mở Thành phố Hồ Chí Minh (HCMCOU) với 3 học bổng khuyến khích học tập.</p>
+          <p>Tôi tập trung nghiên cứu và xây dựng các hệ thống backend chịu tải cao, kiến trúc Modular Monolith, tối ưu hóa cơ sở dữ liệu quan hệ và vận hành hệ thống Home Lab cá nhân.</p>
+        </section>
+
+        <section id="skills">
+          <h2>Kỹ Năng Chuyên Môn</h2>
+          <ul>
+            <li><strong>Ngôn ngữ & Framework Backend:</strong> C#, .NET 9, .NET Core, ASP.NET Core Web API, Entity Framework Core, Dapper.</li>
+            <li><strong>Cơ sở dữ liệu:</strong> PostgreSQL, Microsoft SQL Server, Redis.</li>
+            <li><strong>DevOps & Hạ tầng:</strong> Docker, Docker Compose, Nginx Reverse Proxy, Linux Server, CI/CD GitHub Actions.</li>
+            <li><strong>Kiến trúc hệ thống:</strong> Modular Monolith, Clean Architecture, RESTful API, Asynchronous Processing (System.Threading.Channels).</li>
+            <li><strong>Trí tuệ nhân tạo (AI):</strong> Local LLM (Ollama, Qwen), Vector Search, Trợ lý AI Sigma Cat.</li>
+          </ul>
+        </section>
+
+        <section id="experience">
+          <h2>Kinh Nghiệm Làm Việc</h2>
+          <article>
+            <h3>Tập đoàn Masan (Masan Group) — Software Engineer (.NET Backend)</h3>
+            <p>Phát triển và bảo trì các hệ sinh thái phần mềm SaaS doanh nghiệp, thiết kế cơ sở dữ liệu quy mô lớn và tối ưu hóa hiệu năng nghiệp vụ.</p>
+          </article>
+          <article>
+            <h3>Công ty TecApro — Software Developer</h3>
+            <p>Phát triển các ứng dụng phần mềm nghiệp vụ, lập trình C# và xây dựng API backend.</p>
+          </article>
+        </section>
+
+        <section id="projects">
+          <h2>Dự Án Tiêu Biểu</h2>
+          <article>
+            <h3>Portfolio & Home Lab System (dangvykhoi.com)</h3>
+            <p>Hệ thống Portfolio cá nhân tự vận hành trên nền tảng Docker Container gồm Backend .NET 9 Web API, PostgreSQL 16, Nginx và trợ lý ảo AI Sigma Cat tích hợp mô hình ngôn ngữ cục bộ.</p>
+          </article>
+          <article>
+            <h3>Hệ Thống Quản Trị Nghiệp Vụ SaaS</h3>
+            <p>Kiến trúc Modular Monolith với phân quyền bảo mật, tối ưu hóa truy vấn cơ sở dữ liệu và xử lý tác vụ ngầm.</p>
+          </article>
+        </section>
+
+        <section id="contact">
+          <h2>Thông Tin Liên Hệ</h2>
+          <p>Email: <a href="mailto:dangvykhoi@gmail.com">dangvykhoi@gmail.com</a></p>
+          <p>Số điện thoại: <a href="tel:+84931314792">0931 314 792</a></p>
+          <p>Địa chỉ: Gò Vấp, Thành phố Hồ Chí Minh, Việt Nam</p>
+          <p>GitHub: <a href="https://github.com/vykhoi">https://github.com/vykhoi</a></p>
+          <p>LinkedIn: <a href="https://linkedin.com/in/vykhoi">https://linkedin.com/in/vykhoi</a></p>
+        </section>
+      </main>
+
+      <footer>
+        <p>&copy; 2026 Đặng Vỹ Khôi (Vy Khôi). All rights reserved.</p>
+      </footer>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/oneko.js"></script>
   </body>
