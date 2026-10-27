@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🚀 Đặng Vỹ Khôi (Vy Khôi) — Portfolio & Home Lab System
+# 🚀 Đặng Vỹ Khôi (Dang Vy Khoi) — Portfolio & Home Lab System
 
 **Official Personal Portfolio & Engineering Playground of Dang Vy Khoi**  
 *Software Engineer (.NET Backend) @ Masan Group*
@@ -29,11 +29,11 @@
 
 ## 📖 Giới Thiệu (About)
 
-Chào mừng bạn đến với mã nguồn Portfolio chính thức của mình — **Đặng Vỹ Khôi** (tên thường gọi: **Vy Khôi**)! 👋
+Chào mừng bạn đến với mã nguồn Portfolio chính thức của mình — **Đặng Vỹ Khôi** (Dang Vy Khoi)! 👋
 
 Dự án này là trang cá nhân kết hợp hệ thống **Home Lab** tự vận hành trên nền tảng Docker Container, được thiết kế theo tư duy kỹ sư backend: chú trọng tính ổn định, kiến trúc module hóa, tốc độ phản hồi cao và tích hợp trí tuệ nhân tạo (Local LLM) hoàn toàn riêng tư.
 
-- **Tác giả:** Đặng Vỹ Khôi (Vy Khôi)
+- **Tác giả:** Đặng Vỹ Khôi (Dang Vy Khoi)
 - **Vị trí hiện tại:** Software Engineer (.NET Backend) tại **Tập đoàn Masan (Masan Group)**
 - **Học vấn:** Cử nhân CNTT loại Giỏi (Distinction) — Trường Đại học Mở TP.HCM (HCMCOU)
 
@@ -129,7 +129,7 @@ chmod +x src/Portfolio.AI/scripts/build-model.sh
 
 ## 📬 Thông Tin Liên Hệ & Kết Nối
 
-- **Chủ sở hữu:** Đặng Vỹ Khôi (Vy Khôi)
+- **Chủ sở hữu:** Đặng Vỹ Khôi (Dang Vy Khoi)
 - **Website chính thức:** [https://dangvykhoi.com](https://dangvykhoi.com)
 - **Email:** [dangvykhoi@gmail.com](mailto:dangvykhoi@gmail.com)
 - **Điện thoại:** 0931 314 792
