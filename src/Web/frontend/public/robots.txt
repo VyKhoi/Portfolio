@@ -1,0 +1,9 @@
+# robots.txt for https://dangvykhoi.com
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://dangvykhoi.com/sitemap.xml
