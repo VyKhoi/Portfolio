@@ -66,6 +66,7 @@ services:
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=portfolio_db;Username=postgres;Password=${POSTGRES_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - Ollama__BaseUrl=http://ollama:11434
       - Ollama__Model=sigma-cat
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}

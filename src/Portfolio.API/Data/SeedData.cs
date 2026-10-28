@@ -17,17 +17,31 @@ public static class SeedData
 
         await context.Database.MigrateAsync();
 
-        // 1. Seed Admin User
-        if (!await context.Users.AnyAsync())
+        // 1. Seed or Sync Admin User
+        var envAdminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
+        var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == "admin");
+
+        if (adminUser == null)
         {
+            var initialPassword = !string.IsNullOrWhiteSpace(envAdminPassword)
+                ? envAdminPassword
+                : "Khoi@" + Guid.NewGuid().ToString("N")[..8] + "!";
+
             context.Users.Add(new User
             {
                 Id = Guid.NewGuid(),
                 Username = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(initialPassword),
                 Role = "Admin",
                 CreatedAt = DateTime.UtcNow
             });
+            await context.SaveChangesAsync();
+        }
+        else if (!string.IsNullOrWhiteSpace(envAdminPassword) && !BCrypt.Net.BCrypt.Verify(envAdminPassword, adminUser.PasswordHash))
+        {
+            // Sync password if user configured a new ADMIN_PASSWORD in environment / secrets
+            adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(envAdminPassword);
+            await context.SaveChangesAsync();
         }
 
         // 2. Seed Profile

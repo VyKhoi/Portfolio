@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Portfolio.API.Data;
@@ -45,36 +46,41 @@ public class AuthController : ControllerBase
         return Ok(new { token = token, username = user.Username, role = user.Role });
     }
 
-    public class RegisterDto
+    public class ChangePasswordDto
     {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        public string CurrentPassword { get; set; } = string.Empty;
+        public string NewPassword { get; set; } = string.Empty;
     }
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
     {
-        if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
+        if (string.IsNullOrWhiteSpace(dto.CurrentPassword) || string.IsNullOrWhiteSpace(dto.NewPassword))
         {
-            return BadRequest(new { error = "Username and password are required." });
+            return BadRequest(new { error = "Mật khẩu hiện tại và mật khẩu mới không được để trống." });
         }
 
-        if (await _db.Users.AnyAsync(u => u.Username.ToLower() == dto.Username.ToLower()))
+        if (dto.NewPassword.Length < 8)
         {
-            return BadRequest(new { error = "Username already exists." });
+            return BadRequest(new { error = "Mật khẩu mới phải có tối thiểu 8 ký tự." });
         }
 
-        var user = new User
+        var username = User.Identity?.Name;
+        if (string.IsNullOrEmpty(username))
         {
-            Username = dto.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-            Role = "Admin"
-        };
+            return Unauthorized(new { error = "Không xác định được phiên đăng nhập." });
+        }
 
-        _db.Users.Add(user);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+        {
+            return BadRequest(new { error = "Mật khẩu hiện tại không chính xác." });
+        }
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         await _db.SaveChangesAsync();
 
-        var token = _jwt.GenerateToken(user);
-        return Ok(new { token = token, username = user.Username });
+        return Ok(new { message = "Đổi mật khẩu thành công!" });
     }
 }
