@@ -18,8 +18,11 @@ export function Navbar() {
         <div className="lg:col-span-3 flex items-center px-4 lg:px-8 border-r border-border h-full">
           <a href="#" className="flex items-center gap-3 group">
             <img 
-              src="/icon-192.png" 
+              src="/favicon-96x96.png" 
               alt="Logo" 
+              width={36}
+              height={36}
+              decoding="async"
               className="w-9 h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm"
             />
             <span className="font-mono font-bold text-lg md:text-xl tracking-tight text-text-main">
@@ -50,6 +53,8 @@ export function Navbar() {
           <button 
             className="text-text-main focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? "Đóng menu điều hướng" : "Mở menu điều hướng"}
+            aria-expanded={isOpen}
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>

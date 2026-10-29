@@ -1,10 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { motion } from 'framer-motion'
-import React, { Suspense, lazy } from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { Home } from './pages/public/Home'
-import { useNavigate } from 'react-router-dom'
 
 // Code-split: admin dashboard & chatbot are loaded on demand so public visitors
 // only download what is needed to paint the homepage.
@@ -20,13 +18,11 @@ const CatChatbot = lazy(() => import('./components/CatChatbot').then(m => ({ def
 
 function AdminFallback() {
   return (
-    <div className="flex h-screen items-center justify-center bg-[#0A0A0C] font-mono text-xs text-zinc-500">
+    <div className="flex h-screen items-center justify-center bg-[#0A0A0C] font-mono text-xs text-zinc-400">
       LOADING_MODULE...
     </div>
   )
 }
-
-const queryClient = new QueryClient()
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore(state => state.token)
@@ -85,8 +81,9 @@ function Login() {
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">USERNAME</label>
+            <label htmlFor="login-username" className="block text-xs text-zinc-400 mb-1">USERNAME</label>
             <input 
+              id="login-username"
               type="text" 
               value={username}
               onChange={e => setUsername(e.target.value)}
@@ -95,8 +92,9 @@ function Login() {
             />
           </div>
           <div>
-            <label className="block text-xs text-zinc-500 mb-1">PASSWORD</label>
+            <label htmlFor="login-password" className="block text-xs text-zinc-400 mb-1">PASSWORD</label>
             <input 
+              id="login-password"
               type="password" 
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -118,39 +116,51 @@ function Login() {
   )
 }
 
+function DeferredChatbot() {
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setReady(true), 1200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!ready) return null
+  return (
+    <Suspense fallback={null}>
+      <CatChatbot />
+    </Suspense>
+  )
+}
+
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <Suspense fallback={<AdminFallback />}>
-                <AdminLayout>
-                  <Suspense fallback={<AdminFallback />}>
-                    <Outlet />
-                  </Suspense>
-                </AdminLayout>
-              </Suspense>
-            </ProtectedRoute>
-          }>
-            <Route index element={<DashboardOverview />} />
-            <Route path="inbox" element={<InboxTable />} />
-            <Route path="projects" element={<ProjectCRUD />} />
-            <Route path="profile" element={<ProfileSettings />} />
-            <Route path="experiences" element={<ExperienceCRUD />} />
-            <Route path="skills" element={<SkillCRUD />} />
-            <Route path="ai-logs" element={<AIChatLogs />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <Suspense fallback={null}>
-          <CatChatbot />
-        </Suspense>
-      </Router>
-    </QueryClientProvider>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Suspense fallback={<AdminFallback />}>
+              <AdminLayout>
+                <Suspense fallback={<AdminFallback />}>
+                  <Outlet />
+                </Suspense>
+              </AdminLayout>
+            </Suspense>
+          </ProtectedRoute>
+        }>
+          <Route index element={<DashboardOverview />} />
+          <Route path="inbox" element={<InboxTable />} />
+          <Route path="projects" element={<ProjectCRUD />} />
+          <Route path="profile" element={<ProfileSettings />} />
+          <Route path="experiences" element={<ExperienceCRUD />} />
+          <Route path="skills" element={<SkillCRUD />} />
+          <Route path="ai-logs" element={<AIChatLogs />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <DeferredChatbot />
+    </Router>
   )
 }
 

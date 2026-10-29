@@ -1,6 +1,7 @@
 # robots.txt for https://dangvykhoi.com
 User-agent: *
 Allow: /
+Disallow: /dashboard
 Disallow: /admin
 Disallow: /login
 Disallow: /api/

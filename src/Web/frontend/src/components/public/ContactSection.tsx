@@ -98,6 +98,7 @@ export function ContactSection() {
 
             <div className="relative">
               <Input 
+                id="contact-name"
                 placeholder=" " 
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -105,13 +106,14 @@ export function ContactSection() {
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-name" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Họ và Tên
               </label>
             </div>
             
             <div className="relative">
               <Input 
+                id="contact-email"
                 type="email" 
                 placeholder=" " 
                 value={formData.email}
@@ -120,13 +122,14 @@ export function ContactSection() {
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-email" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Email
               </label>
             </div>
             
             <div className="relative pt-4">
               <textarea 
+                id="contact-message"
                 className="peer flex w-full border-b border-border bg-transparent py-2 text-sm text-text-main font-mono transition-colors focus-visible:outline-none focus-visible:border-primary min-h-[100px] resize-none"
                 placeholder=" "
                 value={formData.message}
@@ -134,7 +137,7 @@ export function ContactSection() {
                 maxLength={1000}
                 required
               />
-              <label className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-message" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Nội dung
               </label>
             </div>

@@ -1,37 +1,26 @@
-import { useEffect, useState } from 'react';
 import { motion } from "framer-motion"
-import { ContentApi } from '../../lib/api';
+import { useCachedContent } from '../../lib/contentCache';
 
 const DEFAULT_SKILLS = [
-  { category: "Backend", name: "C#" },
-  { category: "Backend", name: ".NET 9 / Core" },
-  { category: "Backend", name: "ASP.NET Core Web API" },
-  { category: "Backend", name: "Entity Framework Core" },
-  { category: "Backend", name: "Dapper" },
-  { category: "Database", name: "PostgreSQL" },
-  { category: "Database", name: "SQL Server" },
-  { category: "Database", name: "Redis" },
-  { category: "DevOps & System", name: "Docker & Compose" },
-  { category: "DevOps & System", name: "Nginx" },
-  { category: "DevOps & System", name: "CI/CD & GitHub Actions" },
-  { category: "DevOps & System", name: "Linux / Home Lab" },
-  { category: "Architecture & AI", name: "Modular Monolith" },
-  { category: "Architecture & AI", name: "RESTful API" },
-  { category: "Architecture & AI", name: "Ollama / Local LLM" }
+  { category: "Backend & Core", name: ".NET 8 / 9" },
+  { category: "Backend & Core", name: "C#" },
+  { category: "Backend & Core", name: "Concurrency" },
+  { category: "Backend & Core", name: "REST APIs" },
+  { category: "Backend & Core", name: "SignalR" },
+  { category: "Architecture & Sec", name: "Multi-tenant & RLS" },
+  { category: "Architecture & Sec", name: "Clean Architecture" },
+  { category: "Databases", name: "SQL Server & PostgreSQL" },
+  { category: "Databases", name: "EF Core & Dapper" },
+  { category: "Frontend", name: "React & TypeScript" },
+  { category: "DevOps & Cloud", name: "Docker & Linux" }
 ];
 
 export function AboutSection() {
-  const [skills, setSkills] = useState<any[]>(DEFAULT_SKILLS);
-
-  useEffect(() => {
-    ContentApi.getSkills()
-      .then(data => {
-        if (data && data.length > 0) {
-          setSkills(data);
-        }
-      })
-      .catch(console.error);
-  }, []);
+  const skills = useCachedContent<any[]>(
+    'skills',
+    DEFAULT_SKILLS,
+    data => Array.isArray(data) && data.length > 0,
+  );
 
   // Group skills by category
   const categories = skills.reduce((acc, skill) => {
@@ -85,7 +74,7 @@ export function AboutSection() {
               viewport={{ once: true }}
               className="border border-border p-6 bg-surface hover:border-primary transition-colors"
             >
-              <h4 className="text-primary font-mono text-sm uppercase tracking-widest mb-3">01 // Product Mindset</h4>
+              <h3 className="text-primary font-mono text-sm uppercase tracking-widest mb-3">01 // Product Mindset</h3>
               <p className="text-text-muted leading-relaxed">Tập trung vào tính ổn định của hệ thống trên môi trường production và giá trị mang lại cho doanh nghiệp hơn là các giải pháp lý thuyết suông.</p>
             </motion.div>
             <motion.div 
@@ -94,14 +83,14 @@ export function AboutSection() {
               viewport={{ once: true, margin: "-50px" }}
               className="border border-border p-6 bg-surface hover:border-primary transition-colors"
             >
-              <h4 className="text-primary font-mono text-sm uppercase tracking-widest mb-3">02 // Technical Curiosity</h4>
+              <h3 className="text-primary font-mono text-sm uppercase tracking-widest mb-3">02 // Technical Curiosity</h3>
               <p className="text-text-muted leading-relaxed">Tự triển khai lab cá nhân với Linux, Docker, và CI/CD để liên tục thử nghiệm công nghệ mới, đảm bảo tính mở rộng trong tương lai.</p>
             </motion.div>
           </div>
         </div>
 
         {/* Right: Skills Grid */}
-        <div>
+        <div id="skills">
           <div className="mb-12 flex items-center">
             <h2 className="text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
               Kỹ Năng
@@ -119,9 +108,9 @@ export function AboutSection() {
                 key={skillGroup.title} 
                 className="bg-obsidian p-8 hover:bg-surface transition-colors"
               >
-                <h4 className="font-mono text-xs font-bold text-primary uppercase tracking-widest mb-6">
+                <h3 className="font-mono text-xs font-bold text-primary uppercase tracking-widest mb-6">
                   {skillGroup.title}
-                </h4>
+                </h3>
                 <ul className="space-y-4">
                   {(skillGroup.items as string[]).map((skill: string) => (
                     <li key={skill} className="text-text-main font-body text-sm font-bold flex items-center">

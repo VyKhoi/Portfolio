@@ -1,14 +1,57 @@
-import { useEffect, useState } from 'react';
 import { Badge } from "../ui/Badge"
 import { motion } from "framer-motion"
-import { ContentApi } from '../../lib/api';
+import { useCachedContent } from '../../lib/contentCache';
+
+const DEFAULT_EXPERIENCES = [
+  {
+    role: "Software Engineer (.NET)",
+    company: "SaaS Product Development (Independent Team)",
+    period: "2024 - Present",
+    projectName: "Enterprise SaaS CRM/POS Ecosystem",
+    highlights: [
+      "Built a multi-tenant POS/Web/Mobile core, enabling scalable hybrid deployment from shared infrastructure.",
+      "Developed high-performance .NET 8 APIs handling complex business logic, reporting, and high-volume transactions using Parallelism, Caching, EF Core, LINQ, and Dapper.",
+      "Secured 100+ branches using RLS and JWT auth in a multi-tenant architecture.",
+      "Integrated CardPointe; automated Payroll, SMS, and Commission workflows using Hangfire.",
+      "Enabled real-time synchronization across dashboards, kiosks, and mobile apps using SignalR."
+    ],
+    techStack: [".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI"],
+    order: 1
+  },
+  {
+    role: "Backend Developer",
+    company: "AEGONA Co., Ltd",
+    period: "2023 - 2024",
+    projectName: "Outsourcing Projects (CRM, e-learning)",
+    highlights: [
+      "Contributed to backend development for CRM, e-learning, and booking systems using ASP.NET Core and SQL Server.",
+      "Worked with both monolithic and microservices-based systems, supporting API development and service integration.",
+      "Assisted in refactoring legacy server-side logic and optimizing SQL queries to improve system response time."
+    ],
+    techStack: ["ASP.NET Core", "SQL Server", "Microservices"],
+    order: 2
+  },
+  {
+    role: "Full-stack Developer",
+    company: "Personal Lab",
+    period: "2022 - 2023",
+    projectName: "Family-SaaS: Billing & Task Orchestrator",
+    highlights: [
+      "Built a decoupled ecosystem (.NET 8, MAUI, React) with Repository Pattern and Unit Testing.",
+      "Ran a 24/7 Ubuntu server on repurposed hardware with Docker and background jobs.",
+      "Secured external access via Cloudflare (DNS/SSL) and NAT Port Forwarding."
+    ],
+    techStack: [".NET 8", "React", "Docker", "Linux", "CI/CD"],
+    order: 3
+  }
+];
 
 export function ProjectsBento() {
-  const [experiences, setExperiences] = useState<any[]>([]);
-
-  useEffect(() => {
-    ContentApi.getExperiences().then(setExperiences).catch(console.error);
-  }, []);
+  const experiences = useCachedContent<any[]>(
+    'experiences',
+    DEFAULT_EXPERIENCES,
+    data => Array.isArray(data) && data.length > 0,
+  );
 
   if (!experiences.length) return null;
 
@@ -37,7 +80,7 @@ export function ProjectsBento() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
-                key={index} 
+                key={exp.id || index} 
                 className="relative grid md:grid-cols-12 gap-8 md:gap-12 items-start group"
               >
                 

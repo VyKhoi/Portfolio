@@ -276,6 +276,9 @@ export const CatChatbot: React.FC = () => {
               <img 
                 src="/sigma-cat-sm.png" 
                 alt="Sigma Cat" 
+                width={44}
+                height={44}
+                decoding="async"
                 className="w-11 h-11 rounded-full object-cover border border-[#DEFF9A]"
               />
               <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#DEFF9A] border-2 border-[#121215] animate-pulse"></span>
@@ -300,6 +303,9 @@ export const CatChatbot: React.FC = () => {
                   <img 
                     src="/sigma-cat-sm.png" 
                     alt="Sigma Cat" 
+                    width={40}
+                    height={40}
+                    decoding="async"
                     className="w-10 h-10 rounded-full object-cover border-2 border-[#DEFF9A] shadow-[0_0_15px_rgba(222,255,154,0.3)]"
                   />
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#DEFF9A] border-2 border-[#18181C] rounded-full"></span>
@@ -313,7 +319,8 @@ export const CatChatbot: React.FC = () => {
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="text-zinc-500 hover:text-white transition-colors text-2xl leading-none px-2"
+                aria-label="Đóng cửa sổ chat"
+                className="text-zinc-400 hover:text-white transition-colors text-2xl leading-none px-2"
               >
                 &times;
               </button>
@@ -370,6 +377,7 @@ export const CatChatbot: React.FC = () => {
               />
               <input 
                 type="text" 
+                aria-label="Nhập câu hỏi cho Sigma Cat"
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 maxLength={350}
@@ -380,6 +388,7 @@ export const CatChatbot: React.FC = () => {
               <button 
                 type="submit"
                 disabled={loading || cooldown || !input.trim()}
+                aria-label="Gửi tin nhắn"
                 className="bg-[#DEFF9A] text-black px-4 py-2 rounded-lg font-bold disabled:opacity-50 hover:bg-[#c2f068] transition-colors flex items-center justify-center min-w-[44px]"
                 title={cooldown ? "Vui lòng đợi 3s" : "Gửi tin nhắn"}
               >

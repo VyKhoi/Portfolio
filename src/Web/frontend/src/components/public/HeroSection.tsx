@@ -1,13 +1,12 @@
-import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/Badge";
 import { Download } from "lucide-react";
-import { ContentApi } from "../../lib/api";
+import { useCachedContent } from "../../lib/contentCache";
 
 const DEFAULT_PROFILE = {
-  fullName: "ĐẶNG VỸ KHÔI",
-  title: "Software Engineer | .NET Backend",
-  bio: "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.",
+  fullName: "DANG VY KHOI",
+  title: "Software Engineer | .NET Core",
+  bio: "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS, tập trung vào quy trình nghiệp vụ (business workflows) và tính ổn định của hệ thống.",
   avatarKey: "/profile.jpg",
   cvPdfKey: "/cv.pdf",
   githubLink: "https://github.com/vykhoi",
@@ -15,24 +14,16 @@ const DEFAULT_PROFILE = {
 };
 
 export function HeroSection() {
-  const [profile, setProfile] = useState<any>(DEFAULT_PROFILE);
+  const profile = useCachedContent<any>(
+    'profile',
+    DEFAULT_PROFILE,
+    data => Boolean(data && data.fullName),
+  );
 
-  useEffect(() => {
-    ContentApi.getProfile()
-      .then(data => {
-        if (data && data.fullName) {
-          setProfile(data);
-        }
-      })
-      .catch(err => {
-        console.warn("Using offline fallback profile:", err);
-      });
-  }, []);
-
-  const nameParts = (profile?.fullName || "ĐẶNG VỸ KHÔI").trim().split(' ');
-  const firstName = nameParts[0] || "ĐẶNG";
-  const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts[1] || "VỸ");
-  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "KHÔI";
+  const nameParts = (profile?.fullName || "DANG VY KHOI").trim().split(' ');
+  const firstName = nameParts[0] || "DANG";
+  const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : (nameParts[1] || "VY");
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "KHOI";
 
   return (
     <section className="relative min-h-screen pt-20 flex items-center bg-obsidian overflow-hidden border-b border-border">
@@ -95,7 +86,11 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-20 group-hover:bg-transparent transition-colors duration-500" />
             <img 
               src={profile.avatarKey} 
-              alt="Dang Vy Khoi" 
+              alt="Đặng Vỹ Khôi - Software Engineer (.NET Backend)" 
+              width={400}
+              height={533}
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-cover filter grayscale contrast-125 group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
             />
             {/* Overlay Corner Accents */}

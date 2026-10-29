@@ -26,4 +26,29 @@ function Save-SquarePng($srcName, $targetName, $size) {
     Write-Host "Generated: $targetName ($size x $size, $((Get-Item $out).Length) bytes)"
 }
 
-Save-SquarePng "sigma-cat.png" "sigma-cat-sm.png" 128
+function Optimize-Jpeg($fileName, $maxWidth, $quality) {
+    $filePath = Join-Path $publicDir $fileName
+    $bytes = [System.IO.File]::ReadAllBytes($filePath)
+    $ms = New-Object System.IO.MemoryStream(,$bytes)
+    $src = [System.Drawing.Image]::FromStream($ms)
+    $w = [Math]::Min($src.Width, $maxWidth)
+    $h = [int]([Math]::Round($src.Height * ($w / $src.Width)))
+    $bmp = New-Object System.Drawing.Bitmap($w, $h)
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+    $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $g.CompositingQuality = [System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+    $g.DrawImage($src, 0, 0, $w, $h)
+    $g.Dispose(); $src.Dispose(); $ms.Dispose()
+
+    $codec = [System.Drawing.Imaging.ImageCodecInfo]::GetImageEncoders() | Where-Object { $_.MimeType -eq 'image/jpeg' }
+    $ep = New-Object System.Drawing.Imaging.EncoderParameters(1)
+    $ep.Param[0] = New-Object System.Drawing.Imaging.EncoderParameter([System.Drawing.Imaging.Encoder]::Quality, [long]$quality)
+    $bmp.Save($filePath, $codec, $ep)
+    $bmp.Dispose()
+    Write-Host "Optimized: $fileName ($w x $h, $((Get-Item $filePath).Length) bytes)"
+}
+
+Save-SquarePng "sigma-cat.png" "sigma-cat-sm.png" 96
+Optimize-Jpeg "profile.jpg" 760 80
