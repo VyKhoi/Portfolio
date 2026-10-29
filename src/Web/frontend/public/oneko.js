@@ -2,7 +2,13 @@
 
 (function oneko() {
   const isReducedMotion = window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
-  if (isReducedMotion) return;
+  const isCoarsePointer = window.matchMedia(`(pointer: coarse)`).matches === true;
+  if (isReducedMotion || isCoarsePointer || window.innerWidth < 768) return;
+
+  function isAdminRoute() {
+    const p = window.location.pathname || "";
+    return p.startsWith("/login") || p.startsWith("/dashboard");
+  }
 
   const spriteSets = {
     idle: [[-3, -3]], alert: [[-7, -3]],
@@ -55,13 +61,14 @@
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
       
-      this.posX = w / 2;
-      this.posY = h / 2;
+      // Spawn politely near bottom-right corner instead of blocking center of screen
+      this.posX = Math.max(48, w - 96);
+      this.posY = Math.max(48, h - 108);
       this.targetX = this.posX;
       this.targetY = this.posY;
       
-      this.speed = 5; // Tốc độ di chuyển nhẹ nhàng, tự nhiên
-      this.state = 'idle'; // idle, roam, chase, socialize
+      this.speed = 5;
+      this.state = 'idle';
       
       this.frameCount = 0;
       this.idleTime = 0;
@@ -84,7 +91,6 @@
     pickRandomTarget() {
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
-      // Đi dạo trong phạm vi gần xung quanh, không phóng xa khắp màn hình
       this.targetX = Math.min(Math.max(48, this.posX + (Math.random() * 160 - 80)), w - 48);
       this.targetY = Math.min(Math.max(48, this.posY + (Math.random() * 160 - 80)), h - 48);
       this.state = 'roam';
@@ -118,17 +124,22 @@
       }
       this.idleAnimationFrame += 1;
 
-      // Thỉnh thoảng đi dạo chậm rãi
       if (Math.random() < 0.008 && this.idleAnimation === null) {
         this.pickRandomTarget();
       }
     }
 
     update() {
+      if (isAdminRoute() || window.innerWidth < 768) {
+        this.el.style.display = "none";
+        return;
+      }
+      this.el.style.display = "block";
+
       this.frameCount += 1;
       
-      const MAX_CHASE_DISTANCE = 220; // Nếu chuột xa hơn 220px: KHÔNG đuổi theo!
-      const COMFORT_OFFSET = 75;     // Luôn giữ khoảng cách an toàn 75px, KHÔNG BAO GIỜ đè lên chuột!
+      const MAX_CHASE_DISTANCE = 220;
+      const COMFORT_OFFSET = 75;
 
       if (mouseHasMoved) {
         const diffMouseX = this.posX - mousePosX;
@@ -136,7 +147,6 @@
         const distToMouse = Math.hypot(diffMouseX, diffMouseY);
 
         if (distToMouse > MAX_CHASE_DISTANCE) {
-          // Chuột quá xa: Dừng đuổi ngay, ngồi yên hoặc nghỉ ngơi
           if (this.state === 'chase') {
             this.state = 'idle';
             this.targetX = this.posX;
@@ -144,13 +154,11 @@
             this.resetIdle();
           }
         } else if (distToMouse > COMFORT_OFFSET + 10) {
-          // Chuột ở khoảng vừa phải (85px - 220px): Tiến lại gần nhưng chỉ dừng ở bán kính 75px
           this.state = 'chase';
           const angle = Math.atan2(diffMouseY, diffMouseX);
           this.targetX = mousePosX + Math.cos(angle) * COMFORT_OFFSET;
           this.targetY = mousePosY + Math.sin(angle) * COMFORT_OFFSET;
         } else {
-          // Đã ở cự ly an toàn (<= 85px): Dừng lại, ngồi yên, không đè lên chuột gây vướng thao tác
           if (this.state === 'chase') {
             this.state = 'idle';
             this.targetX = this.posX;
@@ -159,7 +167,6 @@
         }
       }
 
-      // Xử lý di chuyển
       const diffX = this.posX - this.targetX;
       const diffY = this.posY - this.targetY;
       const distance = Math.hypot(diffX, diffY);
@@ -183,12 +190,11 @@
         this.posY -= (diffY / distance) * this.speed;
       }
 
-      // Giữ mèo trong khung nhìn màn hình
       const w = window.innerWidth || document.documentElement.clientWidth || 800;
       const h = window.innerHeight || document.documentElement.clientHeight || 600;
       
-      if (isNaN(this.posX)) this.posX = w / 2;
-      if (isNaN(this.posY)) this.posY = h / 2;
+      if (isNaN(this.posX)) this.posX = w - 96;
+      if (isNaN(this.posY)) this.posY = h - 108;
 
       this.posX = Math.min(Math.max(16, this.posX), w - 16);
       this.posY = Math.min(Math.max(16, this.posY), h - 16);

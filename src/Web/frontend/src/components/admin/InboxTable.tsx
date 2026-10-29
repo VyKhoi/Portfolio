@@ -1,157 +1,268 @@
 import { useState } from "react"
-import { Mail, CheckCircle2, Trash2, Loader2, Inbox } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../../store/authStore"
-import { API_BASE_URL } from "../../lib/api"
-import { AdminLoader, RefreshingBadge } from "./AdminLoader"
+import { Trash2, CheckCircle, Clock, Inbox, Loader2 } from "lucide-react"
+import { AdminLoader } from "./AdminLoader"
+
+interface ContactMessage {
+  id: string
+  name: string
+  email: string
+  subject: string
+  message: string
+  status: string
+  createdAt: string
+}
 
 export function InboxTable() {
+  const token = useAuthStore((state) => state.token)
   const queryClient = useQueryClient()
-  const token = useAuthStore(state => state.token)
+  const baseUrl = "/api"
   const [busyId, setBusyId] = useState<string | null>(null)
 
-  const { data: messages = [], isLoading, isFetching } = useQuery({
-    queryKey: ['messages'],
+  const { data: messages = [], isLoading } = useQuery({
+    queryKey: ["inbox"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/contact/messages`, {
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      const res = await fetch(`${baseUrl}/contact/messages`, {
+        headers: { Authorization: `Bearer ${token}` },
       })
-      if (!res.ok) throw new Error("Failed to fetch messages")
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
       return res.json()
-    }
+    },
   })
 
-  const markAsRead = useMutation({
+  const markReadMutation = useMutation({
     mutationFn: async (id: string) => {
       setBusyId(id)
-      const res = await fetch(`${API_BASE_URL}/contact/messages/${id}/status`, {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      const res = await fetch(`${baseUrl}/contact/messages/${id}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ status: 'Read' })
+        body: JSON.stringify({ status: "Read" }),
       })
       if (!res.ok) throw new Error("Failed to update status")
-      return res.json()
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages'] })
+    onSettled: () => {
+      setBusyId(null)
+      queryClient.invalidateQueries({ queryKey: ["inbox"] })
     },
-    onSettled: () => setBusyId(null)
   })
 
-  const deleteMessage = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       setBusyId(id)
-      const res = await fetch(`${API_BASE_URL}/contact/messages/${id}`, {
-        method: 'DELETE',
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
+      const res = await fetch(`${baseUrl}/contact/messages/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       })
-      if (!res.ok) throw new Error("Failed to delete message")
-      return res.json()
+      if (!res.ok) throw new Error("Failed to delete")
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages'] })
+    onSettled: () => {
+      setBusyId(null)
+      queryClient.invalidateQueries({ queryKey: ["inbox"] })
     },
-    onSettled: () => setBusyId(null)
   })
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 font-mono">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <Inbox className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">INBOX_QUEUE</h1>
-        </div>
-        <AdminLoader label="LOADING_INBOX_QUEUE..." variant="table" rows={5} />
-      </div>
-    )
+    return <AdminLoader label="SCANNING_INBOX_QUEUE..." rows={4} />
   }
 
   return (
-    <div className="space-y-6 font-mono animate-in fade-in duration-200">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <Inbox className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">INBOX_QUEUE</h1>
-          <RefreshingBadge show={isFetching && !isLoading} />
+    <div className="font-mono">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6 sm:mb-8">
+        <div className="flex items-center space-x-3">
+          <Inbox className="w-6 h-6 sm:w-7 sm:h-7 adm-text-accent shrink-0" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight adm-text">
+            INBOX_QUEUE
+          </h1>
         </div>
         <span className="adm-badge-info">{messages.length} MESSAGES</span>
       </div>
 
-      <div className="adm-card rounded-lg overflow-hidden">
-        <table className="w-full text-left font-mono text-sm">
-          <thead
-            className="adm-text-muted border-b adm-divider text-xs"
-            style={{ backgroundColor: "var(--adm-bg-elevated)" }}
-          >
-            <tr>
-              <th className="p-4 font-bold uppercase tracking-wider">Status</th>
-              <th className="p-4 font-bold uppercase tracking-wider">Sender</th>
-              <th className="p-4 font-bold uppercase tracking-wider">Message</th>
-              <th className="p-4 font-bold uppercase tracking-wider">Date</th>
-              <th className="p-4 font-bold uppercase tracking-wider text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y adm-divider">
-            {messages.map((msg: any) => {
-              const isRead = msg.status === "Read"
-              const isRowBusy = busyId === msg.id
-              return (
-                <tr key={msg.id} className="hover:bg-[var(--adm-bg-hover)] transition-colors">
-                  <td className="p-4">
-                    {isRead ? (
-                      <CheckCircle2 className="w-5 h-5 adm-text-muted" />
-                    ) : (
-                      <Mail className="w-5 h-5 adm-text-accent" />
-                    )}
-                  </td>
-                  <td className="p-4">
-                    <div className={isRead ? "adm-text-secondary" : "font-bold"}>{msg.name}</div>
-                    <div className="text-xs adm-text-muted">{msg.email}</div>
-                  </td>
-                  <td className={`p-4 max-w-xs truncate ${isRead ? "adm-text-muted" : "font-bold"}`} title={msg.message}>
-                    {msg.message}
-                  </td>
-                  <td className="p-4 adm-text-muted text-xs">
-                    {new Date(msg.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-right flex justify-end space-x-2">
-                    {!isRead && (
-                      <button
-                        disabled={isRowBusy}
-                        onClick={() => markAsRead.mutate(msg.id)}
-                        className="adm-badge-info cursor-pointer hover:opacity-85 disabled:opacity-50"
-                      >
-                        {isRowBusy && markAsRead.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "MARK_READ"}
-                      </button>
-                    )}
-                    <button
-                      disabled={isRowBusy}
-                      onClick={() => {
-                        if (confirm("Are you sure you want to delete this message?")) {
-                          deleteMessage.mutate(msg.id)
-                        }
-                      }}
-                      className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
-                      aria-label="Xóa tin nhắn"
-                    >
-                      {isRowBusy && deleteMessage.isPending ? <Loader2 className="w-4 h-4 animate-spin adm-text-danger" /> : <Trash2 className="w-4 h-4" />}
-                    </button>
+      {/* Desktop / Tablet Table View */}
+      <div className="hidden md:block adm-card rounded-lg overflow-hidden">
+        <div className="overflow-x-auto adm-scroll">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr
+                className="border-b adm-divider adm-text-muted text-xs"
+                style={{ backgroundColor: "var(--adm-bg-elevated)" }}
+              >
+                <th className="p-4">STATUS</th>
+                <th className="p-4">SENDER</th>
+                <th className="p-4">MESSAGE</th>
+                <th className="p-4">DATE</th>
+                <th className="p-4 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y adm-divider text-sm">
+              {messages.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center adm-text-muted">
+                    NO_MESSAGES_IN_QUEUE
                   </td>
                 </tr>
-              )
-            })}
-            {messages.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center adm-text-muted font-mono">
-                  NO_MESSAGES_IN_QUEUE
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+              {messages.map((m: ContactMessage) => {
+                const isRead = m.status === "Read"
+                const isRowBusy = busyId === m.id
+                return (
+                  <tr
+                    key={m.id}
+                    className="transition-colors"
+                    style={{
+                      backgroundColor: isRead
+                        ? "transparent"
+                        : "var(--adm-accent-soft)",
+                      opacity: isRead ? 0.72 : 1,
+                    }}
+                  >
+                    <td className="p-4 whitespace-nowrap">
+                      {isRead ? (
+                        <span className="inline-flex items-center space-x-1.5 adm-text-muted text-xs">
+                          <CheckCircle className="w-4 h-4" />
+                          <span>READ</span>
+                        </span>
+                      ) : (
+                        <span className="adm-badge-accent">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>NEW</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4">
+                      <div className="font-bold adm-text">{m.name}</div>
+                      <div className="text-xs adm-text-muted">{m.email}</div>
+                    </td>
+                    <td className="p-4 max-w-md">
+                      <p className="adm-text-secondary whitespace-pre-wrap text-xs leading-relaxed">
+                        {m.message}
+                      </p>
+                    </td>
+                    <td className="p-4 text-xs adm-text-muted whitespace-nowrap">
+                      {new Date(m.createdAt).toLocaleString()}
+                    </td>
+                    <td className="p-4 text-right whitespace-nowrap">
+                      <div className="inline-flex space-x-2">
+                        {!isRead && (
+                          <button
+                            type="button"
+                            disabled={isRowBusy}
+                            onClick={() => markReadMutation.mutate(m.id)}
+                            title="Mark as Read"
+                            className="adm-btn-icon disabled:opacity-50"
+                          >
+                            {isRowBusy && markReadMutation.isPending ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          disabled={isRowBusy}
+                          onClick={() => deleteMutation.mutate(m.id)}
+                          title="Delete"
+                          className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
+                        >
+                          {isRowBusy && deleteMutation.isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {messages.length === 0 && (
+          <div className="adm-card p-8 rounded-lg text-center adm-text-muted text-xs">
+            NO_MESSAGES_IN_QUEUE
+          </div>
+        )}
+        {messages.map((m: ContactMessage) => {
+          const isRead = m.status === "Read"
+          const isRowBusy = busyId === m.id
+          return (
+            <div
+              key={m.id}
+              className="adm-card p-4 rounded-lg space-y-3"
+              style={{
+                borderLeft: isRead
+                  ? undefined
+                  : "3px solid var(--adm-accent)",
+              }}
+            >
+              <div className="flex items-center justify-between gap-2">
+                {isRead ? (
+                  <span className="inline-flex items-center space-x-1.5 adm-text-muted text-xs">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    <span>READ</span>
+                  </span>
+                ) : (
+                  <span className="adm-badge-accent">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>NEW</span>
+                  </span>
+                )}
+                <span className="text-[11px] adm-text-muted">
+                  {new Date(m.createdAt).toLocaleString()}
+                </span>
+              </div>
+
+              <div>
+                <div className="font-bold text-sm adm-text">{m.name}</div>
+                <div className="text-xs adm-text-info break-all">{m.email}</div>
+              </div>
+
+              <p className="adm-text-secondary text-xs leading-relaxed whitespace-pre-wrap p-3 rounded adm-elevated">
+                {m.message}
+              </p>
+
+              <div className="flex justify-end gap-2 pt-1">
+                {!isRead && (
+                  <button
+                    type="button"
+                    disabled={isRowBusy}
+                    onClick={() => markReadMutation.mutate(m.id)}
+                    className="adm-btn-secondary text-xs py-1.5 px-3"
+                  >
+                    {isRowBusy && markReadMutation.isPending ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle className="w-3.5 h-3.5 adm-text-accent" />
+                    )}
+                    <span>MARK_READ</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  disabled={isRowBusy}
+                  onClick={() => deleteMutation.mutate(m.id)}
+                  className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
+                  aria-label="Xóa tin nhắn"
+                >
+                  {isRowBusy && deleteMutation.isPending ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )

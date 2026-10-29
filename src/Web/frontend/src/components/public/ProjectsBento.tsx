@@ -56,15 +56,15 @@ export function ProjectsBento() {
   if (!experiences.length) return null;
 
   return (
-    <section id="experience" className="relative py-32 px-4 lg:px-8 bg-surface overflow-hidden">
+    <section id="experience" className="relative py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-surface overflow-hidden">
       {/* Horizontal Line separating sections */}
       <div className="geo-line-h top-0" />
       
       <div className="container mx-auto max-w-6xl relative z-10">
         
-        <div className="mb-24 flex items-center">
-          <div className="w-16 h-[2px] bg-primary mr-6" />
-          <h2 className="text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
+        <div className="mb-12 md:mb-24 flex items-center">
+          <div className="w-8 sm:w-16 h-[2px] bg-primary mr-3 sm:mr-6 shrink-0" />
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
             Kinh Nghiệm <span className="text-primary">&</span> Dự Án
           </h2>
         </div>
@@ -73,7 +73,7 @@ export function ProjectsBento() {
           {/* Timeline Vertical Line */}
           <div className="absolute left-0 md:left-48 top-0 bottom-0 w-[1px] bg-border z-0" />
           
-          <div className="space-y-24">
+          <div className="space-y-12 md:space-y-24">
             {experiences.map((exp, index) => (
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
@@ -81,45 +81,45 @@ export function ProjectsBento() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.6 }}
                 key={exp.id || index} 
-                className="relative grid md:grid-cols-12 gap-8 md:gap-12 items-start group"
+                className="relative grid md:grid-cols-12 gap-4 md:gap-12 items-start group"
               >
                 
                 {/* Timeline Node marker */}
                 <div className="hidden md:block absolute left-48 w-3 h-3 bg-obsidian border-2 border-primary -translate-x-[6px] translate-y-2 rounded-none group-hover:bg-primary transition-colors" />
 
                 {/* Period - Left col */}
-                <div className="md:col-span-3 pt-1 relative z-10 bg-surface md:bg-transparent pr-4 inline-block md:block pl-6 md:pl-0">
-                  <span className="text-xl md:text-3xl font-bold font-mono text-primary uppercase tracking-tighter">
+                <div className="md:col-span-3 pt-1 relative z-10 bg-surface md:bg-transparent pr-4 inline-block md:block pl-4 sm:pl-6 md:pl-0">
+                  <span className="text-lg sm:text-xl md:text-3xl font-bold font-mono text-primary uppercase tracking-tighter">
                     {exp.period}
                   </span>
                 </div>
 
                 {/* Content - Right col */}
-                <div className="md:col-span-9 relative z-10 pl-6 md:pl-0 border-l md:border-l-0 border-border md:border-transparent mt-4 md:mt-0">
-                  <div className="border border-border p-6 md:p-10 bg-obsidian hover:border-primary transition-colors duration-300 relative overflow-hidden group/card">
+                <div className="md:col-span-9 relative z-10 pl-4 sm:pl-6 md:pl-0 border-l md:border-l-0 border-border md:border-transparent">
+                  <div className="border border-border p-5 sm:p-6 md:p-10 bg-obsidian hover:border-primary transition-colors duration-300 relative overflow-hidden group/card">
                     {/* Background accent on hover */}
                     <div className="absolute inset-0 bg-primary/5 translate-y-full group-hover/card:translate-y-0 transition-transform duration-500 ease-out z-0" />
                     
                     <div className="relative z-10">
-                      <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-4">
-                        <h3 className="text-2xl font-bold font-heading text-text-main uppercase">{exp.role}</h3>
-                        <div className="text-text-muted font-mono text-sm tracking-widest mt-2 md:mt-0">{exp.company}</div>
+                      <div className="flex flex-col md:flex-row md:items-baseline md:justify-between mb-3 sm:mb-4">
+                        <h3 className="text-xl sm:text-2xl font-bold font-heading text-text-main uppercase">{exp.role}</h3>
+                        <div className="text-text-muted font-mono text-xs sm:text-sm tracking-widest mt-1.5 md:mt-0">{exp.company}</div>
                       </div>
                       
-                      <h4 className="text-xl font-bold font-heading text-text-main mb-6 uppercase tracking-tighter text-primary">
+                      <h4 className="text-base sm:text-xl font-bold font-heading mb-5 sm:mb-6 uppercase tracking-tighter text-primary">
                         [ PROJECT: {exp.projectName} ]
                       </h4>
 
-                      <ul className="space-y-4 mb-8">
+                      <ul className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                         {exp.highlights.map((item: string, i: number) => (
-                          <li key={i} className="text-text-muted text-base leading-relaxed flex items-start font-body">
-                            <span className="text-primary mr-3 mt-1 font-mono">{`>`}</span>
+                          <li key={i} className="text-text-muted text-sm sm:text-base leading-relaxed flex items-start font-body">
+                            <span className="text-primary mr-2.5 sm:mr-3 mt-1 font-mono shrink-0">{`>`}</span>
                             <span>{item}</span>
                           </li>
                         ))}
                       </ul>
 
-                      <div className="flex flex-wrap gap-2 pt-6 border-t border-border">
+                      <div className="flex flex-wrap gap-2 pt-5 sm:pt-6 border-t border-border">
                         {exp.techStack.map((t: string) => (
                           <Badge key={t} variant="secondary">{t}</Badge>
                         ))}

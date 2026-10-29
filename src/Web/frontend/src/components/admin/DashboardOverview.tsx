@@ -1,146 +1,154 @@
 import { useQuery } from "@tanstack/react-query"
-import { Mail, Briefcase, Activity, CheckCircle2, Code, FolderGit2, BotMessageSquare, Loader2 } from "lucide-react"
-import { API_BASE_URL } from "../../lib/api"
+import { Activity, FolderGit2, Mail, Briefcase, Code, Bot, CheckCircle2 } from "lucide-react"
 import { useAuthStore } from "../../store/authStore"
-import { AdminLoader, RefreshingBadge } from "./AdminLoader"
+import { AdminLoader } from "./AdminLoader"
 
 export function DashboardOverview() {
-  const token = useAuthStore(state => state.token)
-  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
+  const token = useAuthStore((state) => state.token)
+  const baseUrl = "/api"
+  const authHeaders: Record<string, string> = token
+    ? { Authorization: `Bearer ${token}` }
+    : {}
 
-  const { data: messages = [], isLoading: loadingMsg, isFetching: fetchingMsg } = useQuery({
-    queryKey: ['messages'],
+  const { data: projects = [], isLoading: l1 } = useQuery({
+    queryKey: ["projects"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/contact/messages`, { headers: authHeaders })
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch(`${baseUrl}/content/projects`)
+      if (!res.ok) throw new Error("Failed to fetch projects")
       return res.json()
     },
   })
 
-  const { data: projects = [], isLoading: loadingProj, isFetching: fetchingProj } = useQuery({
-    queryKey: ['projects'],
+  const { data: experiences = [], isLoading: l2 } = useQuery({
+    queryKey: ["experiences"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/projects`, { headers: authHeaders })
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch(`${baseUrl}/content/experiences`)
+      if (!res.ok) throw new Error("Failed to fetch experiences")
       return res.json()
     },
   })
 
-  const { data: experiences = [], isLoading: loadingExp } = useQuery({
-    queryKey: ['experiences'],
+  const { data: skills = [], isLoading: l3 } = useQuery({
+    queryKey: ["skills"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/experience`)
-      if (!res.ok) throw new Error("Failed")
+      const res = await fetch(`${baseUrl}/content/skills`)
+      if (!res.ok) throw new Error("Failed to fetch skills")
       return res.json()
     },
   })
 
-  const { data: skills = [], isLoading: loadingSkills } = useQuery({
-    queryKey: ['skills'],
+  const { data: inbox = [], isLoading: l4 } = useQuery({
+    queryKey: ["inbox"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/skills`)
-      if (!res.ok) throw new Error("Failed")
+      if (!token) return []
+      const res = await fetch(`${baseUrl}/contact/messages`, {
+        headers: authHeaders,
+      })
+      if (!res.ok) throw new Error("Failed to fetch inbox")
       return res.json()
     },
   })
 
-  const { data: sessions = [], isLoading: loadingAi } = useQuery({
-    queryKey: ['ai-sessions'],
+  const { data: aiSessions = [], isLoading: l5 } = useQuery({
+    queryKey: ["ai-sessions"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/ai/sessions`, { headers: authHeaders })
-      if (!res.ok) throw new Error("Failed")
+      if (!token) return []
+      const res = await fetch(`${baseUrl}/ai/sessions`, {
+        headers: authHeaders,
+      })
+      if (!res.ok) throw new Error("Failed to fetch ai sessions")
       return res.json()
     },
   })
 
-  const isInitialLoading = loadingMsg && loadingProj && loadingExp && loadingSkills
-  if (isInitialLoading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold mb-8">SYSTEM_OVERVIEW</h1>
-        <AdminLoader label="LOADING_SYSTEM_METRICS..." variant="grid" rows={6} />
-      </div>
-    )
+  const isLoading = l1 || l2 || l3 || l4 || l5
+
+  if (isLoading) {
+    return <AdminLoader label="LOADING_SYSTEM_TELEMETRY..." variant="grid" rows={6} />
   }
 
-  const unreadMessages = messages.filter((m: any) => m.status === 'Pending').length
-  const isRefreshing = (fetchingMsg || fetchingProj) && !isInitialLoading
+  const unreadMessages = Array.isArray(inbox)
+    ? inbox.filter((m: any) => m.status !== "Read").length
+    : 0
 
   const cards = [
     {
       label: "TOTAL_PROJECTS",
-      value: projects.length,
-      loading: loadingProj,
+      value: Array.isArray(projects) ? projects.length : 0,
       icon: FolderGit2,
-      colorClass: "adm-text-accent",
+      tone: "accent",
     },
     {
       label: "EXPERIENCES",
-      value: experiences.length,
-      loading: loadingExp,
+      value: Array.isArray(experiences) ? experiences.length : 0,
       icon: Briefcase,
-      colorClass: "adm-text-accent",
+      tone: "accent",
     },
     {
       label: "SKILLS_INDEXED",
-      value: skills.length,
-      loading: loadingSkills,
+      value: Array.isArray(skills) ? skills.length : 0,
       icon: Code,
-      colorClass: "adm-text-info",
+      tone: "info",
     },
     {
       label: "UNREAD_MESSAGES",
       value: unreadMessages,
-      loading: loadingMsg,
       icon: Mail,
-      colorClass: "adm-text-info",
+      tone: "info",
     },
     {
       label: "AI_CHAT_SESSIONS",
-      value: sessions.length,
-      loading: loadingAi,
-      icon: BotMessageSquare,
-      colorClass: "adm-text-accent",
+      value: Array.isArray(aiSessions) ? aiSessions.length : 0,
+      icon: Bot,
+      tone: "accent",
     },
   ]
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-heading font-bold">SYSTEM_OVERVIEW</h1>
-          <p className="text-xs font-mono adm-text-muted mt-1">
-            REALTIME_TELEMETRY_AND_CONTENT_METRICS
-          </p>
-        </div>
-        <RefreshingBadge show={isRefreshing} />
+    <div className="space-y-6 sm:space-y-8">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1 sm:mb-2 adm-text">
+          SYSTEM_OVERVIEW
+        </h1>
+        <p className="adm-text-muted font-mono text-xs sm:text-sm break-words">
+          REALTIME_TELEMETRY_AND_CONTENT_METRICS
+        </p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {cards.map((card) => (
-          <div key={card.label} className="p-6 adm-card adm-card-hover rounded-lg">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="adm-text-secondary font-mono text-xs font-bold tracking-wider">{card.label}</h2>
-              <card.icon className={`w-5 h-5 ${card.colorClass}`} />
-            </div>
-            {card.loading ? (
-              <div className="h-10 w-20 adm-elevated rounded animate-pulse flex items-center justify-center">
-                <Loader2 className="w-4 h-4 adm-text-muted animate-spin" />
-              </div>
-            ) : (
-              <p className="text-4xl font-bold font-heading">{card.value}</p>
-            )}
-          </div>
-        ))}
 
-        <div className="p-6 adm-card adm-card-hover rounded-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="adm-text-secondary font-mono text-xs font-bold tracking-wider">SYSTEM_STATUS</h2>
-            <Activity className="w-5 h-5 adm-text-success" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {cards.map((card) => {
+          const Icon = card.icon
+          const iconClass =
+            card.tone === "info" ? "adm-text-info" : "adm-text-accent"
+          return (
+            <div
+              key={card.label}
+              className="p-5 sm:p-6 adm-card adm-card-hover rounded-lg"
+            >
+              <div className="flex justify-between items-start mb-3 sm:mb-4">
+                <div className="adm-text-muted font-mono text-xs uppercase tracking-wider">
+                  {card.label}
+                </div>
+                <Icon className={`w-5 h-5 shrink-0 ${iconClass}`} />
+              </div>
+              <div className="text-3xl sm:text-4xl font-bold font-heading adm-text">
+                {card.value}
+              </div>
+            </div>
+          )
+        })}
+
+        <div className="p-5 sm:p-6 adm-card adm-card-hover rounded-lg">
+          <div className="flex justify-between items-start mb-3 sm:mb-4">
+            <div className="adm-text-muted font-mono text-xs uppercase tracking-wider">
+              SYSTEM_STATUS
+            </div>
+            <Activity className="w-5 h-5 adm-text-success shrink-0" />
           </div>
-          <p className="text-2xl font-bold adm-text-success flex items-center gap-2 font-mono">
-            <CheckCircle2 className="w-6 h-6" /> ONLINE
-          </p>
+          <div className="flex items-center space-x-2 text-xl sm:text-2xl font-bold font-mono adm-text-success pt-1">
+            <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+            <span>ONLINE</span>
+          </div>
         </div>
       </div>
     </div>

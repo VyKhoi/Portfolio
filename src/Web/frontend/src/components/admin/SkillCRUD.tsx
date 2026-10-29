@@ -1,147 +1,150 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, X, Save, Code, Loader2 } from 'lucide-react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAuthStore } from '../../store/authStore'
-import { API_BASE_URL } from '../../lib/api'
-import { invalidateContentCache } from '../../lib/contentCache'
-import { AdminLoader, RefreshingBadge } from './AdminLoader'
+import React, { useState } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useAuthStore } from "../../store/authStore"
+import { Plus, Trash2, Edit2, Code, Loader2 } from "lucide-react"
+import { AdminLoader } from "./AdminLoader"
 
 interface Skill {
   id: string
-  name: string
   category: string
-  iconSvgKey: string
+  name: string
   proficiencyLevel: number
-  order: number
 }
 
 export function SkillCRUD() {
-  const token = useAuthStore(state => state.token)
+  const token = useAuthStore((state) => state.token)
   const queryClient = useQueryClient()
+  const baseUrl = "/api"
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  
-  const [formData, setFormData] = useState<Partial<Skill>>({
-    name: '',
-    category: '',
-    iconSvgKey: '',
-    proficiencyLevel: 50,
-    order: 0
+  const [formData, setFormData] = useState({
+    category: "Backend & Core",
+    name: "",
+    proficiencyLevel: 85,
   })
 
-  const { data: skills = [], isLoading, isFetching } = useQuery<Skill[]>({
-    queryKey: ['skills'],
+  const { data: skills = [], isLoading } = useQuery({
+    queryKey: ["skills"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/skills`)
-      if (!res.ok) throw new Error('Failed to fetch skills')
+      const res = await fetch(`${baseUrl}/content/skills`)
+      if (!res.ok) throw new Error("Failed to fetch skills")
       return res.json()
     },
   })
 
-  const saveMutation = useMutation({
-    mutationFn: async (payload: Partial<Skill>) => {
-      const isEdit = !!editingSkill
-      const url = isEdit 
-        ? `${API_BASE_URL}/content/skills/${editingSkill.id}`
-        : `${API_BASE_URL}/content/skills`
-        
-      const res = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
+  const createMutation = useMutation({
+    mutationFn: async (newSkill: any) => {
+      const res = await fetch(`${baseUrl}/content/skills`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(newSkill),
       })
-      if (!res.ok) throw new Error('Failed to save skill')
+      if (!res.ok) throw new Error("Failed to create")
       return res.json()
     },
     onSuccess: () => {
-      setIsModalOpen(false)
-      invalidateContentCache('skills')
-      queryClient.invalidateQueries({ queryKey: ['skills'] })
-    }
+      queryClient.invalidateQueries({ queryKey: ["skills"] })
+      closeModal()
+    },
+  })
+
+  const updateMutation = useMutation({
+    mutationFn: async (skill: Skill) => {
+      const res = await fetch(`${baseUrl}/content/skills/${skill.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(skill),
+      })
+      if (!res.ok) throw new Error("Failed to update")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["skills"] })
+      closeModal()
+    },
   })
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       setDeletingId(id)
-      const res = await fetch(`${API_BASE_URL}/content/skills/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const res = await fetch(`${baseUrl}/content/skills/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       })
-      if (!res.ok) throw new Error('Failed to delete skill')
-      return res.json()
+      if (!res.ok) throw new Error("Failed to delete")
     },
-    onSuccess: () => {
-      invalidateContentCache('skills')
-      queryClient.invalidateQueries({ queryKey: ['skills'] })
+    onSettled: () => {
+      setDeletingId(null)
+      queryClient.invalidateQueries({ queryKey: ["skills"] })
     },
-    onSettled: () => setDeletingId(null)
   })
 
-  const handleOpenModal = (skill?: Skill) => {
+  const openModal = (skill?: Skill) => {
     if (skill) {
       setEditingSkill(skill)
-      setFormData(skill)
+      setFormData({
+        category: skill.category,
+        name: skill.name,
+        proficiencyLevel: skill.proficiencyLevel,
+      })
     } else {
       setEditingSkill(null)
       setFormData({
-        name: '',
-        category: '',
-        iconSvgKey: '',
-        proficiencyLevel: 50,
-        order: skills.length
+        category: "Backend & Core",
+        name: "",
+        proficiencyLevel: 85,
       })
     }
     setIsModalOpen(true)
   }
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault()
-    saveMutation.mutate(formData)
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setEditingSkill(null)
   }
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Delete this skill?')) return
-    deleteMutation.mutate(id)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (editingSkill) {
+      updateMutation.mutate({ ...formData, id: editingSkill.id })
+    } else {
+      createMutation.mutate(formData)
+    }
   }
+
+  const isSaving = createMutation.isPending || updateMutation.isPending
 
   if (isLoading) {
-    return (
-      <div className="p-4 font-mono space-y-6">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <Code className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
-        </div>
-        <AdminLoader label="LOADING_SKILLS_MATRIX..." variant="grid" rows={6} />
-      </div>
-    )
+    return <AdminLoader label="INDEXING_SKILLS_MATRIX..." variant="grid" rows={6} />
   }
 
-  // Group skills by category
-  const groupedSkills = skills.reduce((acc, skill) => {
-    const cat = skill.category || 'Uncategorized'
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(skill)
+  const grouped = skills.reduce((acc: Record<string, Skill[]>, s: Skill) => {
+    if (!acc[s.category]) acc[s.category] = []
+    acc[s.category].push(s)
     return acc
-  }, {} as Record<string, Skill[]>)
+  }, {})
 
   return (
-    <div className="p-4 font-mono animate-in fade-in duration-200">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <Code className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
-          <RefreshingBadge show={isFetching && !isLoading} />
+    <div className="font-mono">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 sm:mb-8">
+        <div className="flex items-center space-x-3">
+          <Code className="w-6 h-6 sm:w-7 sm:h-7 adm-text-accent shrink-0" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight adm-text">
+            SKILLS_MATRIX
+          </h1>
         </div>
         <button
-          onClick={() => handleOpenModal()}
-          className="adm-btn-primary text-xs"
+          type="button"
+          onClick={() => openModal()}
+          className="adm-btn-primary text-xs w-full sm:w-auto"
         >
           <Plus className="w-4 h-4" />
           <span>ADD_SKILL</span>
@@ -149,28 +152,29 @@ export function SkillCRUD() {
       </div>
 
       <div className="space-y-8">
-        {Object.entries(groupedSkills).map(([category, catSkills]) => (
-          <div key={category}>
-            <h2 className="text-sm font-bold adm-text-secondary mb-4 border-b adm-divider pb-2 uppercase tracking-widest">
+        {Object.entries(grouped).map(([category, items]) => (
+          <div key={category} className="space-y-3">
+            <h3 className="text-xs font-bold adm-text-muted uppercase tracking-widest border-b adm-divider pb-2">
               {category}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {catSkills.map(skill => (
-                <motion.div
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {(items as Skill[]).map((skill) => (
+                <div
                   key={skill.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15 }}
-                  className="adm-card adm-card-hover p-4 rounded-lg flex items-center justify-between"
+                  className="adm-card adm-card-hover p-4 rounded-lg flex justify-between items-center gap-3"
                 >
-                  <div className="flex-1 mr-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-bold">{skill.name}</span>
-                      <span className="text-xs adm-text-accent font-bold">{skill.proficiencyLevel}%</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-baseline gap-2 mb-2">
+                      <h4 className="font-bold text-sm sm:text-base adm-text truncate">
+                        {skill.name}
+                      </h4>
+                      <span className="text-xs adm-text-accent font-bold shrink-0">
+                        {skill.proficiencyLevel}%
+                      </span>
                     </div>
-                    <div className="w-full adm-elevated rounded-full h-1.5 overflow-hidden">
-                      <div 
-                        className="h-1.5 rounded-full transition-all" 
+                    <div className="w-full h-1.5 adm-skeleton rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
                         style={{
                           width: `${skill.proficiencyLevel}%`,
                           backgroundColor: "var(--adm-accent)",
@@ -178,130 +182,114 @@ export function SkillCRUD() {
                       />
                     </div>
                   </div>
-                  
                   <div className="flex space-x-1.5 shrink-0">
-                    <button 
-                      onClick={() => handleOpenModal(skill)}
+                    <button
+                      type="button"
+                      onClick={() => openModal(skill)}
                       className="adm-btn-icon"
-                      aria-label="Chỉnh sửa kỹ năng"
+                      aria-label="Sửa kỹ năng"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
-                    <button 
-                      onClick={() => handleDelete(skill.id)}
+                    <button
+                      type="button"
                       disabled={deletingId === skill.id}
+                      onClick={() => deleteMutation.mutate(skill.id)}
                       className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
                       aria-label="Xóa kỹ năng"
                     >
-                      {deletingId === skill.id ? <Loader2 className="w-3.5 h-3.5 animate-spin adm-text-danger" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      {deletingId === skill.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
         ))}
-        {skills.length === 0 && <div className="adm-text-muted">NO_SKILLS_FOUND.</div>}
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <div
-            className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-xs"
-            style={{ backgroundColor: "var(--adm-backdrop)" }}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="adm-card rounded-lg w-full max-w-md overflow-hidden flex flex-col"
-            >
-              <div className="flex items-center justify-between p-4 border-b adm-divider">
-                <h2 className="adm-text-accent font-bold">
-                  {editingSkill ? 'EDIT_SKILL' : 'NEW_SKILL'}
-                </h2>
-                <button 
-                  onClick={() => setIsModalOpen(false)}
-                  className="adm-btn-icon"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+      {isModalOpen && (
+        <div
+          className="fixed inset-0 flex items-center justify-center z-50 p-3 sm:p-4"
+          style={{
+            backgroundColor: "var(--adm-backdrop)",
+            backdropFilter: "blur(4px)",
+          }}
+        >
+          <div className="adm-card p-5 sm:p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-lg sm:text-xl font-bold adm-text-accent mb-5 sm:mb-6">
+              {editingSkill ? "EDIT_SKILL" : "NEW_SKILL"}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="adm-label">CATEGORY</label>
+                <input
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  placeholder="Backend & Core, Databases, DevOps & Cloud..."
+                  className="adm-input"
+                  required
+                />
               </div>
-              
-              <div className="p-5">
-                <form id="skillForm" onSubmit={handleSave} className="space-y-4">
-                  <div>
-                    <label className="adm-label">SKILL_NAME</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="adm-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="adm-label">CATEGORY</label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.category}
-                      onChange={e => setFormData({...formData, category: e.target.value})}
-                      placeholder="e.g. Frontend, Backend, Tools"
-                      className="adm-input"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="adm-label flex justify-between">
-                      <span>PROFICIENCY_LEVEL</span>
-                      <span className="adm-text-accent font-bold">{formData.proficiencyLevel}%</span>
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={formData.proficiencyLevel}
-                      onChange={e => setFormData({...formData, proficiencyLevel: parseInt(e.target.value)})}
-                      className="w-full cursor-pointer"
-                      style={{ accentColor: "var(--adm-accent)" }}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="adm-label">ORDER</label>
-                    <input
-                      type="number"
-                      value={formData.order}
-                      onChange={e => setFormData({...formData, order: parseInt(e.target.value) || 0})}
-                      className="adm-input"
-                    />
-                  </div>
-                </form>
+              <div>
+                <label className="adm-label">SKILL_NAME</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  className="adm-input"
+                  required
+                />
               </div>
-
-              <div className="p-4 border-t adm-divider flex justify-end gap-2">
+              <div>
+                <label className="adm-label">
+                  PROFICIENCY ({formData.proficiencyLevel}%)
+                </label>
+                <input
+                  type="range"
+                  min={10}
+                  max={100}
+                  value={formData.proficiencyLevel}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      proficiencyLevel: Number(e.target.value),
+                    })
+                  }
+                  className="w-full"
+                  style={{ accentColor: "var(--adm-accent)" }}
+                />
+              </div>
+              <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pt-4 border-t adm-divider">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="adm-btn-secondary text-xs"
+                  onClick={closeModal}
+                  className="adm-btn-secondary text-xs w-full sm:w-auto"
                 >
                   CANCEL
                 </button>
                 <button
                   type="submit"
-                  form="skillForm"
-                  disabled={saveMutation.isPending}
-                  className="adm-btn-primary text-xs"
+                  disabled={isSaving}
+                  className="adm-btn-primary text-xs w-full sm:w-auto"
                 >
-                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  <span>{saveMutation.isPending ? 'SAVING...' : 'SAVE'}</span>
+                  {isSaving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{isSaving ? "SAVING..." : "SAVE_SKILL"}</span>
                 </button>
               </div>
-            </motion.div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   )
 }

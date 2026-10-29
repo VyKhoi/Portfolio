@@ -12,20 +12,20 @@ export function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-obsidian/90 backdrop-blur-md border-b border-border">
-      <div className="grid grid-cols-2 lg:grid-cols-12 h-20">
+      <div className="flex items-center justify-between lg:grid lg:grid-cols-12 h-16 lg:h-20">
         
-        {/* Logo - 3 cols */}
-        <div className="lg:col-span-3 flex items-center px-4 lg:px-8 border-r border-border h-full">
-          <a href="#" className="flex items-center gap-3 group">
+        {/* Logo - 3 cols on Desktop */}
+        <div className="lg:col-span-3 flex items-center px-4 sm:px-6 lg:px-8 lg:border-r border-border h-full">
+          <a href="#" className="flex items-center gap-2.5 sm:gap-3 group">
             <img 
               src="/favicon-96x96.png?v=2" 
               alt="Logo" 
               width={36}
               height={36}
               decoding="async"
-              className="w-9 h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm shrink-0"
             />
-            <span className="font-mono font-bold text-lg md:text-xl tracking-tight text-text-main">
+            <span className="font-mono font-bold text-base sm:text-lg md:text-xl tracking-tight text-text-main whitespace-nowrap">
               dangvykhoi<span className="text-primary">.com</span>
             </span>
           </a>
@@ -49,14 +49,14 @@ export function Navbar() {
         </div>
 
         {/* Mobile Toggle */}
-        <div className="lg:hidden flex items-center justify-end px-6 h-full">
+        <div className="lg:hidden flex items-center justify-end border-l border-border h-full">
           <button 
-            className="text-text-main focus:outline-none"
+            className="text-text-main hover:text-primary transition-colors focus:outline-none px-5 h-full flex items-center justify-center"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={isOpen ? "Đóng menu điều hướng" : "Mở menu điều hướng"}
             aria-expanded={isOpen}
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
@@ -73,13 +73,13 @@ export function Navbar() {
               key={link.name} 
               href={link.href} 
               onClick={() => setIsOpen(false)}
-              className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-text-muted hover:text-primary hover:bg-surface transition-all border-b border-border block"
+              className="px-6 py-4 font-mono text-xs font-bold tracking-widest text-text-muted hover:text-primary hover:bg-surface transition-all border-b border-border block"
             >
               {link.name}
             </a>
           ))}
-          <a href="/cv.pdf" target="_blank" className="px-6 py-4 font-mono text-sm font-bold tracking-widest text-primary hover:bg-surface transition-all block">
-            DOWNLOAD_CV
+          <a href="/cv.pdf" target="_blank" className="px-6 py-4 font-mono text-xs font-bold tracking-widest text-primary hover:bg-surface transition-all block">
+            &gt; DOWNLOAD_CV
           </a>
         </div>
       </div>

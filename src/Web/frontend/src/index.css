@@ -302,3 +302,21 @@
 .adm-divider {
   border-color: var(--adm-border);
 }
+
+.admin-theme *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-theme *::-webkit-scrollbar-track {
+  background: var(--adm-bg-elevated);
+}
+
+.admin-theme *::-webkit-scrollbar-thumb {
+  background: var(--adm-border-strong);
+  border-radius: 9999px;
+}
+
+.admin-theme *::-webkit-scrollbar-thumb:hover {
+  background: var(--adm-accent);
+}

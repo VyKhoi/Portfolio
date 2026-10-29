@@ -29,7 +29,6 @@ export const CatChatbot: React.FC = () => {
 
   // Track the neko position and attach click listener
   useEffect(() => {
-    // Initialize Session ID
     let currentSessionId = localStorage.getItem('ai_chat_session_id');
     if (!currentSessionId) {
       currentSessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
@@ -37,7 +36,6 @@ export const CatChatbot: React.FC = () => {
     }
     setSessionId(currentSessionId);
 
-    // Fetch conversation history from backend DB for this session
     const baseUrl = '/api';
 
     fetch(`${baseUrl}/ai/history/${currentSessionId}`)
@@ -54,6 +52,9 @@ export const CatChatbot: React.FC = () => {
       })
       .catch((err) => console.error('Failed to load chat history:', err));
 
+    // Auto-dismiss initial greeting bubble after 4.5s
+    const initialTimer = setTimeout(() => setShowBubble(false), 4500);
+
     let nekoEl: HTMLElement | null = null;
     let frameId: number;
 
@@ -68,23 +69,34 @@ export const CatChatbot: React.FC = () => {
       if (!nekoEl) {
         nekoEl = document.getElementById('neko-cat1');
         if (nekoEl) {
-          nekoEl.style.pointerEvents = 'auto'; // Ensure it's clickable
+          nekoEl.style.pointerEvents = 'auto';
           nekoEl.style.cursor = 'pointer';
           nekoEl.addEventListener('click', clickHandler);
         }
       }
 
-      if (nekoEl && bubbleRef.current) {
-        const left = parseInt(nekoEl.style.left || '0', 10);
-        const top = parseInt(nekoEl.style.top || '0', 10);
-        
-        // Update DOM directly to avoid 60fps React re-renders
-        if (left > 0) {
-          bubbleRef.current.style.left = `${left - 70}px`;
-          bubbleRef.current.style.top = `${top - 45}px`;
-          bubbleRef.current.style.opacity = '1';
+      if (bubbleRef.current) {
+        const isNekoVisible = nekoEl && nekoEl.style.display !== 'none' && window.innerWidth >= 768;
+        if (isNekoVisible && nekoEl) {
+          const left = parseInt(nekoEl.style.left || '0', 10);
+          const top = parseInt(nekoEl.style.top || '0', 10);
+
+          if (left > 0) {
+            bubbleRef.current.style.left = `${Math.max(12, Math.min(left - 70, window.innerWidth - 170))}px`;
+            bubbleRef.current.style.top = `${Math.max(12, top - 48)}px`;
+            bubbleRef.current.style.right = 'auto';
+            bubbleRef.current.style.bottom = 'auto';
+            bubbleRef.current.style.opacity = '1';
+          } else {
+            bubbleRef.current.style.opacity = '0';
+          }
         } else {
-          bubbleRef.current.style.opacity = '0';
+          // Mobile / touch fallback: anchor neatly right above the bottom-right Sigma Cat avatar button
+          bubbleRef.current.style.left = 'auto';
+          bubbleRef.current.style.top = 'auto';
+          bubbleRef.current.style.right = '16px';
+          bubbleRef.current.style.bottom = '76px';
+          bubbleRef.current.style.opacity = '1';
         }
       }
 
@@ -93,18 +105,19 @@ export const CatChatbot: React.FC = () => {
 
     frameId = requestAnimationFrame(trackCat);
 
-    // Randomly show bubble every 15 seconds for 5 seconds
+    // Periodically show bubble every 25 seconds for 4.5 seconds
     const interval = setInterval(() => {
       setIsOpen((currentIsOpen) => {
         if (!currentIsOpen) {
           setShowBubble(true);
-          setTimeout(() => setShowBubble(false), 5000);
+          setTimeout(() => setShowBubble(false), 4500);
         }
         return currentIsOpen;
       });
-    }, 15000);
+    }, 25000);
 
     return () => {
+      clearTimeout(initialTimer);
       cancelAnimationFrame(frameId);
       clearInterval(interval);
       if (nekoEl) {
@@ -118,7 +131,6 @@ export const CatChatbot: React.FC = () => {
     const trimmedInput = input.trim();
     if (!trimmedInput || loading || cooldown) return;
 
-    // Immediately reflect user message
     const updatedMessages = [...messages, { role: 'user' as const, content: trimmedInput }];
     setMessages(updatedMessages);
     setInput('');
@@ -153,7 +165,6 @@ export const CatChatbot: React.FC = () => {
         throw new Error(`HTTP ${res.status}`);
       }
 
-      // Add placeholder assistant message that will be populated as tokens stream in
       setMessages([...updatedMessages, { role: 'assistant', content: '' }]);
       setLoading(false);
 
@@ -195,7 +206,6 @@ export const CatChatbot: React.FC = () => {
                 return next;
               });
             } catch {
-              // Raw text chunk fallback
               accumulated += dataStr;
               setMessages(prev => {
                 const next = [...prev];
@@ -232,7 +242,7 @@ export const CatChatbot: React.FC = () => {
 
   return (
     <>
-      {/* Speech bubble following animated cat */}
+      {/* Speech bubble following animated cat or anchored above mobile button */}
       <AnimatePresence>
         {!isOpen && showBubble && (
           <motion.div
@@ -242,16 +252,16 @@ export const CatChatbot: React.FC = () => {
             exit={{ opacity: 0, scale: 0.8 }}
             style={{
               position: 'fixed',
-              left: -999,
-              top: -999,
-              zIndex: 2147483646,
+              right: 16,
+              bottom: 76,
+              zIndex: 99998,
               pointerEvents: 'none',
               opacity: 0
             }}
-            className="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg shadow-lg max-w-[150px] text-center"
+            className="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg shadow-lg max-w-[165px] text-center"
           >
             Hỏi gì về anh Khôi hong? Bấm vào em nè 😼
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0"></div>
+            <div className="absolute -bottom-2 right-5 md:left-1/2 md:-translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0"></div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -269,7 +279,7 @@ export const CatChatbot: React.FC = () => {
               setIsOpen(true);
               setShowBubble(false);
             }}
-            className="fixed bottom-6 right-6 z-[99999] p-1 bg-[#121215] border-2 border-[#DEFF9A]/60 hover:border-[#DEFF9A] text-white rounded-full shadow-[0_0_25px_rgba(222,255,154,0.3)] transition-all group flex items-center justify-center cursor-pointer"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999] p-1 bg-[#121215] border-2 border-[#DEFF9A]/60 hover:border-[#DEFF9A] text-white rounded-full shadow-[0_0_25px_rgba(222,255,154,0.3)] transition-all group flex items-center justify-center cursor-pointer"
             aria-label="Mở chat với Sigma Cat"
           >
             <div className="relative">
@@ -294,10 +304,9 @@ export const CatChatbot: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 right-6 w-[360px] max-w-[calc(100vw-32px)] bg-[#121215] border border-[#27272A] shadow-2xl rounded-xl z-[99999] font-mono overflow-hidden flex flex-col"
-            style={{ height: '480px' }}
+            className="fixed bottom-3 right-3 left-3 sm:left-auto sm:bottom-6 sm:right-6 sm:w-[360px] h-[min(480px,calc(100dvh-24px))] bg-[#121215] border border-[#27272A] shadow-2xl rounded-xl z-[99999] font-mono overflow-hidden flex flex-col"
           >
-            <div className="bg-[#18181C] border-b border-[#27272A] p-4 flex justify-between items-center">
+            <div className="bg-[#18181C] border-b border-[#27272A] p-3.5 sm:p-4 flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <img 
@@ -326,7 +335,7 @@ export const CatChatbot: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-[#27272A] scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-[#27272A] scrollbar-track-transparent">
               {messages.length === 0 && (
                 <div className="text-center mt-6">
                   <div className="inline-block bg-[#18181C] border border-[#27272A] text-zinc-400 text-xs px-4 py-2 rounded-full">
@@ -364,7 +373,6 @@ export const CatChatbot: React.FC = () => {
             </div>
 
             <form onSubmit={handleSend} className="p-3 border-t border-[#27272A] bg-[#18181C] flex gap-2">
-              {/* Anti-bot Honeypot field (hidden from real users) */}
               <input 
                 type="text" 
                 name="website_trap"
@@ -381,15 +389,15 @@ export const CatChatbot: React.FC = () => {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 maxLength={350}
-                placeholder={cooldown ? "Đang thở 3s..." : "Hỏi gì về anh Khôi... (tối đa 350 ký tự)"}
+                placeholder={cooldown ? "Đang thở 3s..." : "Hỏi gì về anh Khôi..."}
                 disabled={loading || cooldown}
-                className="flex-1 bg-[#0A0A0C] border border-[#27272A] text-white text-sm rounded-lg px-4 py-3 focus:border-[#DEFF9A] focus:ring-1 focus:ring-[#DEFF9A] outline-none transition-all placeholder:text-zinc-600 disabled:opacity-60"
+                className="flex-1 min-w-0 bg-[#0A0A0C] border border-[#27272A] text-white text-sm rounded-lg px-3.5 py-2.5 focus:border-[#DEFF9A] focus:ring-1 focus:ring-[#DEFF9A] outline-none transition-all placeholder:text-zinc-600 disabled:opacity-60"
               />
               <button 
                 type="submit"
                 disabled={loading || cooldown || !input.trim()}
                 aria-label="Gửi tin nhắn"
-                className="bg-[#DEFF9A] text-black px-4 py-2 rounded-lg font-bold disabled:opacity-50 hover:bg-[#c2f068] transition-colors flex items-center justify-center min-w-[44px]"
+                className="bg-[#DEFF9A] text-black px-4 py-2 rounded-lg font-bold disabled:opacity-50 hover:bg-[#c2f068] transition-colors flex items-center justify-center min-w-[44px] shrink-0"
                 title={cooldown ? "Vui lòng đợi 3s" : "Gửi tin nhắn"}
               >
                 {cooldown ? (

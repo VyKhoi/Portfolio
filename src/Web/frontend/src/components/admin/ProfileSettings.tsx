@@ -1,176 +1,183 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { Save, User, Lock, KeyRound, Loader2 } from 'lucide-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useAuthStore } from '../../store/authStore'
-import { API_BASE_URL } from '../../lib/api'
-import { invalidateContentCache } from '../../lib/contentCache'
-import { AdminLoader, RefreshingBadge } from './AdminLoader'
-
-const EMPTY_PROFILE = {
-  fullName: '',
-  title: '',
-  bio: '',
-  avatarKey: '',
-  cvPdfKey: '',
-  githubLink: '',
-  linkedinLink: ''
-}
+import React, { useState, useEffect } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useAuthStore } from "../../store/authStore"
+import { Save, User, Lock, KeyRound, Loader2 } from "lucide-react"
+import { AdminLoader } from "./AdminLoader"
 
 export function ProfileSettings() {
-  const token = useAuthStore(state => state.token)
+  const token = useAuthStore((state) => state.token)
   const queryClient = useQueryClient()
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState('')
-  const [isErrorMsg, setIsErrorMsg] = useState(false)
-  const [profile, setProfile] = useState(EMPTY_PROFILE)
+  const baseUrl = "/api"
 
-  // Change Password state
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [formData, setFormData] = useState({
+    fullName: "",
+    title: "",
+    bio: "",
+    avatarKey: "",
+    cvPdfKey: "",
+    githubLink: "",
+    linkedinLink: "",
+  })
+  const [savedSuccess, setSavedSuccess] = useState(false)
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const [pwdMessage, setPwdMessage] = useState<{
+    type: "success" | "error"
+    text: string
+  } | null>(null)
   const [pwdLoading, setPwdLoading] = useState(false)
-  const [pwdMessage, setPwdMessage] = useState('')
-  const [pwdError, setPwdError] = useState('')
 
-  const { data: fetchedProfile, isLoading, isFetching } = useQuery({
-    queryKey: ['profile'],
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/profile`)
-      if (!res.ok) throw new Error('Failed to load profile')
+      const res = await fetch(`${baseUrl}/content/profile`)
+      if (!res.ok) return null
       return res.json()
     },
   })
 
   useEffect(() => {
-    if (fetchedProfile) {
-      setProfile({ ...EMPTY_PROFILE, ...fetchedProfile })
-    }
-  }, [fetchedProfile])
-
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setMessage('')
-    setIsErrorMsg(false)
-    try {
-      const res = await fetch(`${API_BASE_URL}/content/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(profile)
+    if (profile) {
+      setFormData({
+        fullName: profile.fullName || "",
+        title: profile.title || "",
+        bio: profile.bio || "",
+        avatarKey: profile.avatarKey || "",
+        cvPdfKey: profile.cvPdfKey || "",
+        githubLink: profile.githubLink || "",
+        linkedinLink: profile.linkedinLink || "",
       })
-      if (res.ok) {
-        setMessage('PROFILE_UPDATED_SUCCESSFULLY')
-        invalidateContentCache('profile')
-        queryClient.invalidateQueries({ queryKey: ['profile'] })
-      } else {
-        setIsErrorMsg(true)
-        setMessage('ERROR_UPDATING_PROFILE')
-      }
-    } catch (err) {
-      console.error(err)
-      setIsErrorMsg(true)
-      setMessage('SYSTEM_ERROR')
-    } finally {
-      setSaving(false)
-      setTimeout(() => setMessage(''), 3000)
     }
+  }, [profile])
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const res = await fetch(`${baseUrl}/content/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) throw new Error("Failed to update profile")
+      return res.json()
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["profile"] })
+      setSavedSuccess(true)
+      setTimeout(() => setSavedSuccess(false), 3000)
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    updateMutation.mutate(formData)
   }
 
-  const handleChangePassword = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault()
-    setPwdMessage('')
-    setPwdError('')
+    setPwdMessage(null)
 
-    if (newPassword !== confirmPassword) {
-      setPwdError('Mật khẩu xác nhận không khớp!')
+    if (passwordData.newPassword.length < 8) {
+      setPwdMessage({
+        type: "error",
+        text: "Mật khẩu mới phải có ít nhất 8 ký tự.",
+      })
       return
     }
 
-    if (newPassword.length < 8) {
-      setPwdError('Mật khẩu mới phải có tối thiểu 8 ký tự!')
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPwdMessage({
+        type: "error",
+        text: "Xác nhận mật khẩu mới không khớp.",
+      })
       return
     }
 
     setPwdLoading(true)
     try {
-      const res = await fetch(`${API_BASE_URL}/auth/change-password`, {
-        method: 'POST',
+      const res = await fetch(`${baseUrl}/auth/change-password`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ currentPassword, newPassword })
+        body: JSON.stringify({
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        }),
       })
+
       const data = await res.json()
-      if (res.ok) {
-        setPwdMessage(data.message || 'PASSWORD_UPDATED_SUCCESSFULLY')
-        setCurrentPassword('')
-        setNewPassword('')
-        setConfirmPassword('')
+      if (!res.ok) {
+        setPwdMessage({
+          type: "error",
+          text: data.error || "Đổi mật khẩu thất bại.",
+        })
       } else {
-        setPwdError(data.error || 'FAILED_TO_UPDATE_PASSWORD')
+        setPwdMessage({
+          type: "success",
+          text: "PASSWORD_UPDATED_SUCCESSFULLY!",
+        })
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        })
       }
-    } catch (err: any) {
-      setPwdError(err.message || 'SYSTEM_ERROR')
+    } catch {
+      setPwdMessage({ type: "error", text: "Lỗi kết nối máy chủ." })
     } finally {
       setPwdLoading(false)
-      setTimeout(() => {
-        setPwdMessage('')
-        setPwdError('')
-      }, 5000)
     }
   }
 
   if (isLoading) {
-    return (
-      <div className="p-4 font-mono space-y-6">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <User className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">PROFILE_CONFIGURATION</h1>
-        </div>
-        <AdminLoader label="LOADING_SYSTEM_PROFILE..." variant="form" />
-      </div>
-    )
+    return <AdminLoader label="LOADING_PROFILE_CONFIG..." variant="form" />
   }
 
   return (
-    <div className="p-4 font-mono animate-in fade-in duration-200">
-      <div className="flex items-center justify-between mb-8 max-w-2xl">
-        <div className="flex items-center space-x-3 adm-text-accent">
-          <User className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-wider">PROFILE_CONFIGURATION</h1>
+    <div className="font-mono max-w-3xl space-y-8 sm:space-y-12">
+      <div>
+        <div className="flex items-center space-x-3 mb-5 sm:mb-6">
+          <User className="w-6 h-6 sm:w-7 sm:h-7 adm-text-accent shrink-0" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight adm-text break-words">
+            PROFILE_CONFIGURATION
+          </h1>
         </div>
-        <RefreshingBadge show={isFetching && !isLoading} />
-      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="adm-card p-6 rounded-lg max-w-2xl"
-      >
-        <form onSubmit={handleSave} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <form
+          onSubmit={handleSubmit}
+          className="adm-card p-4 sm:p-6 rounded-lg space-y-5 sm:space-y-6"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="adm-label">FULL_NAME</label>
               <input
                 type="text"
-                value={profile.fullName}
-                onChange={e => setProfile({...profile, fullName: e.target.value})}
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 className="adm-input"
+                required
               />
             </div>
             <div>
               <label className="adm-label">TITLE</label>
               <input
                 type="text"
-                value={profile.title}
-                onChange={e => setProfile({...profile, title: e.target.value})}
+                value={formData.title}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 className="adm-input"
+                required
               />
             </div>
           </div>
@@ -178,20 +185,24 @@ export function ProfileSettings() {
           <div>
             <label className="adm-label">BIO</label>
             <textarea
-              value={profile.bio}
-              onChange={e => setProfile({...profile, bio: e.target.value})}
-              rows={4}
-              className="adm-input resize-none"
+              value={formData.bio}
+              onChange={(e) =>
+                setFormData({ ...formData, bio: e.target.value })
+              }
+              className="adm-input h-28"
+              required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="adm-label">GITHUB_LINK</label>
               <input
                 type="text"
-                value={profile.githubLink}
-                onChange={e => setProfile({...profile, githubLink: e.target.value})}
+                value={formData.githubLink}
+                onChange={(e) =>
+                  setFormData({ ...formData, githubLink: e.target.value })
+                }
                 className="adm-input"
               />
             </div>
@@ -199,20 +210,24 @@ export function ProfileSettings() {
               <label className="adm-label">LINKEDIN_LINK</label>
               <input
                 type="text"
-                value={profile.linkedinLink}
-                onChange={e => setProfile({...profile, linkedinLink: e.target.value})}
+                value={formData.linkedinLink}
+                onChange={(e) =>
+                  setFormData({ ...formData, linkedinLink: e.target.value })
+                }
                 className="adm-input"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="adm-label">AVATAR_KEY</label>
               <input
                 type="text"
-                value={profile.avatarKey}
-                onChange={e => setProfile({...profile, avatarKey: e.target.value})}
+                value={formData.avatarKey}
+                onChange={(e) =>
+                  setFormData({ ...formData, avatarKey: e.target.value })
+                }
                 className="adm-input"
               />
             </div>
@@ -220,60 +235,79 @@ export function ProfileSettings() {
               <label className="adm-label">CV_PDF_KEY</label>
               <input
                 type="text"
-                value={profile.cvPdfKey}
-                onChange={e => setProfile({...profile, cvPdfKey: e.target.value})}
+                value={formData.cvPdfKey}
+                onChange={(e) =>
+                  setFormData({ ...formData, cvPdfKey: e.target.value })
+                }
                 className="adm-input"
               />
             </div>
           </div>
 
-          <div className="pt-4 flex items-center justify-between border-t adm-divider">
-            <div className={`text-sm font-bold ${isErrorMsg ? 'adm-text-danger' : 'adm-text-success'}`}>
-              {message}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t adm-divider">
+            <div>
+              {savedSuccess && (
+                <span className="adm-text-success text-xs font-bold">
+                  &gt; PROFILE_SAVED_SUCCESSFULLY!
+                </span>
+              )}
             </div>
             <button
               type="submit"
-              disabled={saving}
-              className="adm-btn-primary text-xs"
+              disabled={updateMutation.isPending}
+              className="adm-btn-primary text-xs w-full sm:w-auto"
             >
-              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span>{saving ? 'SAVING...' : 'SAVE_CONFIGURATION'}</span>
+              {updateMutation.isPending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              <span>
+                {updateMutation.isPending ? "SAVING..." : "SAVE_CONFIGURATION"}
+              </span>
             </button>
           </div>
         </form>
-      </motion.div>
+      </div>
 
-      {/* Security & Password Management Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2, delay: 0.05 }}
-        className="adm-card p-6 rounded-lg max-w-2xl mt-8"
-      >
-        <div className="flex items-center space-x-2 adm-text-accent mb-6">
-          <KeyRound className="w-5 h-5" />
-          <h2 className="text-lg font-bold tracking-wider">SECURITY_CONFIGURATION // CHANGE_PASSWORD</h2>
+      {/* Password Change Section */}
+      <div className="adm-card p-4 sm:p-6 rounded-lg">
+        <div className="flex items-center space-x-3 mb-5 sm:mb-6">
+          <KeyRound className="w-5 h-5 sm:w-6 sm:h-6 adm-text-accent shrink-0" />
+          <h2 className="text-base sm:text-xl font-bold tracking-tight adm-text break-words">
+            SECURITY_CONFIGURATION // CHANGE_PASSWORD
+          </h2>
         </div>
 
-        <form onSubmit={handleChangePassword} className="space-y-4">
+        <form onSubmit={handlePasswordChange} className="space-y-5 sm:space-y-6">
           <div>
             <label className="adm-label">CURRENT_PASSWORD</label>
             <input
               type="password"
-              value={currentPassword}
-              onChange={e => setCurrentPassword(e.target.value)}
+              value={passwordData.currentPassword}
+              onChange={(e) =>
+                setPasswordData({
+                  ...passwordData,
+                  currentPassword: e.target.value,
+                })
+              }
               className="adm-input"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="adm-label">NEW_PASSWORD (MIN 8 CHARS)</label>
               <input
                 type="password"
-                value={newPassword}
-                onChange={e => setNewPassword(e.target.value)}
+                value={passwordData.newPassword}
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    newPassword: e.target.value,
+                  })
+                }
                 className="adm-input"
                 required
               />
@@ -282,29 +316,48 @@ export function ProfileSettings() {
               <label className="adm-label">CONFIRM_NEW_PASSWORD</label>
               <input
                 type="password"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
+                value={passwordData.confirmPassword}
+                onChange={(e) =>
+                  setPasswordData({
+                    ...passwordData,
+                    confirmPassword: e.target.value,
+                  })
+                }
                 className="adm-input"
                 required
               />
             </div>
           </div>
 
-          {pwdError && <div className="adm-text-danger text-xs font-bold">{pwdError}</div>}
-          {pwdMessage && <div className="adm-text-success text-xs font-bold">{pwdMessage}</div>}
-
-          <div className="pt-4 flex items-center justify-end border-t adm-divider">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t adm-divider">
+            <div>
+              {pwdMessage && (
+                <span
+                  className={`text-xs font-bold ${
+                    pwdMessage.type === "success"
+                      ? "adm-text-success"
+                      : "adm-text-danger"
+                  }`}
+                >
+                  &gt; {pwdMessage.text}
+                </span>
+              )}
+            </div>
             <button
               type="submit"
               disabled={pwdLoading}
-              className="adm-btn-primary text-xs"
+              className="adm-btn-primary text-xs w-full sm:w-auto"
             >
-              {pwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-              <span>{pwdLoading ? 'UPDATING...' : 'UPDATE_PASSWORD'}</span>
+              {pwdLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Lock className="w-4 h-4" />
+              )}
+              <span>{pwdLoading ? "UPDATING..." : "UPDATE_PASSWORD"}</span>
             </button>
           </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   )
 }

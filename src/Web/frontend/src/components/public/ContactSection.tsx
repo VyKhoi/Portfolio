@@ -41,35 +41,35 @@ export function ContactSection() {
       <div className="grid lg:grid-cols-2 min-h-[80vh]">
         
         {/* Left: Contact Info - Giant Typography */}
-        <div className="p-8 lg:p-24 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-border relative">
+        <div className="p-6 sm:p-10 lg:p-24 flex flex-col justify-center border-b lg:border-b-0 lg:border-r border-border relative">
           <div className="absolute inset-0 bg-primary/5 z-0" />
           
           <div className="relative z-10">
-            <h2 className="text-5xl sm:text-[4rem] md:text-[5rem] lg:text-[7rem] font-bold font-heading uppercase leading-[0.85] tracking-tighter text-text-main mb-12 break-words">
+            <h2 className="text-[2.75rem] sm:text-[4rem] md:text-[5rem] lg:text-[7rem] font-bold font-heading uppercase leading-[0.88] tracking-tighter text-text-main mb-8 lg:mb-12 break-words">
               BẮT ĐẦU<br />
               <span className="text-outline-primary">DỰ ÁN</span><br />
               MỚI.
             </h2>
             
-            <p className="text-text-muted mb-16 text-lg max-w-md font-body">
+            <p className="text-text-muted mb-10 lg:mb-16 text-base sm:text-lg max-w-md font-body leading-relaxed">
               Bạn đang tìm kiếm một kỹ sư phần mềm tập trung vào hiệu suất và kiến trúc vững chắc? Hãy kết nối với tôi.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 font-mono text-sm">
-              <div className="flex flex-col space-y-2">
-                <span className="text-primary font-bold tracking-widest uppercase">Điện thoại</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 font-mono text-sm">
+              <div className="flex flex-col space-y-1.5 sm:space-y-2">
+                <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">Điện thoại</span>
                 <span className="text-text-main">0931 314 792</span>
               </div>
-              <div className="flex flex-col space-y-2">
-                <span className="text-primary font-bold tracking-widest uppercase">Email</span>
-                <span className="text-text-main">dangvykhoi@gmail.com</span>
+              <div className="flex flex-col space-y-1.5 sm:space-y-2">
+                <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">Email</span>
+                <span className="text-text-main break-all">dangvykhoi@gmail.com</span>
               </div>
-              <div className="flex flex-col space-y-2">
-                <span className="text-primary font-bold tracking-widest uppercase">LinkedIn</span>
+              <div className="flex flex-col space-y-1.5 sm:space-y-2">
+                <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">LinkedIn</span>
                 <a href="https://linkedin.com/in/vykhoi" target="_blank" rel="noreferrer" className="text-text-main hover:text-primary transition-colors">/in/vykhoi</a>
               </div>
-              <div className="flex flex-col space-y-2">
-                <span className="text-primary font-bold tracking-widest uppercase">Địa chỉ</span>
+              <div className="flex flex-col space-y-1.5 sm:space-y-2">
+                <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">Địa chỉ</span>
                 <span className="text-text-main">Go Vap, HCMC</span>
               </div>
             </div>
@@ -77,14 +77,13 @@ export function ContactSection() {
         </div>
 
         {/* Right: Contact Form - Stark Geometric */}
-        <div className="p-8 lg:p-24 flex flex-col justify-center bg-obsidian relative">
-          <h3 className="text-2xl font-bold font-heading text-text-main uppercase mb-12 flex items-center">
-            <div className="w-4 h-4 bg-primary mr-4" />
+        <div className="p-6 sm:p-10 lg:p-24 flex flex-col justify-center bg-obsidian relative">
+          <h3 className="text-xl sm:text-2xl font-bold font-heading text-text-main uppercase mb-8 lg:mb-12 flex items-center">
+            <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 bg-primary mr-3 sm:mr-4 shrink-0" />
             Gửi Tin Nhắn
           </h3>
           
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Anti-bot Honeypot field (hidden from real users) */}
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             <input
               type="text"
               name="company_trap"
@@ -106,7 +105,7 @@ export function ContactSection() {
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label htmlFor="contact-name" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-name" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Họ và Tên
               </label>
             </div>
@@ -122,7 +121,7 @@ export function ContactSection() {
                 required 
                 className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label htmlFor="contact-email" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-email" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Email
               </label>
             </div>
@@ -137,7 +136,7 @@ export function ContactSection() {
                 maxLength={1000}
                 required
               />
-              <label htmlFor="contact-message" className="absolute left-0 top-6 text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
+              <label htmlFor="contact-message" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
                 Nội dung
               </label>
             </div>
@@ -156,5 +155,3 @@ export function ContactSection() {
     </section>
   );
 }
-
-

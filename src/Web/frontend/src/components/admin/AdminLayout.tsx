@@ -1,22 +1,21 @@
-import React, { useEffect } from "react"
-import { Routes, Route, Navigate } from "react-router-dom"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useEffect } from "react"
+import { Routes, Route } from "react-router-dom"
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query"
 import { Sidebar } from "./Sidebar"
 import { DashboardOverview } from "./DashboardOverview"
-import { InboxTable } from "./InboxTable"
-import { ProjectCRUD } from "./ProjectCRUD"
-import { ProfileSettings } from "./ProfileSettings"
 import { ExperienceCRUD } from "./ExperienceCRUD"
 import { SkillCRUD } from "./SkillCRUD"
+import { ProjectCRUD } from "./ProjectCRUD"
+import { InboxTable } from "./InboxTable"
 import { AIChatLogs } from "./AIChatLogs"
-import { API_BASE_URL } from "../../lib/api"
+import { ProfileSettings } from "./ProfileSettings"
 import { useAuthStore } from "../../store/authStore"
 import { useAdminThemeStore } from "../../store/adminThemeStore"
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,
+      staleTime: 60_000,
       gcTime: 5 * 60_000,
       refetchOnWindowFocus: false,
       retry: 1,
@@ -25,53 +24,97 @@ const queryClient = new QueryClient({
 })
 
 function AdminPrefetcher() {
-  const token = useAuthStore(state => state.token)
+  const qc = useQueryClient()
+  const token = useAuthStore((state) => state.token)
 
   useEffect(() => {
-    const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
-    const fetchJson = async (path: string, auth = false) => {
-      const res = await fetch(`${API_BASE_URL}${path}`, auth ? { headers: authHeaders } : undefined)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return res.json()
-    }
+    const baseUrl = "/api"
+    const authHeaders: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {}
 
-    // Warm all admin caches in parallel so clicking between Sidebar tabs is instantaneous
-    queryClient.prefetchQuery({ queryKey: ['profile'], queryFn: () => fetchJson('/content/profile') })
-    queryClient.prefetchQuery({ queryKey: ['experiences'], queryFn: () => fetchJson('/content/experience') })
-    queryClient.prefetchQuery({ queryKey: ['skills'], queryFn: () => fetchJson('/content/skills') })
-    queryClient.prefetchQuery({ queryKey: ['projects'], queryFn: () => fetchJson('/content/projects', true) })
-    queryClient.prefetchQuery({ queryKey: ['messages'], queryFn: () => fetchJson('/contact/messages', true) })
-    queryClient.prefetchQuery({ queryKey: ['ai-sessions'], queryFn: () => fetchJson('/ai/sessions', true) })
-  }, [token])
+    qc.prefetchQuery({
+      queryKey: ["profile"],
+      queryFn: async () => {
+        const res = await fetch(`${baseUrl}/content/profile`)
+        if (!res.ok) throw new Error("Failed to fetch profile")
+        return res.json()
+      },
+    })
+    qc.prefetchQuery({
+      queryKey: ["experiences"],
+      queryFn: async () => {
+        const res = await fetch(`${baseUrl}/content/experiences`)
+        if (!res.ok) throw new Error("Failed to fetch experiences")
+        return res.json()
+      },
+    })
+    qc.prefetchQuery({
+      queryKey: ["skills"],
+      queryFn: async () => {
+        const res = await fetch(`${baseUrl}/content/skills`)
+        if (!res.ok) throw new Error("Failed to fetch skills")
+        return res.json()
+      },
+    })
+    qc.prefetchQuery({
+      queryKey: ["projects"],
+      queryFn: async () => {
+        const res = await fetch(`${baseUrl}/content/projects`)
+        if (!res.ok) throw new Error("Failed to fetch projects")
+        return res.json()
+      },
+    })
+
+    if (token) {
+      qc.prefetchQuery({
+        queryKey: ["inbox"],
+        queryFn: async () => {
+          const res = await fetch(`${baseUrl}/contact/messages`, {
+            headers: authHeaders,
+          })
+          if (!res.ok) throw new Error("Failed to fetch inbox")
+          return res.json()
+        },
+      })
+      qc.prefetchQuery({
+        queryKey: ["ai-sessions"],
+        queryFn: async () => {
+          const res = await fetch(`${baseUrl}/ai/sessions`, {
+            headers: authHeaders,
+          })
+          if (!res.ok) throw new Error("Failed to fetch ai sessions")
+          return res.json()
+        },
+      })
+    }
+  }, [qc, token])
 
   return null
 }
 
-export function AdminLayout({ children }: { children?: React.ReactNode }) {
-  const theme = useAdminThemeStore(state => state.theme)
+export function AdminLayout() {
+  const theme = useAdminThemeStore((state) => state.theme)
 
   return (
     <QueryClientProvider client={queryClient}>
       <AdminPrefetcher />
       <div
         data-theme={theme}
-        className="admin-theme flex min-h-screen"
+        className="admin-theme flex flex-col lg:flex-row h-dvh overflow-hidden"
       >
         <Sidebar />
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-y-auto p-4 pb-20 sm:p-6 sm:pb-24 lg:p-8 lg:pb-8 adm-scroll">
           <div className="max-w-6xl mx-auto">
-            {children ?? (
-              <Routes>
-                <Route index element={<DashboardOverview />} />
-                <Route path="inbox" element={<InboxTable />} />
-                <Route path="projects" element={<ProjectCRUD />} />
-                <Route path="profile" element={<ProfileSettings />} />
-                <Route path="experiences" element={<ExperienceCRUD />} />
-                <Route path="skills" element={<SkillCRUD />} />
-                <Route path="ai-logs" element={<AIChatLogs />} />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
-            )}
+            <Routes>
+              <Route path="/" element={<DashboardOverview />} />
+              <Route path="/profile" element={<ProfileSettings />} />
+              <Route path="/experience" element={<ExperienceCRUD />} />
+              <Route path="/skills" element={<SkillCRUD />} />
+              <Route path="/projects" element={<ProjectCRUD />} />
+              <Route path="/inbox" element={<InboxTable />} />
+              <Route path="/ai-logs" element={<AIChatLogs />} />
+            </Routes>
           </div>
         </main>
       </div>

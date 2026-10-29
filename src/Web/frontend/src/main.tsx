@@ -4,8 +4,10 @@ import './index.css'
 import App from './App.tsx'
 import { prefetchPublicContent } from './lib/contentCache'
 
-// Kick off public API requests immediately in parallel with React tree mount
-prefetchPublicContent()
+// Kick off public API requests immediately when visiting the public portfolio
+if (!window.location.pathname.startsWith('/dashboard') && !window.location.pathname.startsWith('/login')) {
+  prefetchPublicContent()
+}
 
 // After a redeploy, old hashed chunks are removed. If a tab opened before the deploy
 // tries to lazy-load one, reload once to fetch the fresh build instead of breaking.
