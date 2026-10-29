@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, X, Save, Briefcase } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, Briefcase, Loader2 } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { API_BASE_URL } from '../../lib/api'
+import { invalidateContentCache } from '../../lib/contentCache'
+import { AdminLoader, RefreshingBadge } from './AdminLoader'
 
 interface Experience {
   id: string
@@ -17,10 +20,10 @@ interface Experience {
 
 export function ExperienceCRUD() {
   const token = useAuthStore(state => state.token)
-  const [experiences, setExperiences] = useState<Experience[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingExp, setEditingExp] = useState<Experience | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   
   const [formData, setFormData] = useState<Partial<Experience>>({
     role: '',
@@ -32,21 +35,58 @@ export function ExperienceCRUD() {
     order: 0
   })
 
-  useEffect(() => {
-    fetchExperiences()
-  }, [])
-
-  const fetchExperiences = async () => {
-    try {
+  const { data: experiences = [], isLoading, isFetching } = useQuery<Experience[]>({
+    queryKey: ['experiences'],
+    queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/content/experience`)
-      const data = await res.json()
-      setExperiences(data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
+      if (!res.ok) throw new Error('Failed to fetch experiences')
+      return res.json()
+    },
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Partial<Experience>) => {
+      const isEdit = !!editingExp
+      const url = isEdit 
+        ? `${API_BASE_URL}/content/experience/${editingExp.id}`
+        : `${API_BASE_URL}/content/experience`
+        
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
+      if (!res.ok) throw new Error('Failed to save experience')
+      return res.json()
+    },
+    onSuccess: () => {
+      setIsModalOpen(false)
+      invalidateContentCache('experiences')
+      queryClient.invalidateQueries({ queryKey: ['experiences'] })
     }
-  }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      setDeletingId(id)
+      const res = await fetch(`${API_BASE_URL}/content/experience/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (!res.ok) throw new Error('Failed to delete experience')
+      return res.json()
+    },
+    onSuccess: () => {
+      invalidateContentCache('experiences')
+      queryClient.invalidateQueries({ queryKey: ['experiences'] })
+    },
+    onSettled: () => setDeletingId(null)
+  })
 
   const handleOpenModal = (exp?: Experience) => {
     if (exp) {
@@ -67,55 +107,35 @@ export function ExperienceCRUD() {
     setIsModalOpen(true)
   }
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const isEdit = !!editingExp
-      const url = isEdit 
-        ? `${API_BASE_URL}/content/experience/${editingExp.id}`
-        : `${API_BASE_URL}/content/experience`
-        
-      const res = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (res.ok) {
-        setIsModalOpen(false)
-        fetchExperiences()
-      }
-    } catch (err) {
-      console.error(err)
-    }
+    saveMutation.mutate(formData)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!window.confirm('Delete this experience?')) return
-    try {
-      const res = await fetch(`${API_BASE_URL}/content/experience/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (res.ok) fetchExperiences()
-    } catch (err) {
-      console.error(err)
-    }
+    deleteMutation.mutate(id)
   }
 
-  if (loading) return <div className="p-8 text-[#DEFF9A]">LOADING_EXPERIENCES...</div>
+  if (isLoading) {
+    return (
+      <div className="p-4 font-mono space-y-6">
+        <div className="flex items-center space-x-3 text-[#DEFF9A]">
+          <Briefcase className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">EXPERIENCE_MANAGER</h1>
+        </div>
+        <AdminLoader label="LOADING_EXPERIENCES..." variant="cards" rows={3} />
+      </div>
+    )
+  }
 
   return (
-    <div className="p-8 font-mono">
+    <div className="p-4 font-mono animate-in fade-in duration-200">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-3 text-[#DEFF9A]">
           <Briefcase className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-wider">EXPERIENCE_MANAGER</h1>
+          <RefreshingBadge show={isFetching && !isLoading} />
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -130,14 +150,15 @@ export function ExperienceCRUD() {
         {experiences.map(exp => (
           <motion.div
             key={exp.id}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#121215] border border-[#27272A] p-6 rounded-lg flex items-start justify-between"
+            transition={{ duration: 0.15 }}
+            className="bg-[#121215] border border-[#27272A] p-6 rounded-lg flex items-start justify-between hover:border-[#3F3F46] transition-colors"
           >
             <div>
               <div className="flex items-center space-x-3 mb-2">
                 <h3 className="text-[#DEFF9A] text-xl font-bold">{exp.role}</h3>
-                <span className="text-zinc-500 text-sm">@ {exp.company}</span>
+                <span className="text-zinc-400 text-sm">@ {exp.company}</span>
               </div>
               <div className="text-zinc-400 text-sm mb-4">{exp.period}</div>
               
@@ -166,9 +187,10 @@ export function ExperienceCRUD() {
               </button>
               <button 
                 onClick={() => handleDelete(exp.id)}
-                className="p-2 text-zinc-400 hover:text-[#F43F5E] bg-[#18181C] hover:bg-[#27272A] rounded transition-colors"
+                disabled={deletingId === exp.id}
+                className="p-2 text-zinc-400 hover:text-[#F43F5E] bg-[#18181C] hover:bg-[#27272A] rounded transition-colors disabled:opacity-50"
               >
-                <Trash2 className="w-4 h-4" />
+                {deletingId === exp.id ? <Loader2 className="w-4 h-4 animate-spin text-[#F43F5E]" /> : <Trash2 className="w-4 h-4" />}
               </button>
             </div>
           </motion.div>
@@ -190,7 +212,7 @@ export function ExperienceCRUD() {
                 </h2>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="text-zinc-500 hover:text-white"
+                  className="text-zinc-400 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -200,7 +222,7 @@ export function ExperienceCRUD() {
                 <form id="expForm" onSubmit={handleSave} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">ROLE</label>
+                      <label className="block text-xs text-zinc-400 mb-1">ROLE</label>
                       <input
                         type="text"
                         required
@@ -210,7 +232,7 @@ export function ExperienceCRUD() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">COMPANY</label>
+                      <label className="block text-xs text-zinc-400 mb-1">COMPANY</label>
                       <input
                         type="text"
                         required
@@ -223,7 +245,7 @@ export function ExperienceCRUD() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">PERIOD</label>
+                      <label className="block text-xs text-zinc-400 mb-1">PERIOD</label>
                       <input
                         type="text"
                         required
@@ -234,7 +256,7 @@ export function ExperienceCRUD() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-zinc-500 mb-1">PROJECT_NAME</label>
+                      <label className="block text-xs text-zinc-400 mb-1">PROJECT_NAME</label>
                       <input
                         type="text"
                         value={formData.projectName}
@@ -245,7 +267,7 @@ export function ExperienceCRUD() {
                   </div>
 
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1">TECH_STACK (comma separated)</label>
+                    <label className="block text-xs text-zinc-400 mb-1">TECH_STACK (comma separated)</label>
                     <input
                       type="text"
                       value={formData.techStack?.join(', ')}
@@ -255,7 +277,7 @@ export function ExperienceCRUD() {
                   </div>
 
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1">ORDER</label>
+                    <label className="block text-xs text-zinc-400 mb-1">ORDER</label>
                     <input
                       type="number"
                       value={formData.order}
@@ -270,10 +292,11 @@ export function ExperienceCRUD() {
                 <button
                   type="submit"
                   form="expForm"
-                  className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors"
+                  disabled={saveMutation.isPending}
+                  className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>SAVE_CHANGES</span>
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{saveMutation.isPending ? 'SAVING...' : 'SAVE_CHANGES'}</span>
                 </button>
               </div>
             </motion.div>

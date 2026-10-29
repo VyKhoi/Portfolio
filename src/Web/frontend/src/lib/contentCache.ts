@@ -52,6 +52,18 @@ export function hasCachedContent(): boolean {
   return (Object.keys(fetchers) as ContentKey[]).every(k => readCache(k) !== undefined);
 }
 
+export function invalidateContentCache(key?: ContentKey) {
+  try {
+    const keys = key ? [key] : (Object.keys(fetchers) as ContentKey[]);
+    for (const k of keys) {
+      inflight.delete(k);
+      localStorage.removeItem(PREFIX + k);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 export function prefetchPublicContent(): Promise<void> {
   return Promise.allSettled(
     (Object.keys(fetchers) as ContentKey[]).map(k => fetchContent(k)),

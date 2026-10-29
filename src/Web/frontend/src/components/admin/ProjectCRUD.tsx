@@ -1,51 +1,55 @@
 import { Badge } from "../ui/Badge"
 import { Button } from "../ui/Button"
-import { Plus, Edit2, Trash2, X } from "lucide-react"
+import { Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { Input } from "../ui/Input"
 import { useAuthStore } from "../../store/authStore"
 import { API_BASE_URL } from "../../lib/api"
+import { AdminLoader, RefreshingBadge } from "./AdminLoader"
 
 export function ProjectCRUD() {
-  const queryClient = useQueryClient();
-  const token = useAuthStore(state => state.token);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
+  const queryClient = useQueryClient()
+  const token = useAuthStore(state => state.token)
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [editingProject, setEditingProject] = useState<any>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: '', slug: '', summary: '', descriptionMdx: '', techStack: '',
     status: 'Published', order: 0, isFeatured: false
-  });
+  })
 
-  const { data: projects = [], isLoading } = useQuery({
+  const { data: projects = [], isLoading, isFetching } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/content/projects`);
-      if (!res.ok) throw new Error("Failed to fetch projects");
-      return res.json();
+      const res = await fetch(`${API_BASE_URL}/content/projects`)
+      if (!res.ok) throw new Error("Failed to fetch projects")
+      return res.json()
     }
-  });
+  })
 
   const deleteProject = useMutation({
     mutationFn: async (id: string) => {
+      setDeletingId(id)
       const res = await fetch(`${API_BASE_URL}/content/projects/${id}`, { 
         method: 'DELETE',
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
-      });
-      if (!res.ok) throw new Error("Failed to delete");
-      return res.json();
+      })
+      if (!res.ok) throw new Error("Failed to delete")
+      return res.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-    }
-  });
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+    },
+    onSettled: () => setDeletingId(null)
+  })
 
   const saveProject = useMutation({
     mutationFn: async (data: any) => {
-      const isEdit = !!editingProject;
+      const isEdit = !!editingProject
       const url = isEdit 
         ? `${API_BASE_URL}/content/projects/${editingProject.id}`
-        : `${API_BASE_URL}/content/projects`;
+        : `${API_BASE_URL}/content/projects`
       const res = await fetch(url, {
         method: isEdit ? 'PUT' : 'POST',
         headers: { 
@@ -53,36 +57,46 @@ export function ProjectCRUD() {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify(data)
-      });
-      if (!res.ok) throw new Error("Failed to save project");
-      return res.json();
+      })
+      if (!res.ok) throw new Error("Failed to save project")
+      return res.json()
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      setIsModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['projects'] })
+      setIsModalOpen(false)
     }
-  });
+  })
 
   const openModal = (project?: any) => {
     if (project) {
-      setEditingProject(project);
-      setFormData(project);
+      setEditingProject(project)
+      setFormData(project)
     } else {
-      setEditingProject(null);
+      setEditingProject(null)
       setFormData({
         title: '', slug: '', summary: '', descriptionMdx: '', techStack: '',
         status: 'Published', order: projects.length + 1, isFeatured: false
-      });
+      })
     }
-    setIsModalOpen(true);
-  };
+    setIsModalOpen(true)
+  }
 
-  if (isLoading) return <div className="text-zinc-500 font-mono">LOADING_REGISTRY...</div>
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-heading font-bold">PROJECTS_REGISTRY</h1>
+        <AdminLoader label="LOADING_PROJECTS_REGISTRY..." variant="cards" rows={3} />
+      </div>
+    )
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-heading font-bold">PROJECTS_REGISTRY</h1>
+        <div className="flex items-center space-x-3">
+          <h1 className="text-3xl font-heading font-bold">PROJECTS_REGISTRY</h1>
+          <RefreshingBadge show={isFetching && !isLoading} />
+        </div>
         <Button size="sm" onClick={() => openModal()} className="bg-[#DEFF9A] text-black hover:bg-[#DEFF9A]/80 uppercase tracking-wider">
           <Plus className="w-4 h-4 mr-2" /> New Project
         </Button>
@@ -98,7 +112,7 @@ export function ProjectCRUD() {
                   {proj.status}
                 </Badge>
               </div>
-              <div className="text-sm font-mono text-zinc-500">Tech Stack: {proj.techStack}</div>
+              <div className="text-sm font-mono text-zinc-400">Tech Stack: {proj.techStack}</div>
             </div>
             <div className="flex space-x-2">
               <Button variant="ghost" size="icon" onClick={() => openModal(proj)} className="text-[#00E5FF] hover:bg-[#00E5FF]/10">
@@ -106,10 +120,11 @@ export function ProjectCRUD() {
               </Button>
               <Button 
                 variant="ghost" size="icon" 
+                disabled={deletingId === proj.id}
                 onClick={() => { if (confirm("Are you sure?")) deleteProject.mutate(proj.id); }}
                 className="text-[#F43F5E] hover:bg-[#F43F5E]/10"
               >
-                <Trash2 className="w-4 h-4" />
+                {deletingId === proj.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
               </Button>
             </div>
           </div>
@@ -124,7 +139,7 @@ export function ProjectCRUD() {
           <div className="bg-[#121215] border border-[#27272A] rounded-lg w-full max-w-lg p-6 shadow-2xl">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold font-heading">{editingProject ? 'EDIT_PROJECT' : 'NEW_PROJECT'}</h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)} className="text-zinc-500"><X className="w-5 h-5"/></Button>
+              <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)} className="text-zinc-400"><X className="w-5 h-5"/></Button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); saveProject.mutate(formData); }} className="space-y-4">
               <Input placeholder="Title" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
@@ -134,7 +149,9 @@ export function ProjectCRUD() {
               <div className="flex justify-end space-x-2 pt-4 border-t border-[#27272A]">
                 <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                 <Button type="submit" disabled={saveProject.isPending} className="bg-[#00E5FF] text-black hover:bg-[#00E5FF]/80">
-                  {saveProject.isPending ? 'SAVING...' : 'SAVE_PROJECT'}
+                  {saveProject.isPending ? (
+                    <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> SAVING...</span>
+                  ) : 'SAVE_PROJECT'}
                 </Button>
               </div>
             </form>

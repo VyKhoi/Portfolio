@@ -1,8 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Plus, Edit2, Trash2, X, Save, Code } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, Code, Loader2 } from 'lucide-react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/authStore'
 import { API_BASE_URL } from '../../lib/api'
+import { invalidateContentCache } from '../../lib/contentCache'
+import { AdminLoader, RefreshingBadge } from './AdminLoader'
 
 interface Skill {
   id: string
@@ -15,10 +18,10 @@ interface Skill {
 
 export function SkillCRUD() {
   const token = useAuthStore(state => state.token)
-  const [skills, setSkills] = useState<Skill[]>([])
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   
   const [formData, setFormData] = useState<Partial<Skill>>({
     name: '',
@@ -28,21 +31,58 @@ export function SkillCRUD() {
     order: 0
   })
 
-  useEffect(() => {
-    fetchSkills()
-  }, [])
-
-  const fetchSkills = async () => {
-    try {
+  const { data: skills = [], isLoading, isFetching } = useQuery<Skill[]>({
+    queryKey: ['skills'],
+    queryFn: async () => {
       const res = await fetch(`${API_BASE_URL}/content/skills`)
-      const data = await res.json()
-      setSkills(data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
+      if (!res.ok) throw new Error('Failed to fetch skills')
+      return res.json()
+    },
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Partial<Skill>) => {
+      const isEdit = !!editingSkill
+      const url = isEdit 
+        ? `${API_BASE_URL}/content/skills/${editingSkill.id}`
+        : `${API_BASE_URL}/content/skills`
+        
+      const res = await fetch(url, {
+        method: isEdit ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      })
+      if (!res.ok) throw new Error('Failed to save skill')
+      return res.json()
+    },
+    onSuccess: () => {
+      setIsModalOpen(false)
+      invalidateContentCache('skills')
+      queryClient.invalidateQueries({ queryKey: ['skills'] })
     }
-  }
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      setDeletingId(id)
+      const res = await fetch(`${API_BASE_URL}/content/skills/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      if (!res.ok) throw new Error('Failed to delete skill')
+      return res.json()
+    },
+    onSuccess: () => {
+      invalidateContentCache('skills')
+      queryClient.invalidateQueries({ queryKey: ['skills'] })
+    },
+    onSettled: () => setDeletingId(null)
+  })
 
   const handleOpenModal = (skill?: Skill) => {
     if (skill) {
@@ -61,63 +101,43 @@ export function SkillCRUD() {
     setIsModalOpen(true)
   }
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
-    try {
-      const isEdit = !!editingSkill
-      const url = isEdit 
-        ? `${API_BASE_URL}/content/skills/${editingSkill.id}`
-        : `${API_BASE_URL}/content/skills`
-        
-      const res = await fetch(url, {
-        method: isEdit ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(formData)
-      })
-
-      if (res.ok) {
-        setIsModalOpen(false)
-        fetchSkills()
-      }
-    } catch (err) {
-      console.error(err)
-    }
+    saveMutation.mutate(formData)
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!window.confirm('Delete this skill?')) return
-    try {
-      const res = await fetch(`${API_BASE_URL}/content/skills/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-      if (res.ok) fetchSkills()
-    } catch (err) {
-      console.error(err)
-    }
+    deleteMutation.mutate(id)
   }
 
-  if (loading) return <div className="p-8 text-[#DEFF9A]">LOADING_SKILLS...</div>
+  if (isLoading) {
+    return (
+      <div className="p-4 font-mono space-y-6">
+        <div className="flex items-center space-x-3 text-[#DEFF9A]">
+          <Code className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
+        </div>
+        <AdminLoader label="LOADING_SKILLS_MATRIX..." variant="grid" rows={6} />
+      </div>
+    )
+  }
 
   // Group skills by category
   const groupedSkills = skills.reduce((acc, skill) => {
-    const cat = skill.category || 'Uncategorized';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(skill);
-    return acc;
-  }, {} as Record<string, Skill[]>);
+    const cat = skill.category || 'Uncategorized'
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(skill)
+    return acc
+  }, {} as Record<string, Skill[]>)
 
   return (
-    <div className="p-8 font-mono">
+    <div className="p-4 font-mono animate-in fade-in duration-200">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-3 text-[#DEFF9A]">
           <Code className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
+          <RefreshingBadge show={isFetching && !isLoading} />
         </div>
         <button
           onClick={() => handleOpenModal()}
@@ -136,15 +156,15 @@ export function SkillCRUD() {
               {catSkills.map(skill => (
                 <motion.div
                   key={skill.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15 }}
                   className="bg-[#121215] border border-[#27272A] p-4 rounded-lg flex items-center justify-between hover:border-[#DEFF9A]/50 transition-colors"
                 >
                   <div className="flex-1 mr-4">
                     <div className="flex items-center space-x-2 mb-2">
                       <span className="text-[#DEFF9A] font-bold">{skill.name}</span>
                     </div>
-                    {/* Progress bar for proficiency */}
                     <div className="w-full bg-[#18181C] rounded-full h-1.5">
                       <div 
                         className="bg-[#DEFF9A] h-1.5 rounded-full" 
@@ -162,9 +182,10 @@ export function SkillCRUD() {
                     </button>
                     <button 
                       onClick={() => handleDelete(skill.id)}
-                      className="p-1.5 text-zinc-400 hover:text-[#F43F5E] rounded transition-colors"
+                      disabled={deletingId === skill.id}
+                      className="p-1.5 text-zinc-400 hover:text-[#F43F5E] rounded transition-colors disabled:opacity-50"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deletingId === skill.id ? <Loader2 className="w-4 h-4 animate-spin text-[#F43F5E]" /> : <Trash2 className="w-4 h-4" />}
                     </button>
                   </div>
                 </motion.div>
@@ -190,7 +211,7 @@ export function SkillCRUD() {
                 </h2>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="text-zinc-500 hover:text-white"
+                  className="text-zinc-400 hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -199,7 +220,7 @@ export function SkillCRUD() {
               <div className="p-4">
                 <form id="skillForm" onSubmit={handleSave} className="space-y-4">
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1">SKILL_NAME</label>
+                    <label className="block text-xs text-zinc-400 mb-1">SKILL_NAME</label>
                     <input
                       type="text"
                       required
@@ -209,7 +230,7 @@ export function SkillCRUD() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1">CATEGORY</label>
+                    <label className="block text-xs text-zinc-400 mb-1">CATEGORY</label>
                     <input
                       type="text"
                       required
@@ -221,7 +242,7 @@ export function SkillCRUD() {
                   </div>
                   
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1 flex justify-between">
+                    <label className="block text-xs text-zinc-400 mb-1 flex justify-between">
                       <span>PROFICIENCY_LEVEL</span>
                       <span className="text-[#DEFF9A]">{formData.proficiencyLevel}%</span>
                     </label>
@@ -236,7 +257,7 @@ export function SkillCRUD() {
                   </div>
 
                   <div>
-                    <label className="block text-xs text-zinc-500 mb-1">ORDER</label>
+                    <label className="block text-xs text-zinc-400 mb-1">ORDER</label>
                     <input
                       type="number"
                       value={formData.order}
@@ -251,10 +272,11 @@ export function SkillCRUD() {
                 <button
                   type="submit"
                   form="skillForm"
-                  className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors"
+                  disabled={saveMutation.isPending}
+                  className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors disabled:opacity-50"
                 >
-                  <Save className="w-4 h-4" />
-                  <span>SAVE</span>
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{saveMutation.isPending ? 'SAVING...' : 'SAVE'}</span>
                 </button>
               </div>
             </motion.div>

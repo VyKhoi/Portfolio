@@ -1,25 +1,21 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import { motion } from 'framer-motion'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { Home } from './pages/public/Home'
+import { AdminLoader } from './components/admin/AdminLoader'
 
-// Code-split: admin dashboard & chatbot are loaded on demand so public visitors
-// only download what is needed to paint the homepage.
+// Code-split: the entire Admin console is loaded as a single cohesive bundle on /dashboard
+// so public visitors don't download it, while switching between admin tabs is 0ms instant.
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })))
-const InboxTable = lazy(() => import('./components/admin/InboxTable').then(m => ({ default: m.InboxTable })))
-const ProjectCRUD = lazy(() => import('./components/admin/ProjectCRUD').then(m => ({ default: m.ProjectCRUD })))
-const DashboardOverview = lazy(() => import('./components/admin/DashboardOverview').then(m => ({ default: m.DashboardOverview })))
-const ProfileSettings = lazy(() => import('./components/admin/ProfileSettings').then(m => ({ default: m.ProfileSettings })))
-const ExperienceCRUD = lazy(() => import('./components/admin/ExperienceCRUD').then(m => ({ default: m.ExperienceCRUD })))
-const SkillCRUD = lazy(() => import('./components/admin/SkillCRUD').then(m => ({ default: m.SkillCRUD })))
-const AIChatLogs = lazy(() => import('./components/admin/AIChatLogs').then(m => ({ default: m.AIChatLogs })))
 const CatChatbot = lazy(() => import('./components/CatChatbot').then(m => ({ default: m.CatChatbot })))
 
-function AdminFallback() {
+function AdminBootFallback() {
   return (
-    <div className="flex h-screen items-center justify-center bg-[#0A0A0C] font-mono text-xs text-zinc-400">
-      LOADING_MODULE...
+    <div className="min-h-screen bg-[#121215] text-white p-8">
+      <div className="max-w-6xl mx-auto pt-8">
+        <AdminLoader label="INITIALIZING_ADMIN_CONSOLE..." variant="grid" rows={6} />
+      </div>
     </div>
   )
 }
@@ -138,25 +134,13 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={
+        <Route path="/dashboard/*" element={
           <ProtectedRoute>
-            <Suspense fallback={<AdminFallback />}>
-              <AdminLayout>
-                <Suspense fallback={<AdminFallback />}>
-                  <Outlet />
-                </Suspense>
-              </AdminLayout>
+            <Suspense fallback={<AdminBootFallback />}>
+              <AdminLayout />
             </Suspense>
           </ProtectedRoute>
-        }>
-          <Route index element={<DashboardOverview />} />
-          <Route path="inbox" element={<InboxTable />} />
-          <Route path="projects" element={<ProjectCRUD />} />
-          <Route path="profile" element={<ProfileSettings />} />
-          <Route path="experiences" element={<ExperienceCRUD />} />
-          <Route path="skills" element={<SkillCRUD />} />
-          <Route path="ai-logs" element={<AIChatLogs />} />
-        </Route>
+        } />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <DeferredChatbot />
