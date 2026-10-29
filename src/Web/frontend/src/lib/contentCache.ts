@@ -6,7 +6,7 @@ import { ContentApi } from './api';
 // - Requests are de-duplicated and kicked off before React mounts (see main.tsx),
 //   so first-time visitors get real data in parallel with the JS bundle.
 
-const PREFIX = 'content-cache:v1:';
+const PREFIX = 'content-cache:v2:';
 
 const fetchers = {
   profile: ContentApi.getProfile,

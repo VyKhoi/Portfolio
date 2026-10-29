@@ -44,20 +44,27 @@ public static class SeedData
             await context.SaveChangesAsync();
         }
 
-        // 2. Seed Profile
-        if (!await context.Profiles.AnyAsync())
+        // 2. Seed or Upgrade Profile
+        var existingProfile = await context.Profiles.FirstOrDefaultAsync();
+        if (existingProfile == null)
         {
             context.Profiles.Add(new Profile
             {
                 Id = Guid.NewGuid(),
-                FullName = "DANG VY KHOI",
-                Title = "Software Engineer | .NET Core",
-                Bio = "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS, tập trung vào quy trình nghiệp vụ (business workflows) và tính ổn định của hệ thống.",
+                FullName = "ĐẶNG VỸ KHÔI",
+                Title = "Software Engineer | .NET Backend",
+                Bio = "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.",
                 AvatarKey = "/profile.jpg",
                 CvPdfKey = "/cv.pdf",
                 GithubLink = "https://github.com/vykhoi",
                 LinkedinLink = "https://linkedin.com/in/vykhoi"
             });
+        }
+        else if (existingProfile.FullName == "DANG VY KHOI")
+        {
+            existingProfile.FullName = "ĐẶNG VỸ KHÔI";
+            existingProfile.Title = "Software Engineer | .NET Backend";
+            existingProfile.Bio = "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.";
         }
 
         // 3. Seed Experiences
