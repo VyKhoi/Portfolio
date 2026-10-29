@@ -7,15 +7,26 @@ import { AdminLoader } from "./AdminLoader"
 interface Project {
   id: string
   title: string
-  description: string
-  techStackJson: string
-  githubUrl: string
-  liveDemoUrl: string
-  thumbnailKey: string
+  slug?: string
+  summary?: string
+  description?: string
+  descriptionMdx?: string
+  techStack?: string[]
+  techStackJson?: string
+  githubUrl?: string
+  demoUrl?: string
+  liveDemoUrl?: string
+  coverImageKey?: string
   status: string
+  order?: number
+  isFeatured?: boolean
 }
 
-function parseTechTags(raw: string): string[] {
+function getProjectTags(proj: Project): string[] {
+  if (Array.isArray(proj.techStack) && proj.techStack.length > 0) {
+    return proj.techStack
+  }
+  const raw = proj.techStackJson || ""
   if (!raw) return []
   const trimmed = raw.trim()
   if (trimmed.startsWith("[")) {
@@ -25,7 +36,7 @@ function parseTechTags(raw: string): string[] {
         return parsed.map((s) => String(s).trim()).filter(Boolean)
       }
     } catch {
-      // fallback to comma split
+      // fallback
     }
   }
   return trimmed
@@ -45,11 +56,10 @@ export function ProjectCRUD() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
-    techStackJson: ".NET 9, PostgreSQL, React, Docker",
+    summary: "",
+    techStackText: ".NET 9, PostgreSQL, React, Docker",
     githubUrl: "",
-    liveDemoUrl: "",
-    thumbnailKey: "",
+    demoUrl: "",
     status: "Published",
   })
 
@@ -82,7 +92,7 @@ export function ProjectCRUD() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: async (proj: Project) => {
+    mutationFn: async (proj: any) => {
       const res = await fetch(`${baseUrl}/content/projects/${proj.id}`, {
         method: "PUT",
         headers: {
@@ -119,23 +129,21 @@ export function ProjectCRUD() {
     if (proj) {
       setEditingProj(proj)
       setFormData({
-        title: proj.title,
-        description: proj.description,
-        techStackJson: parseTechTags(proj.techStackJson).join(", "),
+        title: proj.title || "",
+        summary: proj.summary || proj.description || proj.descriptionMdx || "",
+        techStackText: getProjectTags(proj).join(", "),
         githubUrl: proj.githubUrl || "",
-        liveDemoUrl: proj.liveDemoUrl || "",
-        thumbnailKey: proj.thumbnailKey || "",
+        demoUrl: proj.demoUrl || proj.liveDemoUrl || "",
         status: proj.status || "Published",
       })
     } else {
       setEditingProj(null)
       setFormData({
         title: "",
-        description: "",
-        techStackJson: ".NET 9, PostgreSQL, React, Docker",
+        summary: "",
+        techStackText: ".NET 9, PostgreSQL, React, Docker",
         githubUrl: "",
-        liveDemoUrl: "",
-        thumbnailKey: "",
+        demoUrl: "",
         status: "Published",
       })
     }
@@ -149,11 +157,25 @@ export function ProjectCRUD() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const tags = parseTechTags(formData.techStackJson)
+    const tags = formData.techStackText
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+
     const payload = {
-      ...formData,
-      techStackJson: JSON.stringify(tags),
+      title: formData.title,
+      slug: editingProj?.slug || "",
+      summary: formData.summary,
+      descriptionMdx: editingProj?.descriptionMdx || formData.summary,
+      coverImageKey: editingProj?.coverImageKey || "",
+      techStack: tags,
+      githubUrl: formData.githubUrl,
+      demoUrl: formData.demoUrl,
+      status: formData.status,
+      order: editingProj?.order ?? projects.length + 1,
+      isFeatured: editingProj?.isFeatured ?? true,
     }
+
     if (editingProj) {
       updateMutation.mutate({ ...payload, id: editingProj.id })
     } else {
@@ -188,7 +210,9 @@ export function ProjectCRUD() {
 
       <div className="grid grid-cols-1 gap-4">
         {projects.map((proj: Project) => {
-          const tags = parseTechTags(proj.techStackJson)
+          const tags = getProjectTags(proj)
+          const desc = proj.summary || proj.description || proj.descriptionMdx
+          const demo = proj.demoUrl || proj.liveDemoUrl
           return (
             <div
               key={proj.id}
@@ -209,9 +233,11 @@ export function ProjectCRUD() {
                     {proj.status}
                   </span>
                 </div>
-                <p className="adm-text-secondary text-xs sm:text-sm leading-relaxed">
-                  {proj.description}
-                </p>
+                {desc && (
+                  <p className="adm-text-secondary text-xs sm:text-sm leading-relaxed">
+                    {desc}
+                  </p>
+                )}
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {tags.map((t) => (
@@ -221,7 +247,7 @@ export function ProjectCRUD() {
                     ))}
                   </div>
                 )}
-                {(proj.githubUrl || proj.liveDemoUrl) && (
+                {(proj.githubUrl || demo) && (
                   <div className="flex flex-wrap gap-4 pt-1 text-xs">
                     {proj.githubUrl && (
                       <a
@@ -234,9 +260,9 @@ export function ProjectCRUD() {
                         <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
-                    {proj.liveDemoUrl && (
+                    {demo && (
                       <a
-                        href={proj.liveDemoUrl}
+                        href={demo}
                         target="_blank"
                         rel="noreferrer"
                         className="adm-text-accent hover:underline inline-flex items-center gap-1"
@@ -303,11 +329,11 @@ export function ProjectCRUD() {
                 />
               </div>
               <div>
-                <label className="adm-label">DESCRIPTION</label>
+                <label className="adm-label">SUMMARY / DESCRIPTION</label>
                 <textarea
-                  value={formData.description}
+                  value={formData.summary}
                   onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                    setFormData({ ...formData, summary: e.target.value })
                   }
                   className="adm-input h-24"
                   required
@@ -319,9 +345,9 @@ export function ProjectCRUD() {
                 </label>
                 <input
                   type="text"
-                  value={formData.techStackJson}
+                  value={formData.techStackText}
                   onChange={(e) =>
-                    setFormData({ ...formData, techStackJson: e.target.value })
+                    setFormData({ ...formData, techStackText: e.target.value })
                   }
                   className="adm-input"
                   required
@@ -343,9 +369,9 @@ export function ProjectCRUD() {
                   <label className="adm-label">LIVE_DEMO_URL</label>
                   <input
                     type="text"
-                    value={formData.liveDemoUrl}
+                    value={formData.demoUrl}
                     onChange={(e) =>
-                      setFormData({ ...formData, liveDemoUrl: e.target.value })
+                      setFormData({ ...formData, demoUrl: e.target.value })
                     }
                     className="adm-input"
                   />

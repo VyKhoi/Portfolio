@@ -132,6 +132,7 @@ public class ContentController : ControllerBase
 
     // ─── EXPERIENCES ─────────────────────────────────────────
     [HttpGet("experience")]
+    [HttpGet("experiences")]
     public async Task<IActionResult> GetExperiences()
     {
         if (!_cache.TryGetValue(ExperiencesCacheKey, out List<Experience>? experiences))
@@ -144,6 +145,7 @@ public class ContentController : ControllerBase
     }
 
     [HttpPost("experience")]
+    [HttpPost("experiences")]
     [Authorize]
     public async Task<IActionResult> AddExperience([FromBody] Experience exp)
     {
@@ -155,6 +157,7 @@ public class ContentController : ControllerBase
     }
 
     [HttpPut("experience/{id}")]
+    [HttpPut("experiences/{id}")]
     [Authorize]
     public async Task<IActionResult> UpdateExperience(Guid id, [FromBody] Experience updatedExp)
     {
@@ -175,6 +178,7 @@ public class ContentController : ControllerBase
     }
 
     [HttpDelete("experience/{id}")]
+    [HttpDelete("experiences/{id}")]
     [Authorize]
     public async Task<IActionResult> DeleteExperience(Guid id)
     {

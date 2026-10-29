@@ -36,7 +36,7 @@ export function ExperienceCRUD() {
   const { data: experiences = [], isLoading } = useQuery({
     queryKey: ["experiences"],
     queryFn: async () => {
-      const res = await fetch(`${baseUrl}/content/experiences`)
+      const res = await fetch(`${baseUrl}/content/experience`)
       if (!res.ok) throw new Error("Failed to fetch experiences")
       return res.json()
     },
@@ -44,7 +44,7 @@ export function ExperienceCRUD() {
 
   const createMutation = useMutation({
     mutationFn: async (newExp: any) => {
-      const res = await fetch(`${baseUrl}/content/experiences`, {
+      const res = await fetch(`${baseUrl}/content/experience`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export function ExperienceCRUD() {
 
   const updateMutation = useMutation({
     mutationFn: async (exp: any) => {
-      const res = await fetch(`${baseUrl}/content/experiences/${exp.id}`, {
+      const res = await fetch(`${baseUrl}/content/experience/${exp.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +83,7 @@ export function ExperienceCRUD() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       setDeletingId(id)
-      const res = await fetch(`${baseUrl}/content/experiences/${id}`, {
+      const res = await fetch(`${baseUrl}/content/experience/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       })

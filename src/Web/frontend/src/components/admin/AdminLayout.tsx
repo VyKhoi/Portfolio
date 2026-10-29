@@ -44,7 +44,7 @@ function AdminPrefetcher() {
     qc.prefetchQuery({
       queryKey: ["experiences"],
       queryFn: async () => {
-        const res = await fetch(`${baseUrl}/content/experiences`)
+        const res = await fetch(`${baseUrl}/content/experience`)
         if (!res.ok) throw new Error("Failed to fetch experiences")
         return res.json()
       },
