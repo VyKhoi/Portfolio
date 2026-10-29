@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
+import { useAdminThemeStore } from './store/adminThemeStore'
 import { motion } from 'framer-motion'
+import { Sun, Moon, Loader2 } from 'lucide-react'
 import React, { Suspense, lazy, useEffect, useState } from 'react'
 import { Home } from './pages/public/Home'
 import { AdminLoader } from './components/admin/AdminLoader'
@@ -11,8 +13,9 @@ const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(m =
 const CatChatbot = lazy(() => import('./components/CatChatbot').then(m => ({ default: m.CatChatbot })))
 
 function AdminBootFallback() {
+  const theme = useAdminThemeStore(state => state.theme)
   return (
-    <div className="min-h-screen bg-[#121215] text-white p-8">
+    <div data-theme={theme} className="admin-theme min-h-screen p-8">
       <div className="max-w-6xl mx-auto pt-8">
         <AdminLoader label="INITIALIZING_ADMIN_CONSOLE..." variant="grid" rows={6} />
       </div>
@@ -29,6 +32,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function Login() {
   const setToken = useAuthStore(state => state.setToken)
   const token = useAuthStore(state => state.token)
+  const { theme, toggleTheme } = useAdminThemeStore()
   const navigate = useNavigate()
   const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
@@ -66,45 +70,59 @@ function Login() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-[#0A0A0C]">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-8 bg-[#121215] border border-[#27272A] rounded-lg shadow-2xl w-full max-w-md font-mono"
+    <div data-theme={theme} className="admin-theme flex h-screen items-center justify-center relative px-4 font-mono">
+      <button
+        type="button"
+        onClick={toggleTheme}
+        className="adm-btn-secondary absolute top-6 right-6 text-xs font-bold uppercase tracking-wider"
+        aria-label="Chuyển đổi giao diện Sáng / Tối"
       >
-        <div className="flex items-center space-x-2 text-[#DEFF9A] mb-8 justify-center">
-          <span className="font-bold text-xl">SYS_ADMIN // LOGIN</span>
+        {theme === 'dark' ? <Sun className="w-4 h-4 adm-text-accent" /> : <Moon className="w-4 h-4 adm-text-accent" />}
+        <span>{theme === 'dark' ? 'LIGHT_MODE' : 'DARK_MODE'}</span>
+      </button>
+
+      <motion.div 
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-8 adm-card rounded-lg w-full max-w-md"
+      >
+        <div className="flex items-center space-x-2 adm-text-accent mb-2 justify-center">
+          <span className="font-bold text-xl tracking-wider">SYS_ADMIN // LOGIN</span>
         </div>
+        <p className="text-center text-xs adm-text-muted mb-8">
+          AUTHENTICATION_REQUIRED_FOR_CONSOLE_ACCESS
+        </p>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="login-username" className="block text-xs text-zinc-400 mb-1">USERNAME</label>
+            <label htmlFor="login-username" className="adm-label">USERNAME</label>
             <input 
               id="login-username"
               type="text" 
               value={username}
               onChange={e => setUsername(e.target.value)}
-              className="w-full bg-[#18181C] border border-[#27272A] p-3 text-white rounded focus:border-[#DEFF9A] outline-none transition-colors"
+              className="adm-input"
               required 
             />
           </div>
           <div>
-            <label htmlFor="login-password" className="block text-xs text-zinc-400 mb-1">PASSWORD</label>
+            <label htmlFor="login-password" className="adm-label">PASSWORD</label>
             <input 
               id="login-password"
               type="password" 
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full bg-[#18181C] border border-[#27272A] p-3 text-white rounded focus:border-[#DEFF9A] outline-none transition-colors"
+              className="adm-input"
               required 
             />
           </div>
-          {error && <div className="text-[#F43F5E] text-sm">{error}</div>}
+          {error && <div className="adm-text-danger text-sm font-bold">{error}</div>}
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-3 font-bold rounded transition-colors disabled:opacity-50"
+            className="adm-btn-primary w-full py-3 mt-2"
           >
-            {loading ? "AUTHENTICATING..." : "INITIATE_SESSION"}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span>{loading ? "AUTHENTICATING..." : "INITIATE_SESSION"}</span>
           </button>
         </form>
       </motion.div>

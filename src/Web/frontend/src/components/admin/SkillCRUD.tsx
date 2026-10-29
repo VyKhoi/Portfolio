@@ -114,7 +114,7 @@ export function SkillCRUD() {
   if (isLoading) {
     return (
       <div className="p-4 font-mono space-y-6">
-        <div className="flex items-center space-x-3 text-[#DEFF9A]">
+        <div className="flex items-center space-x-3 adm-text-accent">
           <Code className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
         </div>
@@ -134,14 +134,14 @@ export function SkillCRUD() {
   return (
     <div className="p-4 font-mono animate-in fade-in duration-200">
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-3 text-[#DEFF9A]">
+        <div className="flex items-center space-x-3 adm-text-accent">
           <Code className="w-8 h-8" />
           <h1 className="text-2xl font-bold tracking-wider">SKILLS_MATRIX</h1>
           <RefreshingBadge show={isFetching && !isLoading} />
         </div>
         <button
           onClick={() => handleOpenModal()}
-          className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors"
+          className="adm-btn-primary text-xs"
         >
           <Plus className="w-4 h-4" />
           <span>ADD_SKILL</span>
@@ -151,7 +151,9 @@ export function SkillCRUD() {
       <div className="space-y-8">
         {Object.entries(groupedSkills).map(([category, catSkills]) => (
           <div key={category}>
-            <h2 className="text-lg text-white mb-4 border-b border-[#27272A] pb-2 uppercase tracking-widest">{category}</h2>
+            <h2 className="text-sm font-bold adm-text-secondary mb-4 border-b adm-divider pb-2 uppercase tracking-widest">
+              {category}
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {catSkills.map(skill => (
                 <motion.div
@@ -159,33 +161,39 @@ export function SkillCRUD() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15 }}
-                  className="bg-[#121215] border border-[#27272A] p-4 rounded-lg flex items-center justify-between hover:border-[#DEFF9A]/50 transition-colors"
+                  className="adm-card adm-card-hover p-4 rounded-lg flex items-center justify-between"
                 >
                   <div className="flex-1 mr-4">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-[#DEFF9A] font-bold">{skill.name}</span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-bold">{skill.name}</span>
+                      <span className="text-xs adm-text-accent font-bold">{skill.proficiencyLevel}%</span>
                     </div>
-                    <div className="w-full bg-[#18181C] rounded-full h-1.5">
+                    <div className="w-full adm-elevated rounded-full h-1.5 overflow-hidden">
                       <div 
-                        className="bg-[#DEFF9A] h-1.5 rounded-full" 
-                        style={{ width: `${skill.proficiencyLevel}%` }}
-                      ></div>
+                        className="h-1.5 rounded-full transition-all" 
+                        style={{
+                          width: `${skill.proficiencyLevel}%`,
+                          backgroundColor: "var(--adm-accent)",
+                        }}
+                      />
                     </div>
                   </div>
                   
-                  <div className="flex space-x-1">
+                  <div className="flex space-x-1.5 shrink-0">
                     <button 
                       onClick={() => handleOpenModal(skill)}
-                      className="p-1.5 text-zinc-400 hover:text-[#DEFF9A] rounded transition-colors"
+                      className="adm-btn-icon"
+                      aria-label="Chỉnh sửa kỹ năng"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button 
                       onClick={() => handleDelete(skill.id)}
                       disabled={deletingId === skill.id}
-                      className="p-1.5 text-zinc-400 hover:text-[#F43F5E] rounded transition-colors disabled:opacity-50"
+                      className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
+                      aria-label="Xóa kỹ năng"
                     >
-                      {deletingId === skill.id ? <Loader2 className="w-4 h-4 animate-spin text-[#F43F5E]" /> : <Trash2 className="w-4 h-4" />}
+                      {deletingId === skill.id ? <Loader2 className="w-3.5 h-3.5 animate-spin adm-text-danger" /> : <Trash2 className="w-3.5 h-3.5" />}
                     </button>
                   </div>
                 </motion.div>
@@ -193,58 +201,61 @@ export function SkillCRUD() {
             </div>
           </div>
         ))}
-        {skills.length === 0 && <div className="text-zinc-500">NO_SKILLS_FOUND.</div>}
+        {skills.length === 0 && <div className="adm-text-muted">NO_SKILLS_FOUND.</div>}
       </div>
 
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-xs"
+            style={{ backgroundColor: "var(--adm-backdrop)" }}
+          >
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#121215] border border-[#27272A] rounded-lg w-full max-w-md overflow-hidden flex flex-col"
+              className="adm-card rounded-lg w-full max-w-md overflow-hidden flex flex-col"
             >
-              <div className="flex items-center justify-between p-4 border-b border-[#27272A]">
-                <h2 className="text-[#DEFF9A] font-bold">
+              <div className="flex items-center justify-between p-4 border-b adm-divider">
+                <h2 className="adm-text-accent font-bold">
                   {editingSkill ? 'EDIT_SKILL' : 'NEW_SKILL'}
                 </h2>
                 <button 
                   onClick={() => setIsModalOpen(false)}
-                  className="text-zinc-400 hover:text-white"
+                  className="adm-btn-icon"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               
-              <div className="p-4">
+              <div className="p-5">
                 <form id="skillForm" onSubmit={handleSave} className="space-y-4">
                   <div>
-                    <label className="block text-xs text-zinc-400 mb-1">SKILL_NAME</label>
+                    <label className="adm-label">SKILL_NAME</label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={e => setFormData({...formData, name: e.target.value})}
-                      className="w-full bg-[#18181C] border border-[#27272A] p-2 text-white rounded outline-none focus:border-[#DEFF9A]"
+                      className="adm-input"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-400 mb-1">CATEGORY</label>
+                    <label className="adm-label">CATEGORY</label>
                     <input
                       type="text"
                       required
                       value={formData.category}
                       onChange={e => setFormData({...formData, category: e.target.value})}
                       placeholder="e.g. Frontend, Backend, Tools"
-                      className="w-full bg-[#18181C] border border-[#27272A] p-2 text-white rounded outline-none focus:border-[#DEFF9A]"
+                      className="adm-input"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-xs text-zinc-400 mb-1 flex justify-between">
+                    <label className="adm-label flex justify-between">
                       <span>PROFICIENCY_LEVEL</span>
-                      <span className="text-[#DEFF9A]">{formData.proficiencyLevel}%</span>
+                      <span className="adm-text-accent font-bold">{formData.proficiencyLevel}%</span>
                     </label>
                     <input
                       type="range"
@@ -252,28 +263,36 @@ export function SkillCRUD() {
                       max="100"
                       value={formData.proficiencyLevel}
                       onChange={e => setFormData({...formData, proficiencyLevel: parseInt(e.target.value)})}
-                      className="w-full accent-[#DEFF9A]"
+                      className="w-full cursor-pointer"
+                      style={{ accentColor: "var(--adm-accent)" }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs text-zinc-400 mb-1">ORDER</label>
+                    <label className="adm-label">ORDER</label>
                     <input
                       type="number"
                       value={formData.order}
                       onChange={e => setFormData({...formData, order: parseInt(e.target.value) || 0})}
-                      className="w-full bg-[#18181C] border border-[#27272A] p-2 text-white rounded outline-none focus:border-[#DEFF9A]"
+                      className="adm-input"
                     />
                   </div>
                 </form>
               </div>
 
-              <div className="p-4 border-t border-[#27272A] flex justify-end">
+              <div className="p-4 border-t adm-divider flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="adm-btn-secondary text-xs"
+                >
+                  CANCEL
+                </button>
                 <button
                   type="submit"
                   form="skillForm"
                   disabled={saveMutation.isPending}
-                  className="flex items-center space-x-2 bg-[#DEFF9A] hover:bg-[#DEFF9A]/80 text-black px-4 py-2 font-bold rounded transition-colors disabled:opacity-50"
+                  className="adm-btn-primary text-xs"
                 >
                   {saveMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   <span>{saveMutation.isPending ? 'SAVING...' : 'SAVE'}</span>

@@ -57,7 +57,7 @@ export function DashboardOverview() {
   if (isInitialLoading) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold text-white mb-8">SYSTEM_OVERVIEW</h1>
+        <h1 className="text-3xl font-heading font-bold mb-8">SYSTEM_OVERVIEW</h1>
         <AdminLoader label="LOADING_SYSTEM_METRICS..." variant="grid" rows={6} />
       </div>
     )
@@ -72,68 +72,73 @@ export function DashboardOverview() {
       value: projects.length,
       loading: loadingProj,
       icon: FolderGit2,
-      color: "text-[#DEFF9A]",
+      colorClass: "adm-text-accent",
     },
     {
       label: "EXPERIENCES",
       value: experiences.length,
       loading: loadingExp,
       icon: Briefcase,
-      color: "text-[#DEFF9A]",
+      colorClass: "adm-text-accent",
     },
     {
       label: "SKILLS_INDEXED",
       value: skills.length,
       loading: loadingSkills,
       icon: Code,
-      color: "text-[#00E5FF]",
+      colorClass: "adm-text-info",
     },
     {
       label: "UNREAD_MESSAGES",
       value: unreadMessages,
       loading: loadingMsg,
       icon: Mail,
-      color: "text-[#00E5FF]",
+      colorClass: "adm-text-info",
     },
     {
       label: "AI_CHAT_SESSIONS",
       value: sessions.length,
       loading: loadingAi,
       icon: BotMessageSquare,
-      color: "text-[#DEFF9A]",
+      colorClass: "adm-text-accent",
     },
   ]
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-heading font-bold text-white">SYSTEM_OVERVIEW</h1>
+        <div>
+          <h1 className="text-3xl font-heading font-bold">SYSTEM_OVERVIEW</h1>
+          <p className="text-xs font-mono adm-text-muted mt-1">
+            REALTIME_TELEMETRY_AND_CONTENT_METRICS
+          </p>
+        </div>
         <RefreshingBadge show={isRefreshing} />
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {cards.map((card) => (
-          <div key={card.label} className="p-6 bg-[#121215] border border-[#27272A] rounded-lg hover:border-[#3F3F46] transition-colors">
+          <div key={card.label} className="p-6 adm-card adm-card-hover rounded-lg">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-zinc-400 font-mono text-sm">{card.label}</h3>
-              <card.icon className={`w-5 h-5 ${card.color}`} />
+              <h2 className="adm-text-secondary font-mono text-xs font-bold tracking-wider">{card.label}</h2>
+              <card.icon className={`w-5 h-5 ${card.colorClass}`} />
             </div>
             {card.loading ? (
-              <div className="h-10 w-20 bg-[#18181C] border border-[#27272A] rounded animate-pulse flex items-center justify-center">
-                <Loader2 className="w-4 h-4 text-zinc-500 animate-spin" />
+              <div className="h-10 w-20 adm-elevated rounded animate-pulse flex items-center justify-center">
+                <Loader2 className="w-4 h-4 adm-text-muted animate-spin" />
               </div>
             ) : (
-              <p className="text-4xl font-bold text-white">{card.value}</p>
+              <p className="text-4xl font-bold font-heading">{card.value}</p>
             )}
           </div>
         ))}
 
-        <div className="p-6 bg-[#121215] border border-[#27272A] rounded-lg">
+        <div className="p-6 adm-card adm-card-hover rounded-lg">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-zinc-400 font-mono text-sm">SYSTEM_STATUS</h3>
-            <Activity className="w-5 h-5 text-green-500" />
+            <h2 className="adm-text-secondary font-mono text-xs font-bold tracking-wider">SYSTEM_STATUS</h2>
+            <Activity className="w-5 h-5 adm-text-success" />
           </div>
-          <p className="text-2xl font-bold text-green-500 flex items-center gap-2">
+          <p className="text-2xl font-bold adm-text-success flex items-center gap-2 font-mono">
             <CheckCircle2 className="w-6 h-6" /> ONLINE
           </p>
         </div>

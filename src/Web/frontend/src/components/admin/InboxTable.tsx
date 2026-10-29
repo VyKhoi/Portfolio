@@ -1,7 +1,5 @@
 import { useState } from "react"
-import { Badge } from "../ui/Badge"
-import { Button } from "../ui/Button"
-import { Mail, CheckCircle2, Trash2, Loader2 } from "lucide-react"
+import { Mail, CheckCircle2, Trash2, Loader2, Inbox } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../../store/authStore"
 import { API_BASE_URL } from "../../lib/api"
@@ -61,89 +59,93 @@ export function InboxTable() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold">INBOX_QUEUE</h1>
+      <div className="space-y-6 font-mono">
+        <div className="flex items-center space-x-3 adm-text-accent">
+          <Inbox className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">INBOX_QUEUE</h1>
+        </div>
         <AdminLoader label="LOADING_INBOX_QUEUE..." variant="table" rows={5} />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 font-mono animate-in fade-in duration-200">
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-3xl font-heading font-bold">INBOX_QUEUE</h1>
+        <div className="flex items-center space-x-3 adm-text-accent">
+          <Inbox className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">INBOX_QUEUE</h1>
           <RefreshingBadge show={isFetching && !isLoading} />
         </div>
-        <Badge variant="outline" className="text-[#00E5FF] border-[#00E5FF]">{messages.length} MESSAGES</Badge>
+        <span className="adm-badge-info">{messages.length} MESSAGES</span>
       </div>
 
-      <div className="border border-[#27272A] rounded-lg bg-[#0A0A0C] overflow-hidden">
+      <div className="adm-card rounded-lg overflow-hidden">
         <table className="w-full text-left font-mono text-sm">
-          <thead className="bg-[#121215] text-zinc-400 border-b border-[#27272A]">
+          <thead
+            className="adm-text-muted border-b adm-divider text-xs"
+            style={{ backgroundColor: "var(--adm-bg-elevated)" }}
+          >
             <tr>
-              <th className="p-4 font-normal uppercase">Status</th>
-              <th className="p-4 font-normal uppercase">Sender</th>
-              <th className="p-4 font-normal uppercase">Message</th>
-              <th className="p-4 font-normal uppercase">Date</th>
-              <th className="p-4 font-normal uppercase text-right">Action</th>
+              <th className="p-4 font-bold uppercase tracking-wider">Status</th>
+              <th className="p-4 font-bold uppercase tracking-wider">Sender</th>
+              <th className="p-4 font-bold uppercase tracking-wider">Message</th>
+              <th className="p-4 font-bold uppercase tracking-wider">Date</th>
+              <th className="p-4 font-bold uppercase tracking-wider text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#27272A]">
+          <tbody className="divide-y adm-divider">
             {messages.map((msg: any) => {
               const isRead = msg.status === "Read"
               const isRowBusy = busyId === msg.id
               return (
-                <tr key={msg.id} className="hover:bg-[#18181C] transition-colors">
+                <tr key={msg.id} className="hover:bg-[var(--adm-bg-hover)] transition-colors">
                   <td className="p-4">
                     {isRead ? (
-                      <CheckCircle2 className="w-5 h-5 text-zinc-600" />
+                      <CheckCircle2 className="w-5 h-5 adm-text-muted" />
                     ) : (
-                      <Mail className="w-5 h-5 text-[#DEFF9A]" />
+                      <Mail className="w-5 h-5 adm-text-accent" />
                     )}
                   </td>
-                  <td className="p-4 text-zinc-300">
-                    <div>{msg.name}</div>
-                    <div className="text-xs text-zinc-500">{msg.email}</div>
+                  <td className="p-4">
+                    <div className={isRead ? "adm-text-secondary" : "font-bold"}>{msg.name}</div>
+                    <div className="text-xs adm-text-muted">{msg.email}</div>
                   </td>
-                  <td className={`p-4 ${isRead ? "text-zinc-500" : "text-white font-bold"} max-w-xs truncate`} title={msg.message}>
+                  <td className={`p-4 max-w-xs truncate ${isRead ? "adm-text-muted" : "font-bold"}`} title={msg.message}>
                     {msg.message}
                   </td>
-                  <td className="p-4 text-zinc-500">
+                  <td className="p-4 adm-text-muted text-xs">
                     {new Date(msg.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-4 text-right flex justify-end space-x-2">
                     {!isRead && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <button
                         disabled={isRowBusy}
                         onClick={() => markAsRead.mutate(msg.id)}
-                        className="h-8 text-xs uppercase text-[#00E5FF] hover:bg-[#00E5FF]/10"
+                        className="adm-badge-info cursor-pointer hover:opacity-85 disabled:opacity-50"
                       >
-                        {isRowBusy && markAsRead.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "Mark Read"}
-                      </Button>
+                        {isRowBusy && markAsRead.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "MARK_READ"}
+                      </button>
                     )}
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <button
                       disabled={isRowBusy}
                       onClick={() => {
                         if (confirm("Are you sure you want to delete this message?")) {
                           deleteMessage.mutate(msg.id)
                         }
                       }}
-                      className="h-8 w-8 p-0 text-zinc-400 hover:text-[#F43F5E] hover:bg-[#F43F5E]/10"
+                      className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
+                      aria-label="Xóa tin nhắn"
                     >
-                      {isRowBusy && deleteMessage.isPending ? <Loader2 className="w-4 h-4 animate-spin text-[#F43F5E]" /> : <Trash2 className="w-4 h-4" />}
-                    </Button>
+                      {isRowBusy && deleteMessage.isPending ? <Loader2 className="w-4 h-4 animate-spin adm-text-danger" /> : <Trash2 className="w-4 h-4" />}
+                    </button>
                   </td>
                 </tr>
               )
             })}
             {messages.length === 0 && (
               <tr>
-                <td colSpan={5} className="p-8 text-center text-zinc-500 font-mono">
+                <td colSpan={5} className="p-8 text-center adm-text-muted font-mono">
                   NO_MESSAGES_IN_QUEUE
                 </td>
               </tr>

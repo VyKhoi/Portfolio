@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
+import { Loader2, BotMessageSquare } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { API_BASE_URL } from '../../lib/api';
 
@@ -52,94 +52,117 @@ export function AIChatLogs() {
   });
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-4 font-mono animate-in fade-in duration-200">
+    <div className="flex h-[calc(100vh-6rem)] gap-4 font-mono animate-in fade-in duration-200">
       {/* LEFT COLUMN: Sessions List */}
-      <div className="w-1/3 bg-[#121215] border border-[#27272A] rounded-lg shadow-lg flex flex-col overflow-hidden">
-        <div className="p-4 border-b border-[#27272A] bg-[#18181C] flex items-center justify-between">
+      <div className="w-1/3 adm-card rounded-lg flex flex-col overflow-hidden">
+        <div
+          className="p-4 border-b adm-divider flex items-center justify-between"
+          style={{ backgroundColor: "var(--adm-bg-elevated)" }}
+        >
           <div>
-            <h2 className="text-[#DEFF9A] font-bold">🤖 AI SESSIONS</h2>
-            <p className="text-xs text-zinc-400">Live chat history with Sigma Cat 😼</p>
+            <h2 className="adm-text-accent font-bold flex items-center gap-2">
+              <BotMessageSquare className="w-4 h-4" />
+              <span>AI_SESSIONS</span>
+            </h2>
+            <p className="text-xs adm-text-muted mt-0.5">Live chat history with Sigma Cat</p>
           </div>
           {isFetchingSessions && !isLoadingSessions && (
-            <Loader2 className="w-4 h-4 text-[#DEFF9A] animate-spin" />
+            <Loader2 className="w-4 h-4 adm-text-accent animate-spin" />
           )}
         </div>
         
-        <div className="flex-1 overflow-y-auto p-2 space-y-2 scrollbar-thin scrollbar-thumb-[#27272A]">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2">
           {isLoadingSessions ? (
             <div className="space-y-2 p-2">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-3 rounded bg-[#0A0A0C] border border-[#27272A] space-y-2 animate-pulse">
+                <div key={i} className="p-3 rounded adm-elevated space-y-2 animate-pulse">
                   <div className="flex justify-between">
-                    <div className="h-3 w-24 bg-[#27272A] rounded" />
-                    <div className="h-2.5 w-14 bg-[#18181C] rounded" />
+                    <div className="h-3 w-24 adm-skeleton rounded" />
+                    <div className="h-2.5 w-14 adm-skeleton rounded" />
                   </div>
-                  <div className="h-2.5 w-16 bg-[#18181C] rounded" />
+                  <div className="h-2.5 w-16 adm-skeleton rounded" />
                 </div>
               ))}
             </div>
           ) : sessions.length === 0 ? (
-            <p className="text-zinc-500 text-center text-xs mt-8">No chat sessions found.</p>
+            <p className="adm-text-muted text-center text-xs mt-8">No chat sessions found.</p>
           ) : (
-            sessions.map((session) => (
-              <div 
-                key={session.sessionId}
-                onClick={() => setSelectedSessionId(session.sessionId)}
-                className={`p-3 rounded cursor-pointer transition-colors border ${
-                  selectedSessionId === session.sessionId 
-                    ? 'bg-[#18181C] border-[#DEFF9A]/50' 
-                    : 'bg-[#0A0A0C] border-transparent hover:border-[#27272A]'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-zinc-300 truncate w-32" title={session.sessionId}>
-                    {session.sessionId.split('-')[0]}...
-                  </span>
-                  <span className="text-[10px] text-zinc-400">
-                    {new Date(session.lastMessageAt).toLocaleTimeString()}
-                  </span>
+            sessions.map((session) => {
+              const isSelected = selectedSessionId === session.sessionId;
+              return (
+                <div 
+                  key={session.sessionId}
+                  onClick={() => setSelectedSessionId(session.sessionId)}
+                  style={
+                    isSelected
+                      ? {
+                          backgroundColor: "var(--adm-accent-soft)",
+                          borderColor: "var(--adm-accent-border)",
+                        }
+                      : undefined
+                  }
+                  className={`p-3 rounded cursor-pointer transition-colors border ${
+                    isSelected
+                      ? ''
+                      : 'border-transparent hover:bg-[var(--adm-bg-hover)] hover:border-[var(--adm-border)]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span
+                      className={`text-xs font-bold truncate w-32 ${isSelected ? 'adm-text-accent' : ''}`}
+                      title={session.sessionId}
+                    >
+                      {session.sessionId.split('-')[0]}...
+                    </span>
+                    <span className="text-[10px] adm-text-secondary">
+                      {new Date(session.lastMessageAt).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className="text-[10px] adm-text-muted">
+                    {new Date(session.lastMessageAt).toLocaleDateString()}
+                  </div>
                 </div>
-                <div className="text-[10px] text-zinc-500">
-                  {new Date(session.lastMessageAt).toLocaleDateString()}
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
 
       {/* RIGHT COLUMN: Messages List */}
-      <div className="w-2/3 bg-[#121215] border border-[#27272A] rounded-lg shadow-lg flex flex-col overflow-hidden">
+      <div className="w-2/3 adm-card rounded-lg flex flex-col overflow-hidden">
         {selectedSessionId ? (
           <>
-            <div className="p-4 border-b border-[#27272A] bg-[#18181C] flex items-center justify-between">
+            <div
+              className="p-4 border-b adm-divider flex items-center justify-between"
+              style={{ backgroundColor: "var(--adm-bg-elevated)" }}
+            >
               <div>
-                <h3 className="text-white font-bold text-sm">Session Details</h3>
-                <p className="text-xs text-zinc-400">ID: {selectedSessionId}</p>
+                <h3 className="font-bold text-sm">SESSION_TRANSCRIPT</h3>
+                <p className="text-xs adm-text-muted">ID: {selectedSessionId}</p>
               </div>
               <div className="flex items-center gap-2">
                 {isFetchingMessages && !isLoadingMessages && (
-                  <Loader2 className="w-3.5 h-3.5 text-[#DEFF9A] animate-spin" />
+                  <Loader2 className="w-3.5 h-3.5 adm-text-accent animate-spin" />
                 )}
-                <span className="text-xs bg-[#DEFF9A] text-black px-2 py-1 rounded font-bold">LIVE</span>
+                <span className="adm-badge-accent">LIVE</span>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-[#27272A]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {isLoadingMessages ? (
                 <div className="space-y-4">
                   <div className="flex justify-end">
-                    <div className="h-12 w-56 bg-[#18181C] border border-[#27272A] rounded-2xl animate-pulse" />
+                    <div className="h-12 w-56 adm-elevated rounded-2xl animate-pulse" />
                   </div>
                   <div className="flex justify-start">
-                    <div className="h-20 w-72 bg-[#18181C] border border-[#27272A] rounded-2xl animate-pulse" />
+                    <div className="h-20 w-72 adm-elevated rounded-2xl animate-pulse" />
                   </div>
                   <div className="flex justify-end">
-                    <div className="h-10 w-44 bg-[#18181C] border border-[#27272A] rounded-2xl animate-pulse" />
+                    <div className="h-10 w-44 adm-elevated rounded-2xl animate-pulse" />
                   </div>
                 </div>
               ) : messages.length === 0 ? (
-                <p className="text-zinc-500 text-center text-xs">No messages yet.</p>
+                <p className="adm-text-muted text-center text-xs">No messages yet.</p>
               ) : (
                 messages.map((m) => (
                   <motion.div 
@@ -150,10 +173,22 @@ export function AIChatLogs() {
                     className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div 
-                      className={`max-w-[75%] p-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
+                      style={
+                        m.role === 'user'
+                          ? {
+                              backgroundColor: "var(--adm-accent)",
+                              color: "var(--adm-btn-fg)",
+                            }
+                          : {
+                              backgroundColor: "var(--adm-bg-elevated)",
+                              borderColor: "var(--adm-border)",
+                              color: "var(--adm-text)",
+                            }
+                      }
+                      className={`max-w-[75%] p-3.5 text-sm leading-relaxed shadow-xs whitespace-pre-wrap ${
                         m.role === 'user' 
-                          ? 'bg-[#DEFF9A] text-black rounded-2xl rounded-tr-sm font-medium' 
-                          : 'bg-[#27272A] text-zinc-200 rounded-2xl rounded-tl-sm'
+                          ? 'rounded-2xl rounded-tr-sm font-semibold' 
+                          : 'border rounded-2xl rounded-tl-sm'
                       }`}
                       dangerouslySetInnerHTML={{
                         __html: m.content
@@ -168,9 +203,9 @@ export function AIChatLogs() {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-zinc-500">
-            <span className="text-4xl mb-4">🕵️</span>
-            <p className="text-sm">Select a session to spy on the chat</p>
+          <div className="flex-1 flex flex-col items-center justify-center adm-text-muted">
+            <BotMessageSquare className="w-10 h-10 mb-3 adm-text-accent opacity-80" />
+            <p className="text-sm font-bold">SELECT_A_SESSION_TO_INSPECT_TRANSCRIPT</p>
           </div>
         )}
       </div>

@@ -1,9 +1,6 @@
-import { Badge } from "../ui/Badge"
-import { Button } from "../ui/Button"
-import { Plus, Edit2, Trash2, X, Loader2 } from "lucide-react"
+import { Plus, Edit2, Trash2, X, Loader2, FolderGit2, Save } from "lucide-react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
-import { Input } from "../ui/Input"
 import { useAuthStore } from "../../store/authStore"
 import { API_BASE_URL } from "../../lib/api"
 import { AdminLoader, RefreshingBadge } from "./AdminLoader"
@@ -83,76 +80,135 @@ export function ProjectCRUD() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <h1 className="text-3xl font-heading font-bold">PROJECTS_REGISTRY</h1>
+      <div className="space-y-6 font-mono">
+        <div className="flex items-center space-x-3 adm-text-accent">
+          <FolderGit2 className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">PROJECTS_REGISTRY</h1>
+        </div>
         <AdminLoader label="LOADING_PROJECTS_REGISTRY..." variant="cards" rows={3} />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6 font-mono animate-in fade-in duration-200">
       <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <h1 className="text-3xl font-heading font-bold">PROJECTS_REGISTRY</h1>
+        <div className="flex items-center space-x-3 adm-text-accent">
+          <FolderGit2 className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-wider">PROJECTS_REGISTRY</h1>
           <RefreshingBadge show={isFetching && !isLoading} />
         </div>
-        <Button size="sm" onClick={() => openModal()} className="bg-[#DEFF9A] text-black hover:bg-[#DEFF9A]/80 uppercase tracking-wider">
-          <Plus className="w-4 h-4 mr-2" /> New Project
-        </Button>
+        <button
+          onClick={() => openModal()}
+          className="adm-btn-primary text-xs uppercase tracking-wider"
+        >
+          <Plus className="w-4 h-4" />
+          <span>NEW_PROJECT</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
         {projects.map((proj: any) => (
-          <div key={proj.id} className="flex items-center justify-between p-6 border border-[#27272A] bg-[#0A0A0C] rounded-lg hover:border-[#3F3F46] transition-colors">
+          <div key={proj.id} className="flex items-center justify-between p-6 adm-card adm-card-hover rounded-lg">
             <div>
-              <div className="flex items-center space-x-4 mb-2">
-                <h3 className="text-xl font-heading font-bold text-white">{proj.title}</h3>
-                <Badge variant="outline" className={proj.status === 'Published' ? 'text-[#DEFF9A] border-[#DEFF9A]' : 'text-zinc-500'}>
+              <div className="flex flex-wrap items-center gap-3 mb-2">
+                <h3 className="text-xl font-heading font-bold">{proj.title}</h3>
+                <span className={proj.status === 'Published' ? 'adm-badge-accent' : 'adm-tag'}>
                   {proj.status}
-                </Badge>
+                </span>
               </div>
-              <div className="text-sm font-mono text-zinc-400">Tech Stack: {proj.techStack}</div>
+              {proj.summary && (
+                <p className="text-sm adm-text-secondary mb-2 font-sans">{proj.summary}</p>
+              )}
+              <div className="text-xs adm-text-muted">Tech Stack: {proj.techStack}</div>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="ghost" size="icon" onClick={() => openModal(proj)} className="text-[#00E5FF] hover:bg-[#00E5FF]/10">
+            <div className="flex space-x-2 shrink-0 ml-4">
+              <button
+                onClick={() => openModal(proj)}
+                className="adm-btn-icon"
+                aria-label="Chỉnh sửa dự án"
+              >
                 <Edit2 className="w-4 h-4" />
-              </Button>
-              <Button 
-                variant="ghost" size="icon" 
+              </button>
+              <button
                 disabled={deletingId === proj.id}
                 onClick={() => { if (confirm("Are you sure?")) deleteProject.mutate(proj.id); }}
-                className="text-[#F43F5E] hover:bg-[#F43F5E]/10"
+                className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50"
+                aria-label="Xóa dự án"
               >
-                {deletingId === proj.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-              </Button>
+                {deletingId === proj.id ? <Loader2 className="w-4 h-4 animate-spin adm-text-danger" /> : <Trash2 className="w-4 h-4" />}
+              </button>
             </div>
           </div>
         ))}
         {projects.length === 0 && (
-          <div className="p-8 border border-dashed border-[#27272A] rounded-lg text-center text-zinc-500 font-mono">NO_PROJECTS_FOUND</div>
+          <div className="p-8 border border-dashed adm-divider rounded-lg text-center adm-text-muted font-mono">
+            NO_PROJECTS_FOUND
+          </div>
         )}
       </div>
 
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#121215] border border-[#27272A] rounded-lg w-full max-w-lg p-6 shadow-2xl">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold font-heading">{editingProject ? 'EDIT_PROJECT' : 'NEW_PROJECT'}</h2>
-              <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)} className="text-zinc-400"><X className="w-5 h-5"/></Button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-xs"
+          style={{ backgroundColor: "var(--adm-backdrop)" }}
+        >
+          <div className="adm-card rounded-lg w-full max-w-lg p-6">
+            <div className="flex justify-between items-center mb-6 pb-3 border-b adm-divider">
+              <h2 className="text-lg font-bold adm-text-accent">
+                {editingProject ? 'EDIT_PROJECT' : 'NEW_PROJECT'}
+              </h2>
+              <button onClick={() => setIsModalOpen(false)} className="adm-btn-icon">
+                <X className="w-4 h-4"/>
+              </button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); saveProject.mutate(formData); }} className="space-y-4">
-              <Input placeholder="Title" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
-              <Input placeholder="Slug (e.g. my-project)" value={formData.slug} onChange={e => setFormData({...formData, slug: e.target.value})} required />
-              <Input placeholder="Tech Stack (e.g. React, .NET)" value={formData.techStack} onChange={e => setFormData({...formData, techStack: e.target.value})} />
-              <Input placeholder="Summary" value={formData.summary} onChange={e => setFormData({...formData, summary: e.target.value})} />
-              <div className="flex justify-end space-x-2 pt-4 border-t border-[#27272A]">
-                <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                <Button type="submit" disabled={saveProject.isPending} className="bg-[#00E5FF] text-black hover:bg-[#00E5FF]/80">
-                  {saveProject.isPending ? (
-                    <span className="inline-flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> SAVING...</span>
-                  ) : 'SAVE_PROJECT'}
-                </Button>
+              <div>
+                <label className="adm-label">PROJECT_TITLE</label>
+                <input
+                  className="adm-input"
+                  placeholder="Title"
+                  value={formData.title}
+                  onChange={e => setFormData({...formData, title: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <label className="adm-label">SLUG</label>
+                <input
+                  className="adm-input"
+                  placeholder="Slug (e.g. my-project)"
+                  value={formData.slug}
+                  onChange={e => setFormData({...formData, slug: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <label className="adm-label">TECH_STACK</label>
+                <input
+                  className="adm-input"
+                  placeholder="Tech Stack (e.g. React, .NET)"
+                  value={formData.techStack}
+                  onChange={e => setFormData({...formData, techStack: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="adm-label">SUMMARY</label>
+                <input
+                  className="adm-input"
+                  placeholder="Summary"
+                  value={formData.summary}
+                  onChange={e => setFormData({...formData, summary: e.target.value})}
+                />
+              </div>
+              <div className="flex justify-end space-x-2 pt-4 border-t adm-divider">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="adm-btn-secondary text-xs">
+                  CANCEL
+                </button>
+                <button type="submit" disabled={saveProject.isPending} className="adm-btn-primary text-xs">
+                  {saveProject.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  <span>{saveProject.isPending ? 'SAVING...' : 'SAVE_PROJECT'}</span>
+                </button>
               </div>
             </form>
           </div>
