@@ -6,7 +6,7 @@ import { AdminLoader, RefreshingBadge } from "./AdminLoader"
 
 export function DashboardOverview() {
   const token = useAuthStore(state => state.token)
-  const authHeaders = token ? { Authorization: `Bearer ${token}` } : {}
+  const authHeaders: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
   const { data: messages = [], isLoading: loadingMsg, isFetching: fetchingMsg } = useQuery({
     queryKey: ['messages'],
