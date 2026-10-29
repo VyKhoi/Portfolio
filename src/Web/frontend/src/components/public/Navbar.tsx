@@ -18,7 +18,7 @@ export function Navbar() {
         <div className="lg:col-span-3 flex items-center px-4 lg:px-8 border-r border-border h-full">
           <a href="#" className="flex items-center gap-3 group">
             <img 
-              src="/logo.png" 
+              src="/icon-192.png" 
               alt="Logo" 
               className="w-9 h-9 rounded-full object-cover border border-primary/40 group-hover:border-primary transition-all shadow-sm"
             />

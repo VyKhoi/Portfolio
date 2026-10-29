@@ -274,7 +274,7 @@ export const CatChatbot: React.FC = () => {
           >
             <div className="relative">
               <img 
-                src="/sigma-cat.png" 
+                src="/sigma-cat-sm.png" 
                 alt="Sigma Cat" 
                 className="w-11 h-11 rounded-full object-cover border border-[#DEFF9A]"
               />
@@ -298,7 +298,7 @@ export const CatChatbot: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <img 
-                    src="/sigma-cat.png" 
+                    src="/sigma-cat-sm.png" 
                     alt="Sigma Cat" 
                     className="w-10 h-10 rounded-full object-cover border-2 border-[#DEFF9A] shadow-[0_0_15px_rgba(222,255,154,0.3)]"
                   />

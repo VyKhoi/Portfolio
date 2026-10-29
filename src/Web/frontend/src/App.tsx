@@ -2,18 +2,29 @@ import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from './store/authStore'
 import { motion } from 'framer-motion'
-import React from 'react'
+import React, { Suspense, lazy } from 'react'
 import { Home } from './pages/public/Home'
-import { AdminLayout } from './components/admin/AdminLayout'
-import { InboxTable } from './components/admin/InboxTable'
-import { ProjectCRUD } from './components/admin/ProjectCRUD'
-import { DashboardOverview } from './components/admin/DashboardOverview'
-import { ProfileSettings } from './components/admin/ProfileSettings'
-import { ExperienceCRUD } from './components/admin/ExperienceCRUD'
-import { SkillCRUD } from './components/admin/SkillCRUD'
-import { AIChatLogs } from './components/admin/AIChatLogs'
-import { CatChatbot } from './components/CatChatbot'
 import { useNavigate } from 'react-router-dom'
+
+// Code-split: admin dashboard & chatbot are loaded on demand so public visitors
+// only download what is needed to paint the homepage.
+const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })))
+const InboxTable = lazy(() => import('./components/admin/InboxTable').then(m => ({ default: m.InboxTable })))
+const ProjectCRUD = lazy(() => import('./components/admin/ProjectCRUD').then(m => ({ default: m.ProjectCRUD })))
+const DashboardOverview = lazy(() => import('./components/admin/DashboardOverview').then(m => ({ default: m.DashboardOverview })))
+const ProfileSettings = lazy(() => import('./components/admin/ProfileSettings').then(m => ({ default: m.ProfileSettings })))
+const ExperienceCRUD = lazy(() => import('./components/admin/ExperienceCRUD').then(m => ({ default: m.ExperienceCRUD })))
+const SkillCRUD = lazy(() => import('./components/admin/SkillCRUD').then(m => ({ default: m.SkillCRUD })))
+const AIChatLogs = lazy(() => import('./components/admin/AIChatLogs').then(m => ({ default: m.AIChatLogs })))
+const CatChatbot = lazy(() => import('./components/CatChatbot').then(m => ({ default: m.CatChatbot })))
+
+function AdminFallback() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-[#0A0A0C] font-mono text-xs text-zinc-500">
+      LOADING_MODULE...
+    </div>
+  )
+}
 
 const queryClient = new QueryClient()
 
@@ -116,9 +127,13 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
-              <AdminLayout>
-                <Outlet />
-              </AdminLayout>
+              <Suspense fallback={<AdminFallback />}>
+                <AdminLayout>
+                  <Suspense fallback={<AdminFallback />}>
+                    <Outlet />
+                  </Suspense>
+                </AdminLayout>
+              </Suspense>
             </ProtectedRoute>
           }>
             <Route index element={<DashboardOverview />} />
@@ -129,9 +144,11 @@ function App() {
             <Route path="skills" element={<SkillCRUD />} />
             <Route path="ai-logs" element={<AIChatLogs />} />
           </Route>
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-        <CatChatbot />
+        <Suspense fallback={null}>
+          <CatChatbot />
+        </Suspense>
       </Router>
     </QueryClientProvider>
   )
