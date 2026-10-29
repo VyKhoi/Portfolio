@@ -37,9 +37,9 @@ export function HeroSection() {
         
         {/* Left: Oversized Typography Content (7 cols) */}
         <motion.div 
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          initial={{ opacity: 1, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className="lg:col-span-7 flex flex-col items-start space-y-8 py-12"
         >
           <div className="space-y-4">
@@ -73,9 +73,9 @@ export function HeroSection() {
 
         {/* Right: Offset Frame Profile Image (5 cols) */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 1, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
           className="lg:col-span-5 relative flex justify-center lg:justify-end items-center h-[500px] lg:h-full mt-12 lg:mt-0"
         >
           {/* Geometric offset frame */}
@@ -85,7 +85,7 @@ export function HeroSection() {
           <div className="relative w-full max-w-[320px] md:max-w-[400px] aspect-[3/4] z-10 bg-surface overflow-hidden group mx-auto lg:mr-4">
             <div className="absolute inset-0 bg-primary/20 mix-blend-overlay z-20 group-hover:bg-transparent transition-colors duration-500" />
             <img 
-              src={profile.avatarKey} 
+              src={profile.avatarKey === "/profile.jpg" ? "/profile.jpg?v=2" : profile.avatarKey} 
               alt="Đặng Vỹ Khôi - Software Engineer (.NET Backend)" 
               width={400}
               height={533}
