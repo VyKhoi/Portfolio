@@ -13,21 +13,31 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+
+      - name: Prepare server-managed secrets
+        run: |
+          # Postgres password and JWT secret are generated on the server (~/.config/portfolio) and
+          # never stored in GitHub. Delete a file there and redeploy to rotate it.
+          bash scripts/server-secrets.sh ensure
+          echo "::add-mask::$(cat "$HOME/.config/portfolio/postgres_password")"
+          echo "::add-mask::$(cat "$HOME/.config/portfolio/jwt_secret")"
 
       - name: Create .env file
         run: |
-          cat << 'EOF' > .env
-          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-          JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
-          MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}
-          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
-          EOF
-          # Ollama gets at most half of the server's cores so the other sites stay responsive
-          echo "OLLAMA_CPUS=$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))" >> .env
-          chmod 600 .env
+          (
+            umask 077
+            {
+              echo "POSTGRES_PASSWORD=$(cat "$HOME/.config/portfolio/postgres_password")"
+              echo "JWT_SECRET_KEY=$(cat "$HOME/.config/portfolio/jwt_secret")"
+              echo "ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}"
+              echo "MAIL_APP_PASSWORD=${{ secrets.MAIL_APP_PASSWORD }}"
+              echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}"
+              echo "TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}"
+              # Ollama gets at most half of the server's cores so the other sites stay responsive
+              echo "OLLAMA_CPUS=$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))"
+            } > .env
+          )
 
       - name: Ensure Docker volume for Ollama
         run: |
@@ -45,16 +55,25 @@ jobs:
             # Keep the 14 most recent backups
             ls -1t "$BACKUP_DIR"/portfolio_db_*.dump | tail -n +15 | xargs -r rm -f
           else
-            echo "portfolio_postgres is not running yet, skipping backup"
+            echo "Postgres container is not running yet, skipping backup"
           fi
 
       - name: Build images
         run: |
           docker compose build
 
+      - name: Start database and sync its password
+        run: |
+          docker compose up -d postgres
+          for i in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' portfolio_postgres 2>/dev/null)" = healthy ] && break
+            sleep 2
+          done
+          bash scripts/server-secrets.sh sync-db
+
       - name: Deploy containers
         run: |
-          # pgAdmin now only runs on demand (profile "tools"); remove the old always-on container
+          # pgAdmin only runs on demand (profile "tools"); make sure no always-on container is left
           docker rm -f portfolio_pgadmin 2>/dev/null || true
           docker compose up -d --remove-orphans
 
@@ -74,6 +93,13 @@ jobs:
             sleep 3
           done
           echo "Health check failed"; docker compose ps; docker compose logs --tail 80 backend frontend; exit 1
+
+      - name: Report image versions
+        if: always()
+        run: |
+          docker exec portfolio_ollama ollama --version 2>/dev/null || true
+          docker image inspect dpage/pgadmin4:latest --format 'pgadmin4 {{index .Config.Labels "org.opencontainers.image.version"}} {{.Id}}' 2>/dev/null || true
+          docker exec portfolio_postgres postgres --version 2>/dev/null || true
 
       - name: Cleanup dangling images
         if: always()

@@ -36,7 +36,9 @@ cd src/Web/frontend && npm run build && npm run lint
 ```
 
 ## Deploy
-Push `main` = deploy production ngay (self-hosted runner: tạo `.env` từ GitHub Secrets → **backup DB** `pg_dump` vào `~/backups/portfolio/` (giữ 14 bản, lỗi thì dừng deploy) → `compose build` → `up -d --remove-orphans` → `ollama create sigma-cat` → health check `localhost:18122`). Chỉ push khi Khôi nói "làm đi". Smoke test 2 domain: `bash ../Zwork/smoke.sh`.
+Push `main` = deploy production ngay (self-hosted runner: `scripts/server-secrets.sh ensure` → tạo `.env` → **backup DB** `pg_dump` vào `~/backups/portfolio/` (giữ 14 bản, lỗi thì dừng deploy) → `compose build` → `up -d postgres` + `server-secrets.sh sync-db` → `up -d --remove-orphans` → `ollama create sigma-cat` → health check `localhost:18122`). Chỉ push khi Khôi nói "làm đi". Smoke test 2 domain: `bash ../Zwork/smoke.sh`.
+
+**Secret:** mật khẩu Postgres và JWT secret **không nằm trên GitHub** — được sinh và lưu trên server tại `~/.config/portfolio/{postgres_password,jwt_secret}` (chmod 600). Muốn xoay: xoá file tương ứng trên server rồi deploy lại (xoay JWT = admin đăng nhập lại). GitHub Secrets chỉ còn `MAIL_APP_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (và `ADMIN_PASSWORD` nếu muốn ép mật khẩu admin).
 
 ## Quy ước
 - Repo **public**: không commit secret, `.env`, IP nhà, hay ghi chú về lỗ hổng chưa vá.
