@@ -1,31 +1,67 @@
-# Frontend Architecture
+# Frontend (`src/Web/frontend`)
 
-## 1. Tech Stack
-- **Framework**: React 19 + Vite 6
-- **Styling**: Tailwind CSS v4
-- **State Management**: Zustand
-- **Data Fetching**: @tanstack/react-query + Axios
-- **Routing**: React Router DOM v7 (or equivalent)
-- **Animations**: Framer Motion & Three.js (@react-three/fiber)
-- **UI Components**: Shadcn UI (Custom manual implementation) + Lucide React icons.
+## 1. Tech stack (thực tế đang dùng)
 
-## 2. Folder Structure
+- React 19 + TypeScript 6 + **Vite 8** (rolldown), lint bằng **oxlint**
+- Tailwind CSS v4 (`@tailwindcss/vite`), Framer Motion, lucide-react
+- Zustand (auth, theme admin), TanStack Query (chỉ trong admin), `fetch` thuần (`lib/api.ts`)
+- React Router DOM v7
+- `@microsoft/signalr`, `axios` có trong `package.json` nhưng hiện **không được import** ở đâu (có thể gỡ)
+
+## 2. Cấu trúc
+
 ```
-src/Web/frontend/src/
-├── assets/         # Static images, 3D models (.gltf), fonts
+src/
+├── main.tsx                 # prefetch content public + tự reload 1 lần khi chunk cũ bị xoá sau deploy
+├── App.tsx                  # Router: "/" (Home), "/login", "/dashboard/*" (lazy, ProtectedRoute), chatbot lazy sau 1.2s
+├── index.css                # Tailwind + theme admin (data-theme dark/light, class adm-*)
+├── pages/public/Home.tsx    # Navbar → Hero → About → ProjectsBento → Contact → Footer
 ├── components/
-│   ├── ui/         # Reusable Shadcn-like components (Button, Input, Modal)
-│   ├── public/     # Components specific to the public portfolio
-│   └── admin/      # Components specific to the admin dashboard
-├── hooks/          # Custom React hooks (e.g., useSignalR)
-├── lib/            # Utility functions (e.g., clsx merging for Tailwind)
-├── pages/          # Route components (Home, Dashboard, etc.)
-├── services/       # API clients (Axios setups)
-└── store/          # Zustand stores (authStore, themeStore)
+│   ├── public/              # Hero (profile), About (skills), ProjectsBento (experiences), Contact (form + honeypot)
+│   ├── admin/               # AdminLayout (QueryClient + prefetch), Sidebar, DashboardOverview, ProfileSettings,
+│   │                        # ExperienceCRUD, SkillCRUD, ProjectCRUD, InboxTable, AIChatLogs, AdminLoader (skeleton)
+│   ├── ui/                  # Badge, Button, Card, Input (kiểu shadcn tự viết)
+│   └── CatChatbot.tsx       # Widget Sigma Cat, đọc SSE từ /api/ai/chat/stream
+├── lib/
+│   ├── api.ts               # API_BASE_URL = '/api' (luôn relative), ContentApi, ContactApi
+│   ├── contentCache.ts      # cache localStorage "content-cache:v2:*", useCachedContent()
+│   └── utils.ts             # cn() = clsx + tailwind-merge
+└── store/
+    ├── authStore.ts         # token JWT trong localStorage['token']
+    └── adminThemeStore.ts   # dark/light cho admin
 ```
 
-## 3. Design Philosophy
-- **Wow Factor**: The public site should use smooth transitions (Framer Motion) and a 3D interactive hero section to impress visitors immediately.
-- **Performance**: Heavy 3D assets must be lazy-loaded.
-- **Admin UX**: The dashboard must prioritize speed and utility. Data tables should have sorting and pagination. Rich text editing (TipTap) is used for project descriptions.
-- **Real-time**: The dashboard uses SignalR to listen to new contact messages instantly.
+`public/` chứa: `cv.pdf`, ảnh profile/logo, favicon các cỡ, `robots.txt`, `sitemap.xml`, `site.webmanifest`, file xác minh Google Search Console, `oneko.js` + `oneko.gif` (mèo chạy theo chuột).
+
+`index.html` chứa sẵn: meta SEO/OpenGraph, JSON-LD (Person, WebSite, ProfilePage, FAQPage), boot splash và nội dung HTML fallback cho Googlebot.
+
+## 3. Quy ước
+
+- Gọi API luôn bằng đường dẫn relative `/api/...` — dev thì Vite proxy sang `localhost:5000`, prod thì nginx của container frontend proxy sang `backend:8080`.
+- Trang public: dữ liệu qua `useCachedContent(key, fallback, isValid)` — luôn có fallback hardcode để không bao giờ trống.
+- Admin: dùng `useQuery` với key `profile | experiences | skills | projects | inbox | ai-sessions`; sau khi ghi thì `invalidateQueries`. (Cache `localStorage` của trang public tự làm mới ở lần tải sau nhờ stale-while-revalidate.)
+- Admin được code-split thành **một** bundle lazy để visitor không tải về.
+- Chatbot: `sessionId` lưu `localStorage['ai_chat_session_id']`, có honeypot `websiteTrap`.
+
+## 4. Nginx của container (`nginx.conf`)
+
+| Location | Việc làm |
+| :--- | :--- |
+| `/api/ai/` | rate limit POST 20 r/phút, tắt buffering cho SSE, timeout 120s |
+| `= /api/contact/messages` | rate limit POST 5 r/phút |
+| `= /api/auth/login` | rate limit POST 10 r/phút |
+| `/api/` | proxy thường |
+| `/assets/` | cache 1 năm immutable (file có hash) |
+| file tĩnh khác | cache 1 ngày + stale-while-revalidate |
+| `/login`, `/dashboard` | `X-Robots-Tag: noindex` |
+| `/` | SPA fallback `index.html`, `no-cache` |
+
+## 5. Lệnh
+
+```bash
+cd src/Web/frontend
+npm install
+npm run dev      # http://localhost:5173, proxy /api → localhost:5000
+npm run build    # tsc -b && vite build → dist/
+npm run lint     # oxlint
+```
