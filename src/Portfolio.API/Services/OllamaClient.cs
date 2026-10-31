@@ -29,7 +29,7 @@ public class OllamaClient
 
         var baseUrl = _config["Ollama:BaseUrl"] ?? "http://localhost:11434";
         _httpClient.BaseAddress = new Uri(baseUrl);
-        _httpClient.Timeout = TimeSpan.FromMinutes(2);
+        _httpClient.Timeout = TimeSpan.FromSeconds(60);
     }
 
     public async Task<string> GenerateReplyAsync(List<OllamaChatMessage> conversationHistory, string userMessage)

@@ -3,30 +3,31 @@
 
 ## Program.cs (thứ tự)
 1. Serilog → console + `logs/portfolio-.txt` (xoay vòng theo ngày, giữ 7 file).
-2. `AddDbContext` Npgsql từ `ConnectionStrings:DefaultConnection`.
-3. `AddMemoryCache`.
-4. JWT Bearer HS256 từ `JwtSettings:Secret` (không kiểm tra issuer/audience, `ClockSkew = 0`).
-5. Singleton `ContactChannel`, `JwtService`; hosted `EmailBackgroundWorker`; typed HttpClient `TelegramNotifier`, `OllamaClient`.
-6. CORS `AllowAnyOrigin` (frontend gọi same-origin qua nginx nên thực tế không cần).
-7. OpenAPI chỉ map ở Development.
-8. `SeedData.InitializeAsync` (migrate + seed) trước `app.Run()`; lỗi chỉ log, không dừng app.
+2. `AddDbContext` Npgsql từ `ConnectionStrings:DefaultConnection` — thiếu thì throw (không có fallback).
+3. `AddMemoryCache` (dùng cho cache content + mọi quota/lockout).
+4. JWT Bearer HS256 từ `JwtService.GetValidatedSecret` (thiếu → throw; < 32 ký tự → log cảnh báo). `OnTokenValidated`: token có claim `pwd_ver` phải khớp `PasswordStamp(user.PasswordHash)` (cache 1 phút) — token cũ không có claim vẫn hợp lệ tới hết hạn.
+5. Singleton `ContactChannel`, `JwtService`, `AiConcurrencyGate`; hosted `EmailBackgroundWorker`, `ChatRetentionWorker`; typed HttpClient `TelegramNotifier`, `OllamaClient`.
+6. CORS chỉ `Cors:AllowedOrigins` (prod: dangvykhoi.com + www; dev: localhost:5173, :18122).
+7. `ForwardedHeaders` tin `X-Forwarded-For` từ dải private (10/8, 172.16/12, 192.168/16, loopback) → `RemoteIpAddress` = IP thật của khách.
+8. OpenAPI chỉ map ở Development.
+9. `SeedData.InitializeAsync` (migrate + seed) trước `app.Run()`; lỗi chỉ log, không dừng app.
 
 ## Cấu hình
-`appsettings.json` = mặc định cho dev local. Production override bằng env trong `docker-compose.yml`: `ConnectionStrings__DefaultConnection`, `JwtSettings__Secret`, `ADMIN_PASSWORD`, `MAIL_APP_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `Ollama__BaseUrl`, `Ollama__Model`.
+`appsettings.json` = giá trị không bí mật (repo public). `appsettings.Development.json` = connection string + JWT secret giả cho dev (`dotnet run` dùng Development qua `Properties/launchSettings.json`). Production override bằng env trong `docker-compose.yml`: `ConnectionStrings__DefaultConnection`, `JwtSettings__Secret`, `ADMIN_PASSWORD`, `MAIL_APP_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `Ollama__BaseUrl`, `Ollama__Model`.
 
 ## Package
-BCrypt.Net-Next, MailKit, JwtBearer 9, OpenApi 9, EF Core 9 + Npgsql 9, Serilog.AspNetCore.
+BCrypt.Net-Next, MailKit, JwtBearer 9, OpenApi 9, EF Core 9 + Npgsql 9, Serilog.AspNetCore, `System.Security.Cryptography.Pkcs` 9.0.22 (pin để vá lỗ hổng bản 8.0.1 kéo theo từ MimeKit). Kiểm tra: `dotnet list package --vulnerable --include-transitive`.
 
 ## Dockerfile
-Build từ **root repo** (`context: .`), restore csproj → publish Release → `aspnet:9.0`, cổng 8080.
+Build từ **root repo** (`context: .`), restore csproj → publish Release → `aspnet:9.0`, cổng 8080, chạy bằng user non-root `$APP_UID` (thư mục `/app/logs` được chown).
 
 ## Controllers
 
 🔒 = `[Authorize]` (JWT). Tất cả trả JSON, lỗi dạng `{ error: "..." }`.
 
 ### AuthController — `api/auth` (alias cũ `identity/api/auth`)
-- `POST login` `{username, password}` → `{token, username, role}`; so username không phân biệt hoa thường, BCrypt verify.
-- 🔒 `POST change-password` `{currentPassword, newPassword}` (≥ 8 ký tự), user lấy từ claim `Name`.
+- `POST login` `{username, password}` → `{token, username, role}`; so username không phân biệt hoa thường, BCrypt verify (luôn verify kể cả user không tồn tại → không đo được thời gian). Sai 5 lần/IP → 429 trong 15 phút.
+- 🔒 `POST change-password` `{currentPassword, newPassword}` (8–200 ký tự) → trả `{message, token}` mới; mọi token cũ bị thu hồi (frontend `ProfileSettings` lưu token mới).
 - Không có đăng ký — chỉ có user `admin` do seed tạo.
 
 ### ContentController — `api/content`
@@ -37,12 +38,12 @@ Build từ **root repo** (`context: .`), restore csproj → publish Release → 
 - POST project tự sinh `Slug` = title-lowercase + 4 ký tự GUID nếu trống.
 
 ### ContactController — `api/contact`
-- `POST messages` `{name, email, message, companyTrap}` — `companyTrap` có giá trị = bot → trả OK giả, không lưu. Giới hạn 100/100/1000 ký tự. Lưu DB rồi `ContactChannel.PublishAsync` để gửi mail nền.
-- 🔒 `GET messages`, 🔒 `PATCH messages/{id}/status` `{status}`, 🔒 `DELETE messages/{id}`.
+- `POST messages` `{name, email, message, companyTrap}` — `companyTrap` có giá trị = bot → trả OK giả, không lưu. Giới hạn 100/100/1000 ký tự, email phải hợp lệ (`MailAddress`), 3 tin/giờ/IP → 429. Lưu DB rồi `ContactChannel.PublishAsync` để gửi mail nền.
+- 🔒 `GET messages`, 🔒 `PATCH messages/{id}/status` `{status}` (chỉ `Pending|Read|Replied`), 🔒 `DELETE messages/{id}`.
 
 ### AIController — `api/ai` (~650 dòng)
 - `POST chat` (không stream) và `POST chat/stream` (SSE, frame `data: {"token","chunk"}`, kết thúc `data: [DONE]`). Hai hàm gần như trùng logic — sửa một thì sửa cả hai.
-- Các bước: honeypot `websiteTrap` → rỗng / > 350 ký tự → quota 15 tin / 10 phút theo `IP + sessionId` → upsert `ChatSession` + lưu message → Telegram (fire-and-forget `Task.Run`) → `TryGetFastIntentReply` (so khớp chuỗi có/không dấu, trả câu soạn sẵn) → nếu không khớp thì `OllamaClient` (6 message gần nhất) → lưu reply → Telegram.
+- Các bước: honeypot `websiteTrap` → rỗng / > 350 ký tự → `NormalizeSessionId` (sai định dạng → GUID mới) → quota 15 tin / 10 phút theo IP → upsert `ChatSession` + lưu message → Telegram (fire-and-forget `Task.Run`) → `TryGetFastIntentReply` (so khớp chuỗi có/không dấu, trả câu soạn sẵn) → nếu không khớp thì qua `AiConcurrencyGate` (tối đa 2 cùng lúc, chờ 15s, không được thì trả `BusyReply`) → `OllamaClient` (6 message gần nhất) → lưu reply → Telegram.
 - `GET history/{sessionId}` (public, cho widget khôi phục hội thoại), 🔒 `GET sessions`, 🔒 `GET sessions/{id}/messages`.
 - Thông tin cá nhân nằm cứng trong Fast Intent — đổi CV thì sửa cả `src/Portfolio.AI/knowledge` lẫn hàm này.
 
@@ -50,14 +51,14 @@ Build từ **root repo** (`context: .`), restore csproj → publish Release → 
 
 | File | Lifetime | Việc |
 | :--- | :--- | :--- |
-| `JwtService.cs` | Singleton | `GenerateToken(user)`: HS256, claim `NameIdentifier/Name/Role`, hạn **7 ngày** |
-| `ContactChannel.cs` | Singleton | `Channel<ContactMessage>` unbounded (nhiều writer, 1 reader) |
+| `JwtService.cs` | Singleton | `GenerateToken(user)`: HS256, claim `NameIdentifier/Name/Role/pwd_ver`, hạn **3 ngày**; `GetValidatedSecret`, `PasswordStamp` |
+| `AiConcurrencyGate.cs` | Singleton | `SemaphoreSlim(2)` chặn số request Ollama đồng thời |
+| `ChatRetentionWorker.cs` | HostedService | Mỗi 24h xoá `ChatMessages`/`ChatSessions` cũ hơn 90 ngày |
+| `ContactChannel.cs` | Singleton | `Channel<ContactMessage>` bounded 100, `DropOldest` (nhiều writer, 1 reader) |
 | `EmailBackgroundWorker.cs` | HostedService | Vòng lặp đọc channel → `EmailService`; lỗi thì log + chờ 1s. Hàng đợi chỉ trong RAM (restart là mất, nhưng message đã nằm trong DB) |
-| `EmailService.cs` | Transient | Dựng email HTML (dark theme) → MailKit Gmail `smtp.gmail.com:587` StartTLS. Mật khẩu từ `Mail:Password` hoặc `MAIL_APP_PASSWORD`; thiếu → chỉ log warning |
-| `OllamaClient.cs` | Typed HttpClient | `GenerateReplyAsync` (không stream) và `StreamReplyAsync` (đọc NDJSON từng dòng của `/api/chat`). Timeout 2 phút. Lỗi → trả câu "Meow..." thay vì throw |
-| `TelegramNotifier.cs` | Typed HttpClient | `SendMessageAsync(text)` → Bot API `sendMessage`, `parse_mode: Markdown`. Thiếu token/chatId → bỏ qua |
-
-Lưu ý: Telegram dùng parse_mode Markdown với nội dung khách gõ — ký tự `_ * [ \`` không cân có thể làm Telegram từ chối tin (chỉ log warning).
+| `EmailService.cs` | Transient | Dựng email HTML (dark theme) → MailKit Gmail `smtp.gmail.com:587` StartTLS. Mật khẩu từ `Mail:Password` hoặc `MAIL_APP_PASSWORD`; thiếu → chỉ log warning. Trường khách nhập được `HtmlEncode`; tối đa 30 email/ngày |
+| `OllamaClient.cs` | Typed HttpClient | `GenerateReplyAsync` (không stream) và `StreamReplyAsync` (đọc NDJSON từng dòng của `/api/chat`). Timeout 60s. Lỗi → trả câu "Meow..." thay vì throw |
+| `TelegramNotifier.cs` | Typed HttpClient | `SendMessageAsync(html)` → Bot API `sendMessage`, `parse_mode: HTML`, tối đa 30 tin/giờ (tin thứ 30 kèm thông báo tạm ngưng). Nội dung động phải qua `TelegramNotifier.Escape`. Thiếu token/chatId → bỏ qua |
 
 ## Data (+ Entities, Migrations)
 

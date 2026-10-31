@@ -28,10 +28,10 @@ graph TD
 | Container | Image | Port host → container | Giới hạn |
 | :--- | :--- | :--- | :--- |
 | `portfolio_frontend` | build `src/Web/frontend/Dockerfile` | `18122 → 80` | — |
-| `portfolio_backend` | build `src/Portfolio.API/Dockerfile` | `5000 → 8080` | 0.8 CPU, 512M |
-| `portfolio_postgres` | `postgres:16-alpine` | `5432 → 5432` | 0.5 CPU, 384M |
+| `portfolio_backend` | build `src/Portfolio.API/Dockerfile` | không publish (chỉ frontend gọi) | 0.8 CPU, 512M |
+| `portfolio_postgres` | `postgres:16-alpine` | `127.0.0.1:5432` | 0.5 CPU, 384M |
 | `portfolio_ollama` | `ollama/ollama:latest` | không publish | 5G RAM |
-| `portfolio_pgadmin` | `dpage/pgadmin4` | `5050 → 80` | 384M |
+| `portfolio_pgadmin` | `dpage/pgadmin4` | `127.0.0.1:5050`, chỉ chạy với `--profile tools` | 384M |
 
 - Volume `ollama_models` là **external** → phải `docker volume create ollama_models` một lần (CI tự làm).
 - `src/Portfolio.AI` được mount vào ollama tại `/ai` để `ollama create -f /ai/Modelfile`.

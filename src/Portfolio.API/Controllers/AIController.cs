@@ -23,17 +23,20 @@ public class AIController : ControllerBase
     private readonly OllamaClient _ollama;
     private readonly TelegramNotifier _telegram;
     private readonly IMemoryCache _memCache;
+    private readonly AiConcurrencyGate _aiGate;
 
     public AIController(
-        PortfolioDbContext db, 
-        OllamaClient ollama, 
+        PortfolioDbContext db,
+        OllamaClient ollama,
         TelegramNotifier telegram,
-        IMemoryCache memCache)
+        IMemoryCache memCache,
+        AiConcurrencyGate aiGate)
     {
         _db = db;
         _ollama = ollama;
         _telegram = telegram;
         _memCache = memCache;
+        _aiGate = aiGate;
     }
 
     public class ChatRequestDto
@@ -73,13 +76,11 @@ public class AIController : ControllerBase
             return BadRequest(new { error = "Tin nhắn tối đa 350 ký tự để tránh quá tải nha bạn 😼!" });
         }
 
-        var sessionId = string.IsNullOrWhiteSpace(request.SessionId) 
-            ? Guid.NewGuid().ToString() 
-            : request.SessionId;
+        var sessionId = NormalizeSessionId(request.SessionId);
 
         // 2. Session quota check (max 15 messages per 10 minutes)
         var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var quotaKey = $"ai_quota_{clientIp}_{sessionId}";
+        var quotaKey = $"ai_quota_{clientIp}";
         var count = _memCache.GetOrCreate(quotaKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
@@ -128,9 +129,9 @@ public class AIController : ControllerBase
         _ = Task.Run(async () =>
         {
             var shortSession = sessionId.Length > 8 ? sessionId.Substring(0, 8) : sessionId;
-            var alertText = $"🚨 *Khách chat với Sigma Cat 😼!*\n" +
-                            $"🆔 Session: `{shortSession}...`\n" +
-                            $"👤 Khách: {request.Message}";
+            var alertText = $"🚨 <b>Khách chat với Sigma Cat 😼!</b>\n" +
+                            $"🆔 Session: <code>{TelegramNotifier.Escape(shortSession)}...</code>\n" +
+                            $"👤 Khách: {TelegramNotifier.Escape(request.Message)}";
             await _telegram.SendMessageAsync(alertText);
         });
 
@@ -150,7 +151,7 @@ public class AIController : ControllerBase
 
             _ = Task.Run(async () =>
             {
-                var replyText = $"😼 *Sigma Cat trả lời (Fast):*\n{fastReply}";
+                var replyText = $"😼 <b>Sigma Cat trả lời (Fast):</b>\n{TelegramNotifier.Escape(fastReply)}";
                 await _telegram.SendMessageAsync(replyText);
             });
 
@@ -179,8 +180,23 @@ public class AIController : ControllerBase
             }
         }
 
-        // 8. Generate reply from local AI
-        var replyContent = await _ollama.GenerateReplyAsync(historyMessages, request.Message);
+        // 8. Generate reply from local AI (bounded concurrency so a burst cannot pin the server's CPU)
+        string replyContent;
+        if (await _aiGate.TryEnterAsync(HttpContext.RequestAborted))
+        {
+            try
+            {
+                replyContent = await _ollama.GenerateReplyAsync(historyMessages, request.Message);
+            }
+            finally
+            {
+                _aiGate.Exit();
+            }
+        }
+        else
+        {
+            replyContent = BusyReply;
+        }
         if (IsEnglishRefusal(replyContent) || IsForbiddenImpersonation(replyContent))
         {
             if (IsEnglishQuery(request.Message))
@@ -211,7 +227,7 @@ public class AIController : ControllerBase
         // 10. Notify Telegram of reply
         _ = Task.Run(async () =>
         {
-            var replyText = $"😼 *Sigma Cat trả lời:*\n{replyContent}";
+            var replyText = $"😼 <b>Sigma Cat trả lời:</b>\n{TelegramNotifier.Escape(replyContent)}";
             await _telegram.SendMessageAsync(replyText);
         });
 
@@ -248,13 +264,11 @@ public class AIController : ControllerBase
             return;
         }
 
-        var sessionId = string.IsNullOrWhiteSpace(request.SessionId) 
-            ? Guid.NewGuid().ToString() 
-            : request.SessionId;
+        var sessionId = NormalizeSessionId(request.SessionId);
 
         // 2. Session quota check (max 15 messages per 10 minutes)
         var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var quotaKey = $"ai_quota_{clientIp}_{sessionId}";
+        var quotaKey = $"ai_quota_{clientIp}";
         var count = _memCache.GetOrCreate(quotaKey, entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
@@ -299,9 +313,9 @@ public class AIController : ControllerBase
         _ = Task.Run(async () =>
         {
             var shortSession = sessionId.Length > 8 ? sessionId.Substring(0, 8) : sessionId;
-            var alertText = $"🚨 *Khách chat với Sigma Cat (Stream) 😼!*\n" +
-                            $"🆔 Session: `{shortSession}...`\n" +
-                            $"👤 Khách: {request.Message}";
+            var alertText = $"🚨 <b>Khách chat với Sigma Cat (Stream) 😼!</b>\n" +
+                            $"🆔 Session: <code>{TelegramNotifier.Escape(shortSession)}...</code>\n" +
+                            $"👤 Khách: {TelegramNotifier.Escape(request.Message)}";
             await _telegram.SendMessageAsync(alertText);
         });
 
@@ -332,7 +346,7 @@ public class AIController : ControllerBase
 
             _ = Task.Run(async () =>
             {
-                var replyText = $"😼 *Sigma Cat trả lời (Fast Stream):*\n{fastStreamReply}";
+                var replyText = $"😼 <b>Sigma Cat trả lời (Fast Stream):</b>\n{TelegramNotifier.Escape(fastStreamReply)}";
                 await _telegram.SendMessageAsync(replyText);
             });
             return;
@@ -366,30 +380,46 @@ public class AIController : ControllerBase
         var isRefusalOrImpersonation = false;
         var tokenCount = 0;
 
-        await foreach (var chunk in _ollama.StreamReplyAsync(historyMessages, request.Message, cancellationToken))
+        // Bounded concurrency so a burst cannot pin the server's CPU; extra callers get a "busy" reply
+        if (!await _aiGate.TryEnterAsync(cancellationToken))
         {
-            if (tokenCount < 14)
+            await WriteSseAsync(BusyReply);
+            await Response.Body.WriteAsync(Encoding.UTF8.GetBytes("data: [DONE]\n\n"), cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+            return;
+        }
+
+        try
+        {
+            await foreach (var chunk in _ollama.StreamReplyAsync(historyMessages, request.Message, cancellationToken))
             {
-                initialBuffer.Append(chunk);
-                tokenCount++;
-                var peek = initialBuffer.ToString().Trim().ToLowerInvariant();
-                if (IsEnglishRefusal(peek) || IsForbiddenImpersonation(peek))
+                if (tokenCount < 14)
                 {
-                    isRefusalOrImpersonation = true;
-                    break;
+                    initialBuffer.Append(chunk);
+                    tokenCount++;
+                    var peek = initialBuffer.ToString().Trim().ToLowerInvariant();
+                    if (IsEnglishRefusal(peek) || IsForbiddenImpersonation(peek))
+                    {
+                        isRefusalOrImpersonation = true;
+                        break;
+                    }
+                    if (tokenCount == 14)
+                    {
+                        var buffered = initialBuffer.ToString();
+                        fullReplyBuilder.Append(buffered);
+                        await WriteSseAsync(buffered);
+                    }
                 }
-                if (tokenCount == 14)
+                else
                 {
-                    var buffered = initialBuffer.ToString();
-                    fullReplyBuilder.Append(buffered);
-                    await WriteSseAsync(buffered);
+                    fullReplyBuilder.Append(chunk);
+                    await WriteSseAsync(chunk);
                 }
             }
-            else
-            {
-                fullReplyBuilder.Append(chunk);
-                await WriteSseAsync(chunk);
-            }
+        }
+        finally
+        {
+            _aiGate.Exit();
         }
 
         if (tokenCount > 0 && tokenCount < 14 && !isRefusalOrImpersonation)
@@ -444,10 +474,24 @@ public class AIController : ControllerBase
         // 9. Notify Telegram with full reply
         _ = Task.Run(async () =>
         {
-            var replyText = $"😼 *Sigma Cat trả lời:*\n{fullReply}";
+            var replyText = $"😼 <b>Sigma Cat trả lời:</b>\n{TelegramNotifier.Escape(fullReply)}";
             await _telegram.SendMessageAsync(replyText);
         });
     }
+
+    private const string BusyReply = "Meow~ Sigma Cat đang tiếp nhiều khách quá, bạn đợi vài giây rồi hỏi lại em nha 😼!";
+
+    /// <summary>
+    /// Session ids come from the visitor's browser (crypto.randomUUID, or a short base36 string on old
+    /// browsers). Anything else gets a fresh id so junk cannot bloat the database or the Telegram alerts.
+    /// </summary>
+    private static string NormalizeSessionId(string? raw)
+        => IsValidSessionId(raw) ? raw! : Guid.NewGuid().ToString();
+
+    private static bool IsValidSessionId(string? value)
+        => !string.IsNullOrEmpty(value)
+           && value.Length is >= 8 and <= 64
+           && value.All(c => char.IsAsciiLetterOrDigit(c) || c == '-');
 
     private async Task WriteSseAsync(string text)
     {
@@ -614,7 +658,7 @@ public class AIController : ControllerBase
     [HttpGet("history/{sessionId}")]
     public async Task<IActionResult> GetVisitorHistory(string sessionId)
     {
-        if (string.IsNullOrWhiteSpace(sessionId))
+        if (!IsValidSessionId(sessionId))
         {
             return Ok(new List<object>());
         }

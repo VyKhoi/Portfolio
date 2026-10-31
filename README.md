@@ -90,9 +90,9 @@ graph TD
 | Dịch vụ | Địa chỉ Local | Ghi chú |
 | :--- | :--- | :--- |
 | **Frontend Web** | `http://localhost:18122` | Giao diện công khai |
-| **Backend Swagger** | `http://localhost:5000/swagger` | API Documentation |
-| **PostgreSQL** | `localhost:5432` | CSDL chính (`portfolio_db`) |
-| **pgAdmin 4** | `http://localhost:5050` | Quản trị CSDL (`admin@khoi.dev` / `admin`) |
+| **Backend API** | `http://localhost:18122/api/...` (qua nginx) hoặc `dotnet run` → `http://localhost:5000/openapi/v1.json` | Backend không publish port khi chạy Docker |
+| **PostgreSQL** | `127.0.0.1:5432` | CSDL chính (`portfolio_db`), chỉ mở cho máy local |
+| **pgAdmin 4** | `http://127.0.0.1:5050` | Bật khi cần: `docker compose --profile tools up -d pgadmin` |
 
 ---
 

@@ -11,11 +11,13 @@ public class ContactChannel
 
     public ContactChannel()
     {
-        // Unbounded channel for high-throughput, non-blocking in-memory queue
-        _channel = Channel.CreateUnbounded<ContactMessage>(new UnboundedChannelOptions
+        // Bounded so a flood of submissions cannot grow memory without limit; when full the oldest
+        // pending email is dropped (the message itself is already saved in the database).
+        _channel = Channel.CreateBounded<ContactMessage>(new BoundedChannelOptions(100)
         {
             SingleReader = true,
-            SingleWriter = false
+            SingleWriter = false,
+            FullMode = BoundedChannelFullMode.DropOldest
         });
     }
 

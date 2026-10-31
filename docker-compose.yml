@@ -1,5 +1,3 @@
-version: '3.9'
-
 networks:
   portfolio_net:
     driver: bridge
@@ -10,19 +8,28 @@ volumes:
     external: true
   pgadmin_data:
 
+# Rotate container logs so a request flood cannot fill the server's disk
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # ─── 1. DATABASE ─────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
     container_name: portfolio_postgres
     networks: [portfolio_net]
+    logging: *default-logging
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: portfolio_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports: ["5432:5432"]
+    # Only reachable from the server itself (use an SSH tunnel from other machines)
+    ports: ["127.0.0.1:5432:5432"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -41,6 +48,7 @@ services:
     image: ollama/ollama:latest
     container_name: portfolio_ollama
     networks: [portfolio_net]
+    logging: *default-logging
     environment:
       OLLAMA_NUM_PARALLEL: 1
       OLLAMA_KEEP_ALIVE: "24h"
@@ -51,9 +59,12 @@ services:
     deploy:
       resources:
         limits:
+          # Leave CPU for the other sites on this server; the deploy workflow sets half the cores
+          cpus: '${OLLAMA_CPUS:-2}'
           memory: 5G
 
   # ─── 3. BACKEND (.NET 9 MODULAR MONOLITH) ───────────────────
+  # No published port: only the frontend nginx (same Docker network) talks to it
   backend:
     image: portfolio_backend:latest
     build:
@@ -61,8 +72,7 @@ services:
       dockerfile: src/Portfolio.API/Dockerfile
     container_name: portfolio_backend
     networks: [portfolio_net]
-    ports:
-      - "5000:8080"
+    logging: *default-logging
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=portfolio_db;Username=postgres;Password=${POSTGRES_PASSWORD}
       - JwtSettings__Secret=${JWT_SECRET_KEY}
@@ -92,6 +102,7 @@ services:
       dockerfile: Dockerfile
     container_name: portfolio_frontend
     networks: [portfolio_net]
+    logging: *default-logging
     ports:
       - "18122:80"
     depends_on:
@@ -99,12 +110,16 @@ services:
         condition: service_started
 
   # ─── 5. PGADMIN 4 (DATABASE WEB UI) ─────────────────────────
+  # Off by default. Start on demand: `docker compose --profile tools up -d pgadmin`
+  # then open it through an SSH tunnel: ssh -L 5050:localhost:5050 <server>
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: portfolio_pgadmin
+    profiles: [tools]
     networks: [portfolio_net]
+    logging: *default-logging
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@khoi.dev
       PGADMIN_DEFAULT_PASSWORD: admin

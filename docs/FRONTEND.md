@@ -6,7 +6,7 @@
 - Tailwind CSS v4 (`@tailwindcss/vite`), Framer Motion, lucide-react
 - Zustand (auth, theme admin), TanStack Query (chỉ trong admin), `fetch` thuần (`lib/api.ts`)
 - React Router DOM v7
-- `@microsoft/signalr`, `axios` có trong `package.json` nhưng hiện **không được import** ở đâu (có thể gỡ)
+- Không dùng axios/SignalR (đã gỡ 2026-10-31); gọi API bằng `fetch`.
 
 ## 2. Cấu trúc
 

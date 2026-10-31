@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -11,8 +12,30 @@ namespace Portfolio.API.Services;
 
 public class EmailService
 {
+    // Keeps a contact-form flood from exhausting the Gmail sending quota; extra messages still land in the inbox.
+    private const int MaxEmailsPerDay = 30;
+    private static readonly object CapLock = new();
+    private static DateOnly _capDay;
+    private static int _sentToday;
+
     private readonly IConfiguration _config;
     private readonly ILogger<EmailService> _logger;
+
+    private static bool TryReserveDailySlot()
+    {
+        lock (CapLock)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (_capDay != today)
+            {
+                _capDay = today;
+                _sentToday = 0;
+            }
+            if (_sentToday >= MaxEmailsPerDay) return false;
+            _sentToday++;
+            return true;
+        }
+    }
 
     public EmailService(IConfiguration config, ILogger<EmailService> logger)
     {
@@ -29,6 +52,19 @@ public class EmailService
         var username = _config["Mail:Username"] ?? "dangvykhoi@gmail.com";
         var password = _config["Mail:Password"] ?? _config["MAIL_APP_PASSWORD"];
 
+        if (!TryReserveDailySlot())
+        {
+            _logger.LogWarning("Daily contact email cap ({Cap}) reached; message {Id} is saved in the inbox but not emailed.",
+                MaxEmailsPerDay, contact.Id);
+            return;
+        }
+
+        // Visitor input goes into HTML: encode it so it renders as text
+        var name = WebUtility.HtmlEncode(contact.Name);
+        var email = WebUtility.HtmlEncode(contact.Email);
+        var subject = WebUtility.HtmlEncode(contact.Subject);
+        var body = WebUtility.HtmlEncode(contact.Message);
+
         var htmlTemplate = $@"
         <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;'>
             <div style='background-color: #0A0A0C; color: #DEFF9A; padding: 20px; text-align: center; border-bottom: 2px solid #27272A;'>
@@ -39,19 +75,19 @@ public class EmailService
                 <table style='width: 100%; border-collapse: collapse;'>
                     <tr>
                         <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; width: 100px; color: #DEFF9A;'>Họ tên:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{contact.Name}</td>
+                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{name}</td>
                     </tr>
                     <tr>
                         <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; color: #DEFF9A;'>Email:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #00E5FF;'><a href='mailto:{contact.Email}' style='color: #00E5FF; text-decoration: none;'>{contact.Email}</a></td>
+                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #00E5FF;'><a href='mailto:{email}' style='color: #00E5FF; text-decoration: none;'>{email}</a></td>
                     </tr>
                     <tr>
                         <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; color: #DEFF9A;'>Chủ đề:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{contact.Subject}</td>
+                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{subject}</td>
                     </tr>
                     <tr>
                         <td style='padding: 10px; font-weight: bold; vertical-align: top; color: #DEFF9A;'>Tin nhắn:</td>
-                        <td style='padding: 10px; color: #FFFFFF; white-space: pre-wrap; background-color: #18181C; border-radius: 6px; border: 1px solid #27272A;'>{contact.Message}</td>
+                        <td style='padding: 10px; color: #FFFFFF; white-space: pre-wrap; background-color: #18181C; border-radius: 6px; border: 1px solid #27272A;'>{body}</td>
                     </tr>
                 </table>
             </div>

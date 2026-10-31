@@ -4,7 +4,7 @@ Chi tiết: `docs/FRONTEND.md`.
 
 ## Stack
 React 19, TypeScript ~6, Vite 8 (rolldown, `manualChunks` tách vendor-motion / vendor-query / vendor-react), Tailwind 4, Framer Motion, lucide-react, Zustand, TanStack Query (chỉ admin), React Router 7, oxlint. Alias `@` → `src/`.
-`axios` và `@microsoft/signalr` có trong package.json nhưng **không được dùng**.
+Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` trong `CatChatbot.tsx`).
 
 ## src/
 | Đường dẫn | Việc |
@@ -24,7 +24,7 @@ React 19, TypeScript ~6, Vite 8 (rolldown, `manualChunks` tách vendor-motion / 
 `index.html` chứa SEO (meta, OpenGraph, JSON-LD Person/WebSite/ProfilePage/FAQPage), boot splash và HTML fallback cho crawler — sửa thông tin cá nhân thì sửa cả ở đây.
 
 ## Container
-`Dockerfile`: `node:20-alpine` build → `nginx:alpine` serve `dist/`. `nginx.conf` của container: route `/api/*` → `backend:8080`, rate limit POST (ai 20/phút, contact 5/phút, login 10/phút), tắt buffer cho SSE, cache `/assets/` 1 năm, `noindex` cho `/login` `/dashboard`.
+`Dockerfile`: `node:20-alpine` build → `nginx:alpine` serve `dist/`. `nginx.conf` của container: route `/api/*` → `backend:8080`, realip từ `X-Real-IP` của gateway (rate limit tính theo IP thật của khách), rate limit POST (ai 20/phút, contact 5/phút, login 10/phút), CSP an toàn (`frame-ancestors`, `object-src`, `base-uri`, `form-action` — không giới hạn script vì `index.html` có `onload` inline để tải font), tắt buffer cho SSE, cache `/assets/` 1 năm, `noindex` cho `/login` `/dashboard`.
 
 ## Lệnh
 `npm run dev` (proxy `/api` → `localhost:5000`) · `npm run build` · `npm run lint`.

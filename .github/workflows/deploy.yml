@@ -1,5 +1,7 @@
 name: Deploy Portfolio
 
+# Runs on the self-hosted runner at home. Keep this push-only: never add pull_request triggers
+# to this public repo, or forks could run code on the server.
 on:
   push:
     branches:
@@ -23,25 +25,57 @@ jobs:
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }}
           EOF
+          # Ollama gets at most half of the server's cores so the other sites stay responsive
+          echo "OLLAMA_CPUS=$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))" >> .env
+          chmod 600 .env
 
       - name: Ensure Docker volume for Ollama
         run: |
           docker volume create ollama_models || true
 
-      - name: Build and Deploy via Docker Compose
+      - name: Backup database before deploy
         run: |
-          echo "Dọn dẹp container cũ..."
-          docker compose down --remove-orphans || true
-          echo "Build bản mới tinh 100% không dùng cache cũ..."
-          docker compose build --no-cache
-          echo "Khởi động container mới..."
-          docker compose up -d --force-recreate --remove-orphans
-          echo "Xóa các image build cũ (<none>)..."
-          docker image prune -f
+          BACKUP_DIR="$HOME/backups/portfolio"
+          mkdir -p "$BACKUP_DIR"
+          if docker ps --format '{{.Names}}' | grep -qx portfolio_postgres; then
+            FILE="$BACKUP_DIR/portfolio_db_$(date +%Y%m%d_%H%M%S).dump"
+            docker exec portfolio_postgres pg_dump -U postgres -Fc portfolio_db > "$FILE"
+            test -s "$FILE" || { echo "Backup is empty, aborting deploy"; exit 1; }
+            echo "Backup saved: $FILE ($(du -h "$FILE" | cut -f1))"
+            # Keep the 14 most recent backups
+            ls -1t "$BACKUP_DIR"/portfolio_db_*.dump | tail -n +15 | xargs -r rm -f
+          else
+            echo "portfolio_postgres is not running yet, skipping backup"
+          fi
+
+      - name: Build images
+        run: |
+          docker compose build
+
+      - name: Deploy containers
+        run: |
+          # pgAdmin now only runs on demand (profile "tools"); remove the old always-on container
+          docker rm -f portfolio_pgadmin 2>/dev/null || true
+          docker compose up -d --remove-orphans
 
       - name: Initialize or Update AI Model (sigma-cat)
         run: |
-          sleep 5
+          for i in $(seq 1 30); do docker exec portfolio_ollama ollama list >/dev/null 2>&1 && break; sleep 2; done
           docker exec -i portfolio_ollama ollama pull qwen2.5:1.5b
           docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
           docker exec -i portfolio_ollama ollama rm qwen2.5:3b || true
+
+      - name: Health check
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS -o /dev/null http://localhost:18122/ && curl -fsS -o /dev/null http://localhost:18122/api/content/profile; then
+              echo "Portfolio is healthy"; exit 0
+            fi
+            sleep 3
+          done
+          echo "Health check failed"; docker compose ps; docker compose logs --tail 80 backend frontend; exit 1
+
+      - name: Cleanup dangling images
+        if: always()
+        run: |
+          docker image prune -f

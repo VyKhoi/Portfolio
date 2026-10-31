@@ -6,6 +6,7 @@ import { AdminLoader } from "./AdminLoader"
 
 export function ProfileSettings() {
   const token = useAuthStore((state) => state.token)
+  const setToken = useAuthStore((state) => state.setToken)
   const queryClient = useQueryClient()
   const baseUrl = "/api"
 
@@ -120,6 +121,8 @@ export function ProfileSettings() {
           text: data.error || "Đổi mật khẩu thất bại.",
         })
       } else {
+        // Changing the password revokes older tokens; keep this session alive with the fresh one.
+        if (data.token) setToken(data.token)
         setPwdMessage({
           type: "success",
           text: "PASSWORD_UPDATED_SUCCESSFULLY!",

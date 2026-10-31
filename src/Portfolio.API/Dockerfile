@@ -9,6 +9,9 @@ RUN dotnet publish "Portfolio.API.csproj" -c Release -o /app/publish /p:UseAppHo
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+# Serilog writes to /app/logs: give the built-in non-root "app" user ownership, then drop root.
+RUN mkdir -p /app/logs && chown "$APP_UID" /app/logs
+USER $APP_UID
 ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Portfolio.API.dll"]

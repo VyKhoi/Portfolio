@@ -6,6 +6,15 @@ interface ChatMessage {
   content: string;
 }
 
+// Messages are rendered as HTML (for **bold** / *italic*), so escape the raw text first.
+const escapeHtml = (text: string) =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 export const CatChatbot: React.FC = () => {
   const [sessionId, setSessionId] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
@@ -352,7 +361,7 @@ export const CatChatbot: React.FC = () => {
                         : 'bg-[#27272A] text-zinc-200 rounded-2xl rounded-tl-sm'
                     }`}
                     dangerouslySetInnerHTML={{
-                      __html: m.content
+                      __html: escapeHtml(m.content)
                         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.*?)\*/g, '<em>$1</em>')
                     }}
