@@ -18,7 +18,7 @@ x-logging: &default-logging
 services:
   # ─── 1. DATABASE ─────────────────────────────────────────────
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.15-alpine
     container_name: portfolio_postgres
     networks: [portfolio_net]
     logging: *default-logging
@@ -45,7 +45,7 @@ services:
   # ─── 2. LOCAL AI (ISOLATED IN INTERNAL DOCKER NETWORK) ────────
   # NO PORTS EXPOSED TO HOST TO PREVENT EXTERNAL SPAM / SCRAPING
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.40.11
     container_name: portfolio_ollama
     networks: [portfolio_net]
     logging: *default-logging
@@ -113,7 +113,7 @@ services:
   # Off by default. Start on demand: `docker compose --profile tools up -d pgadmin`
   # then open it through an SSH tunnel: ssh -L 5050:localhost:5050 <server>
   pgadmin:
-    image: dpage/pgadmin4:latest
+    image: dpage/pgadmin4:9
     container_name: portfolio_pgadmin
     profiles: [tools]
     networks: [portfolio_net]

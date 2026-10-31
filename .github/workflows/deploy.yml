@@ -98,7 +98,7 @@ jobs:
         if: always()
         run: |
           docker exec portfolio_ollama ollama --version 2>/dev/null || true
-          docker image inspect dpage/pgadmin4:latest --format 'pgadmin4 {{index .Config.Labels "org.opencontainers.image.version"}} {{.Id}}' 2>/dev/null || true
+          docker image inspect dpage/pgadmin4:9 --format 'pgadmin4 {{index .Config.Labels "org.opencontainers.image.version"}} {{.Id}}' 2>/dev/null || true
           docker exec portfolio_postgres postgres --version 2>/dev/null || true
 
       - name: Cleanup dangling images
