@@ -6,6 +6,11 @@ on:
   push:
     branches:
       - main
+    # Docs-only changes do not need a rebuild of the whole site
+    paths-ignore:
+      - "README.md"
+      - "docs/**"
+      - "**/CLAUDE.md"
 
 jobs:
   deploy:
