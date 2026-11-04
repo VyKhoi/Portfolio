@@ -132,6 +132,21 @@ export function ProjectsBento() {
             ))}
           </div>
         </div>
+
+        <a
+          href="https://note.dangvykhoi.com/"
+          target="_blank"
+          rel="noopener"
+          className="mt-12 md:mt-24 block border border-border p-5 sm:p-6 md:p-10 bg-obsidian hover:border-primary transition-colors duration-300"
+        >
+          <div className="text-text-muted font-mono text-xs sm:text-sm tracking-widest mb-2">SIDE PROJECT</div>
+          <h3 className="text-xl sm:text-2xl font-bold font-heading text-text-main uppercase mb-3">
+            ChickenNote <span className="text-primary">→</span>
+          </h3>
+          <p className="text-text-muted text-sm sm:text-base leading-relaxed font-body">
+            Note online miễn phí, không cần tài khoản: đồng bộ tức thì giữa máy tính và điện thoại. Tự viết bằng Go và tự host tại nhà.
+          </p>
+        </a>
       </div>
     </section>
   )
