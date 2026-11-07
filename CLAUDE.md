@@ -3,7 +3,7 @@
 Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kinh nghiệm, kỹ năng, liên hệ), admin console `/dashboard` để sửa nội dung, và chatbot AI local "Sigma Cat".
 
 ## Stack
-.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama `sigma-cat` (Qwen2.5 1.5B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
+.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama `sigma-cat` (Qwen3.5 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
 
 ## Bản đồ module
 | Thư mục | Vai trò | Chi tiết |
@@ -28,6 +28,10 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Telegram tối đa 30 tin/giờ, `parse_mode: HTML` → nội dung động phải qua `TelegramNotifier.Escape`.
 - Chat log > 90 ngày tự xoá (`ChatRetentionWorker`). Backend chạy user non-root `app`.
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
+
+## AI trên server
+- `sigma-cat` chạy `qwen3.5:4b` trên CPU + MX150 (2 GB). GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
+- Backend gửi `think: false`. Đo 2026-11-07: chờ chữ đầu ~5,6s (ngay sau khởi động ~20s), ~4,8 token/giây, một câu trả lời ~11s.
 
 ## Song ngữ và nội dung
 - `/` tiếng Anh (mặc định), `/vi` tiếng Việt, `/en` chuyển 301 về `/`. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.

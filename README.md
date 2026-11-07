@@ -8,7 +8,7 @@
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-vykhoi-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/vykhoi)
 [![GitHub](https://img.shields.io/badge/GitHub-vykhoi-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/vykhoi)
 
-`.NET 9` · `PostgreSQL 16` · `React 19` · `TypeScript` · `Tailwind` · `Ollama (Qwen2.5)` · `Docker` · `Nginx`
+`.NET 9` · `PostgreSQL 16` · `React 19` · `TypeScript` · `Tailwind` · `Ollama (Qwen3.5)` · `Docker` · `Nginx`
 
 </div>
 
@@ -32,7 +32,7 @@ graph LR
 ```
 
 - **Backend:** .NET 9 modular monolith, EF Core, JWT, in-memory cache, background email through `System.Threading.Channels`.
-- **AI:** Ollama + Qwen2.5 1.5B, reachable only inside the Docker network. Its knowledge lives in `src/Portfolio.AI`. Common questions get an instant answer (Fast Intent); the rest stream over SSE.
+- **AI:** Ollama + Qwen3.5 4B on CPU + GPU, reachable only inside the Docker network. Its knowledge lives in `src/Portfolio.AI`. Common questions get an instant answer (Fast Intent); the rest stream over SSE.
 - **Frontend:** React 19, Vite, Tailwind, Framer Motion; SEO with JSON-LD, OpenGraph and a sitemap.
 - **Protection:** rate limits, a honeypot against bots (no captcha), secrets managed on the server.
 

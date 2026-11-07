@@ -154,6 +154,10 @@ public class OllamaChatRequest
 
     [JsonPropertyName("stream")]
     public bool Stream { get; set; } = false;
+
+    // Qwen3.5 reasons before answering by default, too slow for a chat widget on this server
+    [JsonPropertyName("think")]
+    public bool Think { get; set; } = false;
 }
 
 public class OllamaChatMessage

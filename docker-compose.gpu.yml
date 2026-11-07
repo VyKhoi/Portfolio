@@ -1,0 +1,11 @@
+# Gives Ollama the server's NVIDIA GPU. Production turns this on with COMPOSE_FILE in .env;
+# machines without an NVIDIA GPU just run docker-compose.yml.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

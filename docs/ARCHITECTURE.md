@@ -10,7 +10,7 @@ The personal site **dangvykhoi.com** has 3 parts in one repo:
 | :--- | :--- | :--- |
 | Backend | `src/Portfolio.API` | .NET 9 Web API (modular monolith): content CMS, contact inbox, admin auth, AI chat proxy |
 | Frontend | `src/Web/frontend` | React 19 SPA: public pages + `/login` + `/dashboard` (admin console). Built to static files and served by Nginx |
-| AI | `src/Portfolio.AI` | Knowledge in Markdown + the `Modelfile` that creates the Ollama model `sigma-cat` (Qwen2.5 1.5B) |
+| AI | `src/Portfolio.AI` | Knowledge in Markdown + the `Modelfile` that creates the Ollama model `sigma-cat` (Qwen3.5 4B) |
 
 ## 2. Runtime (docker-compose)
 

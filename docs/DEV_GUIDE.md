@@ -65,5 +65,5 @@ docker compose up --build -d
 - The Ollama container is internal-only to prevent public spam and abuse.
 - In development, pulling or updating the model:
   ```bash
-  docker exec -it portfolio_ollama ollama pull qwen2.5:1.5b
+  docker exec -it portfolio_ollama ollama pull qwen3.5:4b
   ```

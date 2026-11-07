@@ -6,7 +6,7 @@ Không có code chạy — chỉ là nguyên liệu để tạo model Ollama `si
 | :--- | :--- |
 | `knowledge/guidelines.md` | Persona (mèo trợ lý, xưng "em", nói về anh Khôi ở ngôi thứ 3, 1–2 câu, cấm gạch đầu dòng) + mẫu hỏi đáp |
 | `knowledge/profile.md`, `experience.md`, `skills.md` | Dữ kiện về Khôi (rất ngắn) |
-| `Modelfile` | **Được sinh ra** từ knowledge: `FROM qwen2.5:1.5b`, PARAMETER (`temperature 0.3`, `num_predict 65`, `num_ctx 1024`, `num_thread 4`...), `SYSTEM """..."""` |
+| `Modelfile` | **Được sinh ra** từ knowledge: `FROM qwen3.5:4b`, PARAMETER (`temperature 0.3`, `num_predict 120`, `num_ctx 4096`, `num_thread 4`...). **`num_ctx` phải lớn hơn system prompt (~1200 token)**, nhỏ hơn thì Ollama cắt mất prompt, `SYSTEM """..."""` |
 | `scripts/assemble.ps1` | Ghép knowledge → Modelfile (Windows) |
 | `scripts/build-model.ps1` | assemble + `docker exec portfolio_ollama ollama create sigma-cat` + alias `meo-code` |
 | `scripts/build-model.sh` | Bản Linux (tự chứa phần ghép) |
