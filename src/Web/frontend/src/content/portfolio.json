@@ -1,0 +1,112 @@
+{
+  "profile": {
+    "fullName": "ĐẶNG VỸ KHÔI",
+    "title": "Software Engineer | .NET Backend",
+    "titleEn": "Software Engineer | .NET Backend",
+    "bio": "Tôi là lập trình viên với 3 năm kinh nghiệm, chủ yếu làm việc với .NET. Ngoài công việc chính, tôi thích tự làm những sản phẩm nhỏ của riêng mình. Cảm ơn bạn đã ghé qua!",
+    "bioEn": "I'm a software developer with 3 years of experience, working mostly with .NET. Outside my day job, I enjoy building small products of my own. Thanks for stopping by!",
+    "avatarKey": "/profile.jpg",
+    "cvPdfKey": "/cv.pdf",
+    "githubLink": "https://github.com/vykhoi",
+    "linkedinLink": "https://linkedin.com/in/vykhoi"
+  },
+  "experiences": [
+    {
+      "role": "Software Engineer (.NET)",
+      "roleEn": "Software Engineer (.NET)",
+      "company": "Masan Group",
+      "companyEn": "Masan Group",
+      "period": "05/2026 - Hiện tại",
+      "periodEn": "05/2026 - Present",
+      "projectName": "",
+      "projectNameEn": "",
+      "highlights": [],
+      "highlightsEn": [],
+      "techStack": [],
+      "order": 1
+    },
+    {
+      "role": "Software Engineer (.NET)",
+      "roleEn": "Software Engineer (.NET)",
+      "company": "Team độc lập",
+      "companyEn": "Independent Team",
+      "period": "2024 - 2026",
+      "periodEn": "2024 - 2026",
+      "projectName": "CRM/POS cho chuỗi salon",
+      "projectNameEn": "CRM/POS for Salon Chains",
+      "highlights": [
+        "Xây phần lõi nhiều tenant dùng chung cho POS, web và ứng dụng di động.",
+        "Viết API .NET 8 cho đặt lịch, thanh toán, tính lương và báo cáo bằng EF Core và Dapper.",
+        "Tách dữ liệu riêng cho hơn 100 chi nhánh bằng row-level security và JWT.",
+        "Tích hợp thanh toán CardPointe; tự động hoá tính lương, SMS và hoa hồng bằng Hangfire.",
+        "Đồng bộ thời gian thực giữa dashboard, kiosk và ứng dụng di động bằng SignalR."
+      ],
+      "highlightsEn": [
+        "Built the multi-tenant core shared by the POS, web and mobile apps.",
+        "Wrote .NET 8 APIs for booking, billing, payroll and reporting with EF Core and Dapper.",
+        "Kept tenant data separate across 100+ branches with row-level security and JWT auth.",
+        "Integrated CardPointe payments; automated payroll, SMS and commission jobs with Hangfire.",
+        "Synced dashboards, kiosks and mobile apps in real time with SignalR."
+      ],
+      "techStack": [".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI"],
+      "order": 2
+    },
+    {
+      "role": "Backend Developer",
+      "roleEn": "Backend Developer",
+      "company": "AEGONA Co., Ltd",
+      "companyEn": "AEGONA Co., Ltd",
+      "period": "2023 - 2024",
+      "periodEn": "2023 - 2024",
+      "projectName": "Dự án outsourcing (CRM, e-learning)",
+      "projectNameEn": "Outsourcing Projects (CRM, e-learning)",
+      "highlights": [
+        "Làm backend cho các hệ thống CRM, e-learning và đặt lịch bằng ASP.NET Core và SQL Server.",
+        "Hỗ trợ phát triển API và tích hợp dịch vụ trên cả hệ thống monolith và microservices.",
+        "Cùng team refactor code cũ phía server và tối ưu câu truy vấn SQL."
+      ],
+      "highlightsEn": [
+        "Worked on the backend of CRM, e-learning and booking systems with ASP.NET Core and SQL Server.",
+        "Supported API development and service integration on monolith and microservices systems.",
+        "Helped refactor legacy server code and speed up SQL queries."
+      ],
+      "techStack": ["ASP.NET Core", "SQL Server", "Microservices"],
+      "order": 3
+    },
+    {
+      "role": "Full-stack Developer",
+      "roleEn": "Full-stack Developer",
+      "company": "Dự án cá nhân",
+      "companyEn": "Personal Project",
+      "period": "2026 - Hiện tại",
+      "periodEn": "2026 - Present",
+      "projectName": "ChickenNote",
+      "projectNameEn": "ChickenNote",
+      "highlights": [
+        "Trang ghi chú online không cần tài khoản: mở một cái tên, gõ, và chữ đồng bộ ngay giữa điện thoại với máy tính.",
+        "Vẫn dùng được khi mất mạng và tự gộp thay đổi khi có mạng lại.",
+        "Backend Go, frontend JavaScript thuần."
+      ],
+      "highlightsEn": [
+        "Online notes with no account: open a name, type, and it syncs between phone and PC right away.",
+        "Keeps working offline and merges the changes when the connection is back.",
+        "Go backend and plain JavaScript frontend."
+      ],
+      "techStack": ["Go", "JavaScript", "SSE", "Docker", "Linux"],
+      "order": 4
+    }
+  ],
+  "skills": [
+    { "category": "Backend & Core", "name": ".NET 8 / 9" },
+    { "category": "Backend & Core", "name": "C#" },
+    { "category": "Backend & Core", "name": "Concurrency" },
+    { "category": "Backend & Core", "name": "REST APIs" },
+    { "category": "Backend & Core", "name": "SignalR" },
+    { "category": "Architecture & Sec", "name": "Multi-tenant & RLS" },
+    { "category": "Architecture & Sec", "name": "Clean Architecture" },
+    { "category": "Databases", "name": "SQL Server & PostgreSQL" },
+    { "category": "Databases", "name": "EF Core & Dapper" },
+    { "category": "Frontend", "name": "React & TypeScript" },
+    { "category": "DevOps & Cloud", "name": "Docker & Linux" }
+  ]
+}

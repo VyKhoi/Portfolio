@@ -7,10 +7,15 @@ import { AdminLoader } from "./AdminLoader"
 interface Experience {
   id: string
   role: string
+  roleEn: string
   company: string
+  companyEn: string
   period: string
+  periodEn: string
   projectName: string
+  projectNameEn: string
   highlights: string[]
+  highlightsEn: string[]
   techStack: string[]
   order: number
 }
@@ -25,10 +30,15 @@ export function ExperienceCRUD() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     role: "",
+    roleEn: "",
     company: "",
+    companyEn: "",
     period: "",
+    periodEn: "",
     projectName: "",
+    projectNameEn: "",
     highlightsText: "",
+    highlightsEnText: "",
     techStackText: "",
     order: 1,
   })
@@ -100,10 +110,15 @@ export function ExperienceCRUD() {
       setEditingExp(exp)
       setFormData({
         role: exp.role,
+        roleEn: exp.roleEn || "",
         company: exp.company,
+        companyEn: exp.companyEn || "",
         period: exp.period,
+        periodEn: exp.periodEn || "",
         projectName: exp.projectName,
+        projectNameEn: exp.projectNameEn || "",
         highlightsText: (exp.highlights || []).join("\n"),
+        highlightsEnText: (exp.highlightsEn || []).join("\n"),
         techStackText: (exp.techStack || []).join(", "),
         order: exp.order,
       })
@@ -111,10 +126,15 @@ export function ExperienceCRUD() {
       setEditingExp(null)
       setFormData({
         role: "",
+        roleEn: "",
         company: "",
+        companyEn: "",
         period: "",
+        periodEn: "",
         projectName: "",
+        projectNameEn: "",
         highlightsText: "",
+        highlightsEnText: "",
         techStackText: "",
         order: experiences.length + 1,
       })
@@ -131,10 +151,18 @@ export function ExperienceCRUD() {
     e.preventDefault()
     const payload = {
       role: formData.role,
+      roleEn: formData.roleEn,
       company: formData.company,
+      companyEn: formData.companyEn,
       period: formData.period,
+      periodEn: formData.periodEn,
       projectName: formData.projectName,
+      projectNameEn: formData.projectNameEn,
       highlights: formData.highlightsText
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      highlightsEn: formData.highlightsEnText
         .split("\n")
         .map((s) => s.trim())
         .filter(Boolean),
@@ -301,7 +329,6 @@ export function ExperienceCRUD() {
                       setFormData({ ...formData, projectName: e.target.value })
                     }
                     className="adm-input"
-                    required
                   />
                 </div>
                 <div>
@@ -328,7 +355,62 @@ export function ExperienceCRUD() {
                     setFormData({ ...formData, highlightsText: e.target.value })
                   }
                   className="adm-input h-32"
-                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="adm-label">ROLE_EN</label>
+                  <input
+                    type="text"
+                    value={formData.roleEn}
+                    onChange={(e) =>
+                      setFormData({ ...formData, roleEn: e.target.value })
+                    }
+                    className="adm-input"
+                  />
+                </div>
+                <div>
+                  <label className="adm-label">COMPANY_EN</label>
+                  <input
+                    type="text"
+                    value={formData.companyEn}
+                    onChange={(e) =>
+                      setFormData({ ...formData, companyEn: e.target.value })
+                    }
+                    className="adm-input"
+                  />
+                </div>
+                <div>
+                  <label className="adm-label">PERIOD_EN</label>
+                  <input
+                    type="text"
+                    value={formData.periodEn}
+                    onChange={(e) =>
+                      setFormData({ ...formData, periodEn: e.target.value })
+                    }
+                    className="adm-input"
+                  />
+                </div>
+                <div>
+                  <label className="adm-label">PROJECT_NAME_EN</label>
+                  <input
+                    type="text"
+                    value={formData.projectNameEn}
+                    onChange={(e) =>
+                      setFormData({ ...formData, projectNameEn: e.target.value })
+                    }
+                    className="adm-input"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="adm-label">HIGHLIGHTS_EN (ONE PER LINE)</label>
+                <textarea
+                  value={formData.highlightsEnText}
+                  onChange={(e) =>
+                    setFormData({ ...formData, highlightsEnText: e.target.value })
+                  }
+                  className="adm-input h-32"
                 />
               </div>
               <div>

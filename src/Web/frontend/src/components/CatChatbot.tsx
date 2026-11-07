@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
+import { useT } from '../lib/i18n';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -16,6 +17,7 @@ const escapeHtml = (text: string) =>
     .replace(/'/g, '&#39;');
 
 export const CatChatbot: React.FC = () => {
+  const t = useT();
   const [sessionId, setSessionId] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -254,7 +256,7 @@ export const CatChatbot: React.FC = () => {
       {/* Speech bubble following animated cat or anchored above mobile button */}
       <AnimatePresence>
         {!isOpen && showBubble && (
-          <motion.div
+          <m.div
             ref={bubbleRef}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -269,16 +271,16 @@ export const CatChatbot: React.FC = () => {
             }}
             className="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg shadow-lg max-w-[165px] text-center"
           >
-            Hỏi gì về anh Khôi hong? Bấm vào em nè 😼
+            {t.chat.bubble}
             <div className="absolute -bottom-2 right-5 md:left-1/2 md:-translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0"></div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
       {/* Floating Toggle Button (Always visible when chat closed) */}
       <AnimatePresence>
         {!isOpen && (
-          <motion.button
+          <m.button
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
@@ -289,12 +291,12 @@ export const CatChatbot: React.FC = () => {
               setShowBubble(false);
             }}
             className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999] p-1 bg-[#121215] border-2 border-[#DEFF9A]/60 hover:border-[#DEFF9A] text-white rounded-full shadow-[0_0_25px_rgba(222,255,154,0.3)] transition-all group flex items-center justify-center cursor-pointer"
-            aria-label="Mở chat với Sigma Cat"
+            aria-label={t.chat.open}
           >
             <div className="relative">
-              <img 
-                src="/sigma-cat-sm.png?v=2" 
-                alt="Sigma Cat" 
+              <img
+                src="/sigma-cat-sm.webp"
+                alt="Sigma Cat"
                 width={44}
                 height={44}
                 decoding="async"
@@ -302,14 +304,14 @@ export const CatChatbot: React.FC = () => {
               />
               <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#DEFF9A] border-2 border-[#121215] animate-pulse"></span>
             </div>
-          </motion.button>
+          </m.button>
         )}
       </AnimatePresence>
 
       {/* Chat Window */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -318,9 +320,9 @@ export const CatChatbot: React.FC = () => {
             <div className="bg-[#18181C] border-b border-[#27272A] p-3.5 sm:p-4 flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <img 
-                    src="/sigma-cat-sm.png?v=2" 
-                    alt="Sigma Cat" 
+                  <img
+                    src="/sigma-cat-sm.webp"
+                    alt="Sigma Cat"
                     width={40}
                     height={40}
                     decoding="async"
@@ -332,12 +334,12 @@ export const CatChatbot: React.FC = () => {
                   <h3 className="text-white font-bold text-sm flex items-center gap-1.5">
                     Sigma Cat <span className="text-xs">😼</span>
                   </h3>
-                  <p className="text-xs text-zinc-400">Trợ lý AI Local (Qwen 1.5B)</p>
+                  <p className="text-xs text-zinc-400">{t.chat.subtitle}</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
-                aria-label="Đóng cửa sổ chat"
+                aria-label={t.chat.close}
                 className="text-zinc-400 hover:text-white transition-colors text-2xl leading-none px-2"
               >
                 &times;
@@ -348,16 +350,16 @@ export const CatChatbot: React.FC = () => {
               {messages.length === 0 && (
                 <div className="text-center mt-6">
                   <div className="inline-block bg-[#18181C] border border-[#27272A] text-zinc-400 text-xs px-4 py-2 rounded-full">
-                    Gợi ý: Hỏi về kỹ năng, kinh nghiệm của anh Khôi! 😼
+                    {t.chat.hint}
                   </div>
                 </div>
               )}
               {messages.map((m, idx) => (
                 <div key={idx} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div 
+                  <div
                     className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
-                      m.role === 'user' 
-                        ? 'bg-[#DEFF9A] text-black rounded-2xl rounded-tr-sm font-medium' 
+                      m.role === 'user'
+                        ? 'bg-[#DEFF9A] text-black rounded-2xl rounded-tr-sm font-medium'
                         : 'bg-[#27272A] text-zinc-200 rounded-2xl rounded-tl-sm'
                     }`}
                     dangerouslySetInnerHTML={{
@@ -382,8 +384,8 @@ export const CatChatbot: React.FC = () => {
             </div>
 
             <form onSubmit={handleSend} className="p-3 border-t border-[#27272A] bg-[#18181C] flex gap-2">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 name="website_trap"
                 value={honeypot}
                 onChange={e => setHoneypot(e.target.value)}
@@ -392,22 +394,22 @@ export const CatChatbot: React.FC = () => {
                 autoComplete="off"
                 aria-hidden="true"
               />
-              <input 
-                type="text" 
-                aria-label="Nhập câu hỏi cho Sigma Cat"
+              <input
+                type="text"
+                aria-label={t.chat.inputLabel}
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 maxLength={350}
-                placeholder={cooldown ? "Đang thở 3s..." : "Hỏi gì về anh Khôi..."}
+                placeholder={cooldown ? t.chat.cooling : t.chat.placeholder}
                 disabled={loading || cooldown}
                 className="flex-1 min-w-0 bg-[#0A0A0C] border border-[#27272A] text-white text-sm rounded-lg px-3.5 py-2.5 focus:border-[#DEFF9A] focus:ring-1 focus:ring-[#DEFF9A] outline-none transition-all placeholder:text-zinc-600 disabled:opacity-60"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={loading || cooldown || !input.trim()}
-                aria-label="Gửi tin nhắn"
+                aria-label={t.chat.send}
                 className="bg-[#DEFF9A] text-black px-4 py-2 rounded-lg font-bold disabled:opacity-50 hover:bg-[#c2f068] transition-colors flex items-center justify-center min-w-[44px] shrink-0"
-                title={cooldown ? "Vui lòng đợi 3s" : "Gửi tin nhắn"}
+                title={cooldown ? t.chat.wait : t.chat.send}
               >
                 {cooldown ? (
                   <span className="text-xs font-mono font-bold">3s</span>
@@ -418,7 +420,7 @@ export const CatChatbot: React.FC = () => {
                 )}
               </button>
             </form>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </>

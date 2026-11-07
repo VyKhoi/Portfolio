@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { ContentApi } from './api';
 
 // Stale-while-revalidate cache for public homepage content.
-// - Returning visitors render the last known content instantly (no text "jumping").
+// - The first render always uses the fallback, which is what the static HTML contains (safe hydration).
+// - Right after that, returning visitors switch to the last known content, then to the fresh response.
 // - Requests are de-duplicated and kicked off before React mounts (see main.tsx),
 //   so first-time visitors get real data in parallel with the JS bundle.
 
-const PREFIX = 'content-cache:v2:';
+const PREFIX = 'content-cache:v3:';
 
 const fetchers = {
   profile: ContentApi.getProfile,
@@ -75,13 +76,14 @@ export function useCachedContent<T>(
   fallback: T,
   isValid: (data: T) => boolean = () => true,
 ): T {
-  const [data, setData] = useState<T>(() => {
-    const cached = readCache<T>(key);
-    return cached !== undefined && isValid(cached) ? cached : fallback;
-  });
+  const [data, setData] = useState<T>(fallback);
 
   useEffect(() => {
     let alive = true;
+    const cached = readCache<T>(key);
+    if (cached !== undefined && isValid(cached)) {
+      setData(prev => (JSON.stringify(prev) === JSON.stringify(cached) ? prev : cached));
+    }
     fetchContent<T>(key)
       .then(fresh => {
         if (!alive || !isValid(fresh)) return;

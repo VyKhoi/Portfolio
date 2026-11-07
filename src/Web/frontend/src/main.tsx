@@ -1,11 +1,15 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import './index.css'
-import App from './App.tsx'
+import { AppRoutes } from './App.tsx'
 import { prefetchPublicContent } from './lib/contentCache'
 
-// Kick off public API requests immediately when visiting the public portfolio
-if (!window.location.pathname.startsWith('/dashboard') && !window.location.pathname.startsWith('/login')) {
+const root = document.getElementById('root')!
+const prerendered = root.dataset.prerendered === 'true'
+
+// Public pages: start refreshing content right away, the static HTML is already on screen
+if (prerendered) {
   prefetchPublicContent()
 }
 
@@ -20,8 +24,30 @@ window.addEventListener('vite:preloadError', (event) => {
   }
 })
 
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
-    <App />
-  </StrictMode>,
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </StrictMode>
 )
+
+if (prerendered) {
+  hydrateRoot(root, app)
+} else {
+  createRoot(root).render(app)
+}
+
+// The cursor cat is a desktop toy: never block the page for it, skip it on touch screens
+if (prerendered && window.matchMedia('(pointer: fine)').matches) {
+  const loadCat = () => {
+    const script = document.createElement('script')
+    script.src = '/oneko.js?v=3'
+    document.body.appendChild(script)
+  }
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadCat, { timeout: 3000 })
+  } else {
+    setTimeout(loadCat, 1500)
+  }
+}

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from "path"
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [
     react(),
     tailwindcss(),
@@ -13,13 +13,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  build: {
+  build: isSsrBuild ? {} : {
+    // Fonts stay separate files: smaller CSS, cached on their own, and no data: exception in the CSP
+    assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined),
     rolldownOptions: {
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('framer-motion')) return 'vendor-motion'
-            if (id.includes('@tanstack/react-query')) return 'vendor-query'
             if (id.includes('react-router') || id.includes('react-dom') || id.includes('/react/')) return 'vendor-react'
           }
         },
@@ -34,4 +34,4 @@ export default defineConfig({
       }
     }
   }
-})
+}))

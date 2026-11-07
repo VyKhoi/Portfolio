@@ -13,7 +13,9 @@ export function ProfileSettings() {
   const [formData, setFormData] = useState({
     fullName: "",
     title: "",
+    titleEn: "",
     bio: "",
+    bioEn: "",
     avatarKey: "",
     cvPdfKey: "",
     githubLink: "",
@@ -46,7 +48,9 @@ export function ProfileSettings() {
       setFormData({
         fullName: profile.fullName || "",
         title: profile.title || "",
+        titleEn: profile.titleEn || "",
         bio: profile.bio || "",
+        bioEn: profile.bioEn || "",
         avatarKey: profile.avatarKey || "",
         cvPdfKey: profile.cvPdfKey || "",
         githubLink: profile.githubLink || "",
@@ -194,6 +198,29 @@ export function ProfileSettings() {
               }
               className="adm-input h-28"
               required
+            />
+          </div>
+
+          <div>
+            <label className="adm-label">TITLE_EN</label>
+            <input
+              type="text"
+              value={formData.titleEn}
+              onChange={(e) =>
+                setFormData({ ...formData, titleEn: e.target.value })
+              }
+              className="adm-input"
+            />
+          </div>
+
+          <div>
+            <label className="adm-label">BIO_EN</label>
+            <textarea
+              value={formData.bioEn}
+              onChange={(e) =>
+                setFormData({ ...formData, bioEn: e.target.value })
+              }
+              className="adm-input h-28"
             />
           </div>
 

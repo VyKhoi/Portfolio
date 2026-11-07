@@ -9,14 +9,17 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 ## src/
 | Đường dẫn | Việc |
 | :--- | :--- |
-| `main.tsx` | Prefetch content public trước khi React mount; bắt `vite:preloadError` để reload 1 lần sau deploy |
-| `App.tsx` | Route `/` (Home), `/login` (form login nằm luôn trong file này), `/dashboard/*` (lazy `AdminLayout`, `ProtectedRoute` kiểm token). `CatChatbot` lazy, hiện sau 1.2s, ẩn ở login/dashboard |
+| `main.tsx` | Trang đã prerender (`data-prerendered`) thì `hydrateRoot`, còn lại (app shell) `createRoot`; prefetch content; bắt `vite:preloadError`; tải `oneko.js` lúc rảnh, chỉ khi có chuột |
+| `App.tsx` | `AppRoutes`: `/`, `/en` (Home), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
+| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/`, `/en` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
+| `content/portfolio.json`, `content/seo.json` | Nội dung dự phòng (vi + en), title/description từng ngôn ngữ |
+| `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định, `pick(item, key, lang)` chọn cột `...En` |
 | `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsBento → Contact → Footer |
 | `components/public/`, `components/admin/` | Xem hai mục cuối file này |
 | `components/ui/` | Badge, Button, Card, Input kiểu shadcn |
 | `components/CatChatbot.tsx` | Widget chat: `sessionId` ở `localStorage['ai_chat_session_id']`, tải `/api/ai/history/{id}`, POST `/api/ai/chat/stream` rồi đọc `ReadableStream` tách dòng `data: ` |
 | `lib/api.ts` | `API_BASE_URL='/api'`, `ContentApi` (profile/experience/skills), `ContactApi` |
-| `lib/contentCache.ts` | Cache `localStorage` `content-cache:v2:*` + `useCachedContent(key, fallback, isValid)` |
+| `lib/contentCache.ts` | Cache `localStorage` `content-cache:v3:*` + `useCachedContent(key, fallback, isValid)` |
 | `store/authStore.ts` | JWT ở `localStorage['token']` |
 | `store/adminThemeStore.ts` | Theme admin dark/light |
 | `index.css` | Tailwind + class `adm-*` cho 2 theme admin |
@@ -24,7 +27,7 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 `index.html` chứa SEO (meta, OpenGraph, JSON-LD Person/WebSite/ProfilePage/FAQPage), boot splash và HTML fallback cho crawler — sửa thông tin cá nhân thì sửa cả ở đây.
 
 ## Container
-`Dockerfile`: `node:20-alpine` build → `nginx:alpine` serve `dist/`. `nginx.conf` của container: route `/api/*` → `backend:8080`, realip từ `X-Real-IP` của gateway (rate limit tính theo IP thật của khách), rate limit POST (ai 20/phút, contact 5/phút, login 10/phút), CSP an toàn (`frame-ancestors`, `object-src`, `base-uri`, `form-action` — không giới hạn script vì `index.html` có `onload` inline để tải font), tắt buffer cho SSE, cache `/assets/` 1 năm, `noindex` cho `/login` `/dashboard`.
+`Dockerfile`: `node:20-alpine` build → `nginx:alpine` serve `dist/`. `nginx.conf`: route `/api/*` → `backend:8080`, rate limit POST (ai 20/phút, contact 5/phút, login 10/phút), tắt buffer cho SSE, cache `/assets/` 1 năm, HTML `s-maxage=120` (có tác dụng khi bật Cache Rule ở Cloudflare), đường dẫn lạ trả 404 thật. CSP + `Permissions-Policy` + COOP ở `nginx-site-headers.conf` (`script-src 'self'`: cấm script inline, `onload=`, font/ảnh từ domain ngoài); X-Frame, nosniff, referrer, HSTS do gateway đặt.
 
 ## Lệnh
 `npm run dev` (proxy `/api` → `localhost:5000`) · `npm run build` · `npm run lint`.

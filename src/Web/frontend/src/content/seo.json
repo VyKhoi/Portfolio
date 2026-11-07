@@ -1,0 +1,22 @@
+{
+  "vi": {
+    "title": "Đặng Vỹ Khôi | Software Engineer (.NET Backend)",
+    "description": "Website cá nhân của Đặng Vỹ Khôi, lập trình viên .NET. Kinh nghiệm làm việc, các dự án tự làm và trợ lý AI Sigma Cat.",
+    "ogImage": "og-image.png",
+    "ogImageAlt": "Đặng Vỹ Khôi, Software Engineer",
+    "locale": "vi_VN",
+    "inLanguage": "vi-VN",
+    "person": "Lập trình viên .NET.",
+    "disambiguating": "Đặng Vỹ Khôi (họ Đặng, tên đệm Vỹ, tên Khôi, không phải Khởi; trên LinkedIn hiển thị theo thứ tự tiếng Anh là Vỹ Khôi Đặng) là lập trình viên .NET, chủ sở hữu website dangvykhoi.com."
+  },
+  "en": {
+    "title": "Dang Vy Khoi | Software Engineer (.NET Backend)",
+    "description": "Personal website of Dang Vy Khoi, a .NET software developer. Work experience, side projects and the Sigma Cat AI assistant.",
+    "ogImage": "og-image-en.png",
+    "ogImageAlt": "Dang Vy Khoi, Software Engineer",
+    "locale": "en_US",
+    "inLanguage": "en",
+    "person": ".NET software developer.",
+    "disambiguating": "Dang Vy Khoi (Đặng Vỹ Khôi, shown as Vỹ Khôi Đặng on LinkedIn) is a .NET software developer and the owner of dangvykhoi.com."
+  }
+}

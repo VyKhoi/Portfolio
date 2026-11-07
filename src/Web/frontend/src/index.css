@@ -1,10 +1,13 @@
 @import "tailwindcss";
+@import "@fontsource-variable/space-grotesk/wght.css";
+@import "@fontsource-variable/urbanist/wght.css";
+@import "@fontsource-variable/jetbrains-mono/wght.css";
 
 @theme {
   /* Typography */
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-body: 'Urbanist', sans-serif;
+  --font-heading: 'Space Grotesk Variable', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', monospace;
+  --font-body: 'Urbanist Variable', sans-serif;
 
   /* Colors */
   --color-obsidian: #050505;
@@ -19,8 +22,39 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+    /* Anchors land below the fixed navbar */
+    scroll-padding-top: 5.5rem;
   }
-  
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .skip-link {
+    position: fixed;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 100;
+    padding: 0.75rem 1rem;
+    background: var(--color-primary);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: none;
+  }
+
   body {
     background-color: var(--color-obsidian);
     color: var(--color-text-main);

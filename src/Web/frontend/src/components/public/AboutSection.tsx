@@ -1,21 +1,12 @@
-import { motion } from "framer-motion"
+import { m } from "framer-motion"
 import { useCachedContent } from '../../lib/contentCache';
+import { useT } from '../../lib/i18n';
+import portfolio from '../../content/portfolio.json';
 
-const DEFAULT_SKILLS = [
-  { category: "Backend & Core", name: ".NET 8 / 9" },
-  { category: "Backend & Core", name: "C#" },
-  { category: "Backend & Core", name: "Concurrency" },
-  { category: "Backend & Core", name: "REST APIs" },
-  { category: "Backend & Core", name: "SignalR" },
-  { category: "Architecture & Sec", name: "Multi-tenant & RLS" },
-  { category: "Architecture & Sec", name: "Clean Architecture" },
-  { category: "Databases", name: "SQL Server & PostgreSQL" },
-  { category: "Databases", name: "EF Core & Dapper" },
-  { category: "Frontend", name: "React & TypeScript" },
-  { category: "DevOps & Cloud", name: "Docker & Linux" }
-];
+const DEFAULT_SKILLS = portfolio.skills;
 
 export function AboutSection() {
+  const t = useT();
   const skills = useCachedContent<any[]>(
     'skills',
     DEFAULT_SKILLS,
@@ -29,63 +20,58 @@ export function AboutSection() {
     return acc;
   }, {} as Record<string, string[]>);
 
-  const SKILL_CATEGORIES = Object.entries(categories).map(([title, items]) => ({ title, items }));
+  const SKILL_CATEGORIES = Object.entries(categories).map(([title, items]) => ({ title: t.skillCategories[title] ?? title, items }));
 
   return (
     <section id="about" className="relative py-16 md:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-obsidian overflow-hidden">
       <div className="geo-line-h top-0" />
-      
+
       <div className="container mx-auto max-w-6xl grid lg:grid-cols-2 gap-12 md:gap-16 lg:gap-24 relative z-10">
-        
+
         {/* Left: Education & Info */}
         <div>
           <div className="mb-8 md:mb-12 flex items-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
-              Học Vấn
+              {t.education}
             </h2>
             <div className="flex-grow h-[1px] bg-border ml-4 sm:ml-6" />
           </div>
 
-          <motion.div 
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             className="border-l-4 border-primary pl-5 sm:pl-6 py-2 mb-12 md:mb-16"
           >
-            <h3 className="text-xl sm:text-2xl font-bold font-heading text-text-main uppercase mb-2">Cử Nhân CNTT</h3>
-            <div className="text-primary font-mono text-xs sm:text-sm uppercase tracking-widest mb-4">Ho Chi Minh City Open University (2020-2024)</div>
+            <h3 className="text-xl sm:text-2xl font-bold font-heading text-text-main uppercase mb-2">{t.degree}</h3>
+            <div className="text-primary font-mono text-xs sm:text-sm uppercase tracking-widest mb-4">{t.school}</div>
             <ul className="space-y-3 text-sm sm:text-base text-text-muted font-body">
-              <li className="flex items-start"><span className="text-primary mr-2 font-mono">{`>`}</span> Tốt nghiệp loại Giỏi (Graduated with Distinction).</li>
-              <li className="flex items-start"><span className="text-primary mr-2 font-mono">{`>`}</span> Đạt 3 Học bổng Khuyến khích Học tập.</li>
+              {t.eduPoints.map(point => (
+                <li key={point} className="flex items-start"><span className="text-primary mr-2 font-mono">{`>`}</span> {point}</li>
+              ))}
             </ul>
-          </motion.div>
+          </m.div>
 
           <div className="mb-8 md:mb-12 flex items-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
-              Tư Duy
+              {t.mindset}
             </h2>
             <div className="flex-grow h-[1px] bg-border ml-4 sm:ml-6" />
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="border border-border p-5 sm:p-6 bg-surface hover:border-primary transition-colors"
-            >
-              <h3 className="text-primary font-mono text-xs sm:text-sm uppercase tracking-widest mb-2.5 sm:mb-3">01 // Product Mindset</h3>
-              <p className="text-sm sm:text-base text-text-muted leading-relaxed">Tập trung vào tính ổn định của hệ thống trên môi trường production và giá trị mang lại cho doanh nghiệp hơn là các giải pháp lý thuyết suông.</p>
-            </motion.div>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              className="border border-border p-5 sm:p-6 bg-surface hover:border-primary transition-colors"
-            >
-              <h3 className="text-primary font-mono text-xs sm:text-sm uppercase tracking-widest mb-2.5 sm:mb-3">02 // Technical Curiosity</h3>
-              <p className="text-sm sm:text-base text-text-muted leading-relaxed">Tự triển khai lab cá nhân với Linux, Docker, và CI/CD để liên tục thử nghiệm công nghệ mới, đảm bảo tính mở rộng trong tương lai.</p>
-            </motion.div>
+            {t.mindsetItems.map(item => (
+              <m.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="border border-border p-5 sm:p-6 bg-surface hover:border-primary transition-colors"
+              >
+                <h3 className="text-primary font-mono text-xs sm:text-sm uppercase tracking-widest mb-2.5 sm:mb-3">{item.title}</h3>
+                <p className="text-sm sm:text-base text-text-muted leading-relaxed">{item.text}</p>
+              </m.div>
+            ))}
           </div>
         </div>
 
@@ -93,19 +79,19 @@ export function AboutSection() {
         <div id="skills">
           <div className="mb-8 md:mb-12 flex items-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading uppercase tracking-tighter text-text-main">
-              Kỹ Năng
+              {t.skills}
             </h2>
             <div className="flex-grow h-[1px] bg-border ml-4 sm:ml-6" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border border border-border">
             {SKILL_CATEGORIES.map((skillGroup, idx) => (
-              <motion.div 
+              <m.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                key={skillGroup.title} 
+                key={skillGroup.title}
                 className="bg-obsidian p-6 sm:p-8 hover:bg-surface transition-colors"
               >
                 <h3 className="font-mono text-xs font-bold text-primary uppercase tracking-widest mb-4 sm:mb-6">
@@ -119,7 +105,7 @@ export function AboutSection() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
