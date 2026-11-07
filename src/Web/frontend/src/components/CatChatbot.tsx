@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
-import { useT } from '../lib/i18n';
+import { useLang, useT } from '../lib/i18n';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -18,6 +18,7 @@ const escapeHtml = (text: string) =>
 
 export const CatChatbot: React.FC = () => {
   const t = useT();
+  const lang = useLang();
   const [sessionId, setSessionId] = useState<string>('');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -161,15 +162,15 @@ export const CatChatbot: React.FC = () => {
         body: JSON.stringify({
           sessionId: sessionId,
           message: trimmedInput,
-          websiteTrap: honeypot,
-          history: messages
+          lang,
+          websiteTrap: honeypot
         })
       });
 
       if (res.status === 429) {
         setMessages([
           ...updatedMessages,
-          { role: 'assistant', content: "Gừừ... Meo meo cần thở xíu! Bạn đợi vài giây rồi hỏi tiếp nha 😼🐾" }
+          { role: 'assistant', content: t.chat.rateLimited }
         ]);
         setLoading(false);
         return;
@@ -202,36 +203,13 @@ export const CatChatbot: React.FC = () => {
           if (trimmed.startsWith('data: ')) {
             const dataStr = trimmed.slice(6);
             if (dataStr === '[DONE]') continue;
-            try {
-              const parsed = JSON.parse(dataStr);
-              if (parsed.error) {
-                accumulated = parsed.error;
-              } else if (parsed.token) {
-                accumulated += parsed.token;
-              }
-              setMessages(prev => {
-                const next = [...prev];
-                if (next.length > 0 && next[next.length - 1].role === 'assistant') {
-                  next[next.length - 1] = {
-                    ...next[next.length - 1],
-                    content: accumulated
-                  };
-                }
-                return next;
-              });
-            } catch {
-              accumulated += dataStr;
-              setMessages(prev => {
-                const next = [...prev];
-                if (next.length > 0 && next[next.length - 1].role === 'assistant') {
-                  next[next.length - 1] = {
-                    ...next[next.length - 1],
-                    content: accumulated
-                  };
-                }
-                return next;
-              });
-            }
+            const parsed = JSON.parse(dataStr);
+            accumulated = parsed.notice ?? accumulated + parsed.token;
+            setMessages(prev => {
+              const next = [...prev];
+              next[next.length - 1] = { role: 'assistant', content: accumulated };
+              return next;
+            });
           }
         }
       }
@@ -239,15 +217,8 @@ export const CatChatbot: React.FC = () => {
       console.error('Chat stream error:', err);
       setMessages(prev => {
         const last = prev[prev.length - 1];
-        if (last && last.role === 'assistant' && !last.content) {
-          const next = [...prev];
-          next[next.length - 1] = {
-            role: 'assistant',
-            content: "Meow... Hệ thống đang bận xíu, bạn thử lại sau vài giây nhé 😼"
-          };
-          return next;
-        }
-        return [...prev, { role: 'assistant', content: "Meow... Hệ thống đang bận xíu, bạn thử lại sau vài giây nhé 😼" }];
+        const kept = last?.role === 'assistant' && !last.content ? prev.slice(0, -1) : prev;
+        return [...kept, { role: 'assistant', content: t.chat.failed }];
       });
     } finally {
       setLoading(false);

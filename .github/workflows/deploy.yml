@@ -86,14 +86,11 @@ jobs:
           docker rm -f portfolio_pgadmin 2>/dev/null || true
           docker compose up -d --remove-orphans
 
-      - name: Initialize or Update AI Model (sigma-cat)
+      - name: Download AI model
         run: |
           for i in $(seq 1 30); do docker exec portfolio_ollama ollama list >/dev/null 2>&1 && break; sleep 2; done
           docker exec -i portfolio_ollama ollama pull qwen3.5:4b
-          docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
-          for old in qwen2.5:3b qwen2.5:1.5b qwen3.5:2b-q4_K_M; do docker exec -i portfolio_ollama ollama rm "$old" || true; done
-          # Load the model now so the first visitor does not wait for it
-          docker exec -i portfolio_ollama ollama run sigma-cat --think=false "chào" >/dev/null || true
+          for old in sigma-cat meo-code qwen2.5:3b qwen2.5:1.5b qwen3.5:2b-q4_K_M; do docker exec -i portfolio_ollama ollama rm "$old" || true; done
 
       - name: Health check
         run: |

@@ -1,22 +1,21 @@
-# src/Portfolio.AI — kiến thức & persona cho chatbot Sigma Cat
+# src/Portfolio.AI — tính cách và câu cố định của Sigma Cat
 
-Không có code chạy — chỉ là nguyên liệu để tạo model Ollama `sigma-cat`.
+**Sigma Cat là nhân vật riêng có tính cách sigma, trợ lý của anh Khôi, không phải anh Khôi.** Tự tin, ít lời, hài khô, không nịnh, không giọng tổng đài. Tính cách chỉ ở giọng nói; sự thật lấy từ dữ liệu, không thổi phồng, hạn chế nhắc Masan.
 
 | File | Vai trò |
 | :--- | :--- |
-| `knowledge/guidelines.md` | Persona (mèo trợ lý, xưng "em", nói về anh Khôi ở ngôi thứ 3, 1–2 câu, cấm gạch đầu dòng) + mẫu hỏi đáp |
-| `knowledge/profile.md`, `experience.md`, `skills.md` | Dữ kiện về Khôi (rất ngắn) |
-| `Modelfile` | **Được sinh ra** từ knowledge: `FROM qwen3.5:4b`, PARAMETER (`temperature 0.3`, `num_predict 120`, `num_ctx 4096`, `num_thread 4`...). **`num_ctx` phải lớn hơn system prompt (~1200 token)**, nhỏ hơn thì Ollama cắt mất prompt, `SYSTEM """..."""` |
-| `scripts/assemble.ps1` | Ghép knowledge → Modelfile (Windows) |
-| `scripts/build-model.ps1` | assemble + `docker exec portfolio_ollama ollama create sigma-cat` + alias `meo-code` |
-| `scripts/build-model.sh` | Bản Linux (tự chứa phần ghép) |
+| `persona.md` | Phần đầu system prompt: danh tính, tính cách, quy tắc. Viết tiếng Anh cho ít token. Giữ ngắn: Qwen3.5 luôn đọc lại ~510 token cuối prompt mỗi tin |
+| `replies.json` | Thông báo hệ thống vi + en (quota, bận, lỗi...), không lưu vào DB |
+| `quick-answers.json` | Câu trả lời tức thì. Chỉ khớp nguyên câu sau khi chuẩn hoá; `{{key}}` lấy từ `AssistantFacts`, không chép fact vào đây |
+| `evals/questions.json` | Bộ đánh giá cho `scripts/eval-sigma.py` |
 
-Thư mục này được mount vào container ollama tại `/ai`.
+Ba file đầu được copy vào `ai/` cạnh API khi build. Không có Modelfile: API gọi thẳng `qwen3.5:4b` với prompt dựng từ DB (`ChatPromptBuilder`).
 
-## Quy trình cập nhật
-1. Sửa `knowledge/*.md`.
-2. Chạy `assemble.ps1` (hoặc `build-model.sh`) để sinh lại `Modelfile`.
-3. Commit **cả knowledge và Modelfile** — CI chỉ chạy `ollama create sigma-cat -f /ai/Modelfile`, không tự ghép.
-4. Nếu đổi dữ kiện hay được hỏi → sửa luôn `TryGetFastIntentReply` trong `Controllers/AIController.cs`.
-
-Không sửa tay `Modelfile` (sẽ bị ghi đè lần ghép sau). Test: `docker exec -it portfolio_ollama ollama run sigma-cat "khôi là ai"`.
+## Cập nhật
+- **Thông tin về anh Khôi:** sửa trong admin (Profile, Experience, Skills, tab Sigma Cat). Có hiệu lực ở tin kế tiếp, không cần deploy.
+- **Tính cách / quy tắc:** sửa `persona.md`, chạy eval trên server trước khi deploy:
+  ```bash
+  python3 scripts/eval-sigma.py --persona /path/to/persona.md
+  ```
+  Script lấy facts hiện tại qua `dotnet Portfolio.API.dll --print-prompt` trong container backend. Tính cách máy không chấm hết được: đọc mẫu trong `eval-results.json` rồi nhờ Khôi duyệt.
+- **Thêm quick answer:** thêm vào `quick-answers.json` và test trong `tests/Portfolio.API.Tests`.

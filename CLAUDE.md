@@ -3,13 +3,13 @@
 Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kinh nghiệm, kỹ năng, liên hệ), admin console `/dashboard` để sửa nội dung, và chatbot AI local "Sigma Cat".
 
 ## Stack
-.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama `sigma-cat` (Qwen3.5 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
+.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama (Qwen3.5 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
 
 ## Bản đồ module
 | Thư mục | Vai trò | Chi tiết |
 | :--- | :--- | :--- |
-| `src/Portfolio.API/` | Backend: Program.cs, Controllers (Auth, Content, Contact, AI), Services (JWT, email, Ollama, Telegram), Data/Entities/Migrations | `src/Portfolio.API/CLAUDE.md` |
-| `src/Portfolio.AI/` | Knowledge markdown → `Modelfile` → model Ollama `sigma-cat` | `src/Portfolio.AI/CLAUDE.md` |
+| `src/Portfolio.API/` | Backend: Program.cs, Controllers, Features/Chat (Sigma Cat), Services (JWT, email, Telegram), Data/Entities/Migrations | `src/Portfolio.API/CLAUDE.md` |
+| `src/Portfolio.AI/` | Persona, câu cố định, quick answer, bộ đánh giá Sigma Cat | `src/Portfolio.AI/CLAUDE.md` |
 | `src/Web/frontend/` | SPA React (public + admin + chatbot) và nginx của container | `src/Web/frontend/CLAUDE.md` |
 | `scripts/` | `generate-favicons.ps1`, `generate-small-images.ps1` (từ `logo.png`), `init-databases.sql`, `servers.json` cho pgAdmin | — |
 | `database/updates/` | Script SQL đổi dữ liệu, CI tự chạy (xem mục dưới) | — |
@@ -30,8 +30,10 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
 
 ## AI trên server
-- `sigma-cat` chạy `qwen3.5:4b` trên CPU + MX150 (2 GB). GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
-- Backend gửi `think: false`. Đo 2026-11-07: chờ chữ đầu ~5,6s (ngay sau khởi động ~20s), ~4,8 token/giây, một câu trả lời ~11s.
+- **Sigma Cat là nhân vật riêng có tính cách sigma, trợ lý của anh Khôi, không phải anh Khôi.** Giữ giọng này ở mọi câu.
+- Chạy `qwen3.5:4b` trên CPU + MX150 (2 GB). GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
+- Không có Modelfile: backend gửi prompt dựng từ DB mỗi tin. Thông tin nằm ở DB (admin), giọng nói ở `src/Portfolio.AI`.
+- Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm.
 
 ## Song ngữ và nội dung
 - `/` tiếng Anh (mặc định), `/vi` tiếng Việt, `/en` chuyển 301 về `/`. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.
@@ -47,7 +49,7 @@ cd src/Web/frontend && npm run build && npm run lint
 ```
 
 ## Deploy
-Push `main` = deploy production ngay (self-hosted runner: `scripts/server-secrets.sh ensure` → tạo `.env` → **backup DB** `pg_dump` vào `~/backups/portfolio/` (giữ 14 bản, lỗi thì dừng deploy) → `compose build` → `up -d postgres` + `server-secrets.sh sync-db` → `up -d --remove-orphans` → `ollama create sigma-cat` → health check `localhost:18122`). Chỉ push khi Khôi nói "làm đi". Smoke test 2 domain: `bash ../Zwork/smoke.sh`.
+Push `main` = deploy production ngay (self-hosted runner: `scripts/server-secrets.sh ensure` → tạo `.env` → **backup DB** `pg_dump` vào `~/backups/portfolio/` (giữ 14 bản, lỗi thì dừng deploy) → `compose build` → `up -d postgres` + `server-secrets.sh sync-db` → `up -d --remove-orphans` → tải model AI → health check `localhost:18122`). Chỉ push khi Khôi nói "làm đi". Smoke test 2 domain: `bash ../Zwork/smoke.sh`.
 
 **Secret:** mật khẩu Postgres và JWT secret **không nằm trên GitHub** — được sinh và lưu trên server tại `~/.config/portfolio/{postgres_password,jwt_secret}` (chmod 600). Muốn xoay: xoá file tương ứng trên server rồi deploy lại (xoay JWT = admin đăng nhập lại). GitHub Secrets chỉ còn `MAIL_APP_PASSWORD`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID` (và `ADMIN_PASSWORD` nếu muốn ép mật khẩu admin).
 

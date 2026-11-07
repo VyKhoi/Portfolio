@@ -8,6 +8,7 @@ import { SkillCRUD } from "./SkillCRUD"
 import { ProjectCRUD } from "./ProjectCRUD"
 import { InboxTable } from "./InboxTable"
 import { AIChatLogs } from "./AIChatLogs"
+import { SigmaCatFacts } from "./SigmaCatFacts"
 import { ProfileSettings } from "./ProfileSettings"
 import { useAuthStore } from "../../store/authStore"
 import { useAdminThemeStore } from "../../store/adminThemeStore"
@@ -113,6 +114,7 @@ export function AdminLayout() {
               <Route path="/skills" element={<SkillCRUD />} />
               <Route path="/projects" element={<ProjectCRUD />} />
               <Route path="/inbox" element={<InboxTable />} />
+              <Route path="/sigma-cat" element={<SigmaCatFacts />} />
               <Route path="/ai-logs" element={<AIChatLogs />} />
             </Routes>
           </div>

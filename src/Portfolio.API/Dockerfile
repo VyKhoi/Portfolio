@@ -3,6 +3,8 @@ WORKDIR /src
 COPY ["src/Portfolio.API/Portfolio.API.csproj", "src/Portfolio.API/"]
 RUN dotnet restore "src/Portfolio.API/Portfolio.API.csproj"
 COPY . .
+# A failing test stops the build, so nothing broken reaches the running containers
+RUN dotnet test tests/Portfolio.API.Tests -c Release
 WORKDIR "/src/src/Portfolio.API"
 RUN dotnet publish "Portfolio.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
 

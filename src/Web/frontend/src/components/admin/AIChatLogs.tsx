@@ -16,6 +16,9 @@ interface ChatMessage {
   sessionId: string
   role: "user" | "assistant"
   content: string
+  source: string | null
+  firstTokenMs: number | null
+  totalMs: number | null
   createdAt: string
 }
 
@@ -214,6 +217,7 @@ export function AIChatLogs() {
                       {m.content}
                     </div>
                     <div className="text-[10px] adm-text-muted mt-1.5 text-right">
+                      {m.source && `${m.source} · ${((m.firstTokenMs ?? 0) / 1000).toFixed(1)}s / ${((m.totalMs ?? 0) / 1000).toFixed(1)}s · `}
                       {new Date(m.createdAt).toLocaleTimeString()}
                     </div>
                   </div>

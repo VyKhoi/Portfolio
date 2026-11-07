@@ -1,36 +1,12 @@
-# 🧠 Portfolio.AI - Local AI knowledge
+# Portfolio.AI
 
-This folder holds the knowledge base, persona and configuration of the local AI model (**Sigma Cat 😼**) used by the Portfolio website. The knowledge files are in Vietnamese because the chatbot answers in Vietnamese.
+Sigma Cat 😼 is Khoi's assistant on the website, a cat with its own personality rather than a copy of him.
 
-## 📁 Structure
+| File | Purpose |
+| :--- | :--- |
+| `persona.md` | Identity, personality and rules: the first part of the system prompt |
+| `replies.json` | System messages in English and Vietnamese |
+| `quick-answers.json` | Instant replies for exact known questions, with `{{key}}` placeholders filled from the database |
+| `evals/questions.json` | Questions scored by `scripts/eval-sigma.py` |
 
-```text
-src/Portfolio.AI/
-├── knowledge/               # Markdown files that teach the AI
-│   ├── profile.md           # Personal details, education, contact
-│   ├── experience.md        # Work experience and projects
-│   ├── skills.md            # Skills and tech stack
-│   └── guidelines.md        # Sigma Cat persona and reply rules
-├── Modelfile                # Generated model definition
-├── scripts/
-│   ├── assemble.ps1         # Merges the Markdown files into the Modelfile
-│   ├── build-model.ps1      # Builds the 'sigma-cat' model on Windows
-│   └── build-model.sh       # Builds the 'sigma-cat' model on Linux/Docker
-└── README.md
-```
-
-## 🚀 Updating the AI's knowledge (no C# changes needed)
-
-1. Edit the matching files in `knowledge/`.
-2. Regenerate the `Modelfile` and rebuild the model:
-   - Windows PowerShell:
-     ```powershell
-     .\scripts\build-model.ps1
-     ```
-   - Or, with an up-to-date `Modelfile`, directly through Docker:
-     ```bash
-     docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
-     ```
-3. Commit both `knowledge/` and `Modelfile`: CI only runs `ollama create` on the committed `Modelfile`.
-
-The `sigma-cat` model picks up the new knowledge right away, with no backend restart or rebuild. Answers hardcoded in Fast Intent (`Controllers/AIController.cs`) are separate and need their own edit.
+Facts about Khoi live in the database and are edited in the admin console. The API builds the prompt on every message and calls `qwen3.5:4b` through Ollama, so edits apply without a deploy.

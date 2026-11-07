@@ -23,6 +23,42 @@ namespace Portfolio.API.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Portfolio.API.Entities.AssistantFact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ValueEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ValueVi")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Key")
+                        .IsUnique();
+
+                    b.ToTable("AssistantFacts");
+                });
+
             modelBuilder.Entity("Portfolio.API.Entities.ChatMessage", b =>
                 {
                     b.Property<int>("Id")
@@ -38,6 +74,9 @@ namespace Portfolio.API.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("FirstTokenMs")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text");
@@ -45,6 +84,12 @@ namespace Portfolio.API.Migrations
                     b.Property<string>("SessionId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("TotalMs")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

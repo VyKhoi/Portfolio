@@ -27,12 +27,12 @@ graph LR
     GW --> FE["Frontend: React 19 + Nginx"]
     FE -->|"/api"| BE["Backend: .NET 9 API"]
     BE --> DB[("PostgreSQL 16")]
-    BE --> AI["Ollama: sigma-cat"]
+    BE --> AI["Ollama: Qwen3.5 4B"]
     BE -.-> N["Gmail / Telegram"]
 ```
 
 - **Backend:** .NET 9 modular monolith, EF Core, JWT, in-memory cache, background email through `System.Threading.Channels`.
-- **AI:** Ollama + Qwen3.5 4B on CPU + GPU, reachable only inside the Docker network. Its knowledge lives in `src/Portfolio.AI`. Common questions get an instant answer (Fast Intent); the rest stream over SSE.
+- **AI:** Sigma Cat is Khoi's assistant with its own personality, on Ollama + Qwen3.5 4B (CPU + GPU), reachable only inside the Docker network. Its prompt is built from the live database, known questions get an instant answer, and the rest stream over SSE. It speaks English and Vietnamese.
 - **Frontend:** React 19, Vite, Tailwind, Framer Motion; SEO with JSON-LD, OpenGraph and a sitemap.
 - **Protection:** rate limits, a honeypot against bots (no captcha), secrets managed on the server.
 
@@ -45,7 +45,7 @@ git clone https://github.com/vykhoi/Portfolio.git && cd Portfolio
 cp .env.example .env
 docker volume create ollama_models
 docker compose up -d --build
-./src/Portfolio.AI/scripts/build-model.sh      # Windows: .\src\Portfolio.AI\scripts\build-model.ps1
+docker exec portfolio_ollama ollama pull qwen3.5:4b
 ```
 
 Open http://localhost:18122. pgAdmin (optional): `docker compose --profile tools up -d pgadmin` → http://127.0.0.1:5050.

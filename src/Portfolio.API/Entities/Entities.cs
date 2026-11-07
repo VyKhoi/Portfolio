@@ -96,5 +96,20 @@ public class ChatMessage
     public string SessionId { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty; // user | assistant
     public string Content { get; set; } = string.Empty;
+    public string? Source { get; set; } // quick | model, assistant messages only
+    public int? FirstTokenMs { get; set; }
+    public int? TotalMs { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>What Sigma Cat knows that the public site does not hold, editable in the admin console.</summary>
+public class AssistantFact
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Key { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
+    public string ValueVi { get; set; } = string.Empty;
+    public string ValueEn { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public bool Enabled { get; set; } = true;
 }

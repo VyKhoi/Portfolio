@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Portfolio.API.Data;
 
-namespace Portfolio.API.Services;
+namespace Portfolio.API.Features.Chat;
 
 /// <summary>Deletes visitor chat logs older than 90 days once a day so spam cannot grow the database forever.</summary>
 public class ChatRetentionWorker : BackgroundService

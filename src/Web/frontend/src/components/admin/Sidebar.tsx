@@ -8,6 +8,7 @@ import {
   Inbox,
   LogOut,
   Bot,
+  Cat,
   User,
   Sun,
   Moon,
@@ -25,6 +26,7 @@ const ADMIN_LINKS = [
   { name: "SKILLS", shortName: "SKILLS", path: "/dashboard/skills", icon: Code },
   { name: "PROJECTS", shortName: "PROJECTS", path: "/dashboard/projects", icon: FolderGit2 },
   { name: "INBOX", shortName: "INBOX", path: "/dashboard/inbox", icon: Inbox },
+  { name: "SIGMA CAT", shortName: "SIGMA", path: "/dashboard/sigma-cat", icon: Cat },
   { name: "AI LOGS", shortName: "AI LOGS", path: "/dashboard/ai-logs", icon: Bot },
 ]
 

@@ -17,6 +17,7 @@ public class PortfolioDbContext : DbContext
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<AssistantFact> AssistantFacts => Set<AssistantFact>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -64,6 +65,12 @@ public class PortfolioDbContext : DbContext
         {
             entity.HasKey(m => m.Id);
             entity.HasIndex(m => m.SessionId);
+        });
+
+        modelBuilder.Entity<AssistantFact>(entity =>
+        {
+            entity.HasKey(f => f.Id);
+            entity.HasIndex(f => f.Key).IsUnique();
         });
     }
 }

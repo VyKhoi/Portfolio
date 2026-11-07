@@ -13,7 +13,7 @@ The system runs lightweight Docker containers:
 2. **Backend**: .NET 9 Modular Monolith Web API (`portfolio_backend`, internal port `8080`, not published)
 3. **Database**: PostgreSQL 16 Alpine (`portfolio_postgres`, `127.0.0.1:5432`)
 4. **Database UI**: pgAdmin 4 (`portfolio_pgadmin`, `127.0.0.1:5050`, only with `--profile tools`)
-5. **Local AI**: Ollama running custom `sigma-cat` model (`portfolio_ollama`, internal network only, CPU-optimized)
+5. **Local AI**: Ollama running `qwen3.5:4b` (`portfolio_ollama`, internal network only)
 
 Total memory footprint: ~1.5 GB RAM.
 
@@ -63,7 +63,11 @@ docker compose up --build -d
 
 ### Local AI Model (Ollama)
 - The Ollama container is internal-only to prevent public spam and abuse.
-- In development, pulling or updating the model:
+- Download the model once:
   ```bash
   docker exec -it portfolio_ollama ollama pull qwen3.5:4b
   ```
+
+### Sigma Cat
+- Tests: `dotnet test tests/Portfolio.API.Tests` (they also run in the backend Docker build).
+- After changing `src/Portfolio.AI/persona.md`, the model or its options, run `python3 scripts/eval-sigma.py` on the server and compare the score.

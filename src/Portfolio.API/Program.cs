@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Portfolio.API.Data;
+using Portfolio.API.Features.Chat;
 using Portfolio.API.Services;
 using Serilog;
 
@@ -96,13 +97,25 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<ContactChannel>();
 builder.Services.AddTransient<EmailService>();
 builder.Services.AddHostedService<EmailBackgroundWorker>();
-builder.Services.AddHostedService<ChatRetentionWorker>();
 
-// 6. External Clients (Local Ollama & Telegram)
+// 6. External Clients
 builder.Services.AddHttpClient<TelegramNotifier>();
-builder.Services.AddHttpClient<OllamaClient>();
-builder.Services.AddSingleton<AiConcurrencyGate>();
 builder.Services.AddSingleton<JwtService>();
+
+// 6b. Sigma Cat
+builder.Services.Configure<ChatOptions>(builder.Configuration.GetSection(ChatOptions.Section));
+builder.Services.Configure<OllamaOptions>(builder.Configuration.GetSection(OllamaOptions.Section));
+builder.Services.AddSingleton<ChatAssets>();
+builder.Services.AddSingleton<ChatQuota>();
+builder.Services.AddSingleton<GenerationGate>();
+builder.Services.AddSingleton<ChatNotificationChannel>();
+builder.Services.AddScoped<ChatPromptBuilder>();
+builder.Services.AddScoped<QuickAnswerMatcher>();
+builder.Services.AddScoped<ChatService>();
+builder.Services.AddHttpClient<ILlmClient, OllamaClient>();
+builder.Services.AddHostedService<ChatRetentionWorker>();
+builder.Services.AddHostedService<ChatNotificationWorker>();
+builder.Services.AddHostedService<LlmWarmupService>();
 
 // 7. CORS: the SPA calls /api on its own origin, so only list the real site (+ Vite dev server)
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
@@ -147,6 +160,15 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Used by scripts/eval-sigma.py. Written to stderr because logs go to stdout.
+if (args.Contains("--print-prompt"))
+{
+    using var promptScope = app.Services.CreateScope();
+    var prompt = await promptScope.ServiceProvider.GetRequiredService<ChatPromptBuilder>().BuildAsync(CancellationToken.None);
+    await Console.Error.WriteAsync(prompt);
+    return;
+}
 
 // Auto-migrate & seed database
 using (var scope = app.Services.CreateScope())

@@ -53,11 +53,10 @@ services:
     logging: *default-logging
     environment:
       OLLAMA_NUM_PARALLEL: 1
-      OLLAMA_KEEP_ALIVE: "24h"
+      OLLAMA_KEEP_ALIVE: "-1m"
       OLLAMA_FLASH_ATTENTION: 1
     volumes:
       - ollama_models:/root/.ollama
-      - ./src/Portfolio.AI:/ai
     deploy:
       resources:
         limits:
@@ -81,7 +80,7 @@ services:
       - JwtSettings__Secret=${JWT_SECRET_KEY}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - Ollama__BaseUrl=http://ollama:11434
-      - Ollama__Model=sigma-cat
+      - Ollama__Model=qwen3.5:4b
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - MAIL_APP_PASSWORD=${MAIL_APP_PASSWORD}

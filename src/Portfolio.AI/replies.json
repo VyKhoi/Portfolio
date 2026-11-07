@@ -1,0 +1,26 @@
+{
+  "honeypot": {
+    "vi": "Em ghi nhận rồi 😼",
+    "en": "Noted 😼"
+  },
+  "empty": {
+    "vi": "Bạn chưa gõ gì. Em không đọc được suy nghĩ 😼",
+    "en": "You typed nothing. I don't read minds 😼"
+  },
+  "tooLong": {
+    "vi": "Dài quá, mèo không đọc. Rút gọn lại đi sen 😼",
+    "en": "Too long. Cats don't read essays. Shorten it 😼"
+  },
+  "quota": {
+    "vi": "Hôm nay nói vậy đủ rồi sen. Em đi nghỉ, cần gấp thì nhắn thẳng cho anh Khôi 😼",
+    "en": "That's enough talking for now. I'm taking a break. If it's urgent, contact Khoi directly 😼"
+  },
+  "busy": {
+    "vi": "Khách đông, em chỉ có một cái não. Đợi vài giây rồi hỏi lại 😼",
+    "en": "Busy here, and I only have one brain. Ask again in a few seconds 😼"
+  },
+  "unavailable": {
+    "vi": "Não em đang ngủ. Lát quay lại, hoặc nhắn thẳng cho anh Khôi 😼",
+    "en": "My brain is napping. Come back later or contact Khoi directly 😼"
+  }
+}

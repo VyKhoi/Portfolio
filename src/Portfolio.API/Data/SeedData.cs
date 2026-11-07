@@ -75,6 +75,19 @@ public static class SeedData
         }
     };
 
+    private static List<AssistantFact> BuildAssistantFacts() => new()
+    {
+        new() { Key = "name", Label = "Full name", ValueVi = "Đặng Vỹ Khôi", ValueEn = "Đặng Vỹ Khôi (Dang Vy Khoi)", Order = 1 },
+        new() { Key = "summary", Label = "Summary", ValueVi = "Software Engineer làm phần mềm 3 năm, chủ yếu .NET", ValueEn = "Software Engineer with 3 years of experience, mostly .NET", Order = 2 },
+        new() { Key = "born", Label = "Born", ValueVi = "2002", ValueEn = "2002", Order = 3 },
+        new() { Key = "location", Label = "Lives in", ValueVi = "Gò Vấp, TP.HCM", ValueEn = "Go Vap, Ho Chi Minh City (Gò Vấp, TP.HCM)", Order = 4 },
+        new() { Key = "education", Label = "Education", ValueVi = "Cử nhân CNTT, Đại học Mở TP.HCM (2020-2024), tốt nghiệp loại Giỏi, 3 học bổng khuyến khích học tập", ValueEn = "Bachelor of IT, Ho Chi Minh City Open University (Đại học Mở TP.HCM), 2020-2024, graduated with Distinction (loại Giỏi), 3 academic scholarships", Order = 5 },
+        new() { Key = "email", Label = "Email", ValueVi = "dangvykhoi@gmail.com", ValueEn = "dangvykhoi@gmail.com", Order = 6 },
+        new() { Key = "phone", Label = "Phone and Zalo", ValueVi = "0931 314 792", ValueEn = "0931 314 792", Order = 7 },
+        new() { Key = "website", Label = "Website", ValueVi = "dangvykhoi.com", ValueEn = "dangvykhoi.com", Order = 8 },
+        new() { Key = "sideProjects", Label = "Side projects", ValueVi = "ChickenNote (note.dangvykhoi.com, app ghi chú online) và website này, tự host trên server ở nhà", ValueEn = "ChickenNote (note.dangvykhoi.com, an online note app) and this website, self-hosted on his home server", Order = 9 },
+    };
+
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
@@ -157,7 +170,13 @@ public static class SeedData
             });
         }
 
-        // 5. Seed Projects (Bento grid showcase)
+        // 5. Seed Sigma Cat facts (the admin console owns them afterwards)
+        if (!await context.AssistantFacts.AnyAsync())
+        {
+            context.AssistantFacts.AddRange(BuildAssistantFacts());
+        }
+
+        // 6. Seed Projects (Bento grid showcase)
         if (!await context.Projects.AnyAsync())
         {
             context.Projects.AddRange(new List<Project>

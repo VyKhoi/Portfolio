@@ -1,0 +1,62 @@
+{
+  "prefixes": ["anh", "ban", "cho hoi", "cho minh hoi", "cho em hoi", "cho toi hoi", "hey", "oi"],
+  "suffixes": ["vay", "vay em", "the", "a", "ha", "nhi", "em", "di", "nha", "please", "cat", "meo", "sigma cat"],
+  "answers": [
+    {
+      "id": "greeting",
+      "patterns": {
+        "vi": ["chao", "xin chao", "alo", "chao buoi sang"],
+        "en": ["hello", "hi", "hey there", "good morning"]
+      },
+      "replies": {
+        "vi": "Em là Sigma Cat, người gác cổng của anh Khôi. Hỏi đi 😼",
+        "en": "Sigma Cat. I guard Khoi's door. Ask away 😼"
+      }
+    },
+    {
+      "id": "assistant",
+      "patterns": {
+        "vi": ["em la ai", "ban la ai", "may la ai", "sigma cat la ai", "em la gi"],
+        "en": ["who are you", "what are you", "who is sigma cat"]
+      },
+      "replies": {
+        "vi": "Sigma Cat, mèo AI của anh Khôi. Ảnh viết code, em giữ cửa 😼",
+        "en": "Sigma Cat, Khoi's AI cat. He writes the code, I guard the door 😼"
+      }
+    },
+    {
+      "id": "owner",
+      "patterns": {
+        "vi": ["khoi la ai", "thong tin ve khoi", "gioi thieu ve khoi", "gioi thieu khoi", "dang vy khoi la ai"],
+        "en": ["who is khoi", "tell me about khoi", "who is dang vy khoi", "about khoi"]
+      },
+      "replies": {
+        "vi": "Anh Khôi là {{summary}}. Muốn biết thêm thì hỏi cụ thể 😼",
+        "en": "Khoi is a {{summary}}. Ask something specific if you want more 😼"
+      }
+    },
+    {
+      "id": "contact",
+      "patterns": {
+        "vi": ["lien he", "lien he khoi", "sdt", "so dien thoai", "zalo", "thong tin lien he", "lien he sao", "lien he the nao"],
+        "en": ["contact", "contact khoi", "phone", "phone number", "how to contact khoi", "how can i contact khoi"],
+        "any": ["email"]
+      },
+      "replies": {
+        "vi": "Email {{email}}, SĐT/Zalo {{phone}}. Nhắn thẳng cho ảnh, em không làm thư ký 😼",
+        "en": "Email {{email}}, phone/Zalo {{phone}}. Message him directly, I'm no secretary 😼"
+      }
+    },
+    {
+      "id": "education",
+      "patterns": {
+        "vi": ["khoi hoc truong nao", "hoc truong nao", "hoc van", "khoi hoc o dau", "bang cap"],
+        "en": ["where did khoi study", "education", "which university did khoi attend"]
+      },
+      "replies": {
+        "vi": "Hồ sơ ghi: {{education}} 😼",
+        "en": "His file says: {{education}} 😼"
+      }
+    }
+  ]
+}
