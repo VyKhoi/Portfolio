@@ -3,6 +3,7 @@
 .env.local
 *.sql
 !scripts/init-databases.sql
+!database/updates/*.sql
 scratch/
 
 # .NET Build artifacts
