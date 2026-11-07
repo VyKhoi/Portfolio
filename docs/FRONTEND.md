@@ -24,7 +24,7 @@ src/
 │   └── CatChatbot.tsx       # Widget Sigma Cat, đọc SSE từ /api/ai/chat/stream
 ├── lib/
 │   ├── api.ts               # API_BASE_URL = '/api' (luôn relative), ContentApi, ContactApi
-│   ├── contentCache.ts      # cache localStorage "content-cache:v2:*", useCachedContent()
+│   ├── contentCache.ts      # cache localStorage "content-cache:v3:*", useCachedContent()
 │   └── utils.ts             # cn() = clsx + tailwind-merge
 └── store/
     ├── authStore.ts         # token JWT trong localStorage['token']

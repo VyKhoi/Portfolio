@@ -2,7 +2,7 @@
 
 # Đặng Vỹ Khôi (Dang Vy Khoi) — Portfolio
 
-**Software Engineer (.NET Backend) @ Masan Group**
+**Software Engineer (.NET Backend)**
 
 [![Website](https://img.shields.io/badge/dangvykhoi.com-00DC82?style=for-the-badge&logo=google-chrome&logoColor=white)](https://dangvykhoi.com)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-vykhoi-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/vykhoi)

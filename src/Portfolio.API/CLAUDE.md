@@ -84,7 +84,7 @@ DbSet cho từng entity + khai báo key/index ở `OnModelCreating`. Không có 
 4. Experiences / Skills: chỉ seed khi bảng trống.
 
 ### Migrations
-Hiện có `20261024145452_InitialCreate`. Thêm thay đổi:
+Hiện có `20261024145452_InitialCreate`, `20261107055905_AddEnglishContent`. Thay đổi **dữ liệu** thì dùng `database/updates/` (xem `CLAUDE.md` ở root). Thay đổi **schema**:
 ```bash
 dotnet ef migrations add <TenMigration> --project src/Portfolio.API
 ```

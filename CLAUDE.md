@@ -12,6 +12,7 @@ Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kinh nghiệm, 
 | `src/Portfolio.AI/` | Knowledge markdown → `Modelfile` → model Ollama `sigma-cat` | `src/Portfolio.AI/CLAUDE.md` |
 | `src/Web/frontend/` | SPA React (public + admin + chatbot) và nginx của container | `src/Web/frontend/CLAUDE.md` |
 | `scripts/` | `generate-favicons.ps1`, `generate-small-images.ps1` (từ `logo.png`), `init-databases.sql`, `servers.json` cho pgAdmin | — |
+| `database/updates/` | Script SQL đổi dữ liệu, CI tự chạy (xem mục dưới) | — |
 | `docs/` | Tài liệu cho người: ARCHITECTURE, FRONTEND, DEV_GUIDE | — |
 
 Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_frontend (nginx) → /api/* → portfolio_backend:8080 → postgres / ollama`.
@@ -27,6 +28,12 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Telegram tối đa 30 tin/giờ, `parse_mode: HTML` → nội dung động phải qua `TelegramNotifier.Escape`.
 - Chat log > 90 ngày tự xoá (`ChatRetentionWorker`). Backend chạy user non-root `app`.
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
+
+## Song ngữ và nội dung
+- `/` tiếng Việt, `/en` tiếng Anh. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.
+- **Đổi dữ liệu bằng script:** thêm file mới đánh số trong `database/updates/` (`0002-ten.sql`), push. CI chạy `scripts/apply-db-updates.sh` sau khi backend healthy: mỗi file chạy đúng 1 lần trong 1 transaction, ghi vào bảng `applied_scripts`, rồi restart backend để xoá cache. Không sửa file đã chạy (bị chặn), không để secret trong đó (repo public).
+- **Đổi nội dung hiển thị thì sửa cả `src/Web/frontend/src/content/portfolio.json`**: file này là nội dung dự phòng và là HTML tĩnh cho Google. CI so API với file (`scripts/check-content.py`) và cảnh báo nếu lệch.
+- Viết mộc mạc, không buzzword; Masan chỉ nêu ngắn trong mục kinh nghiệm, không đưa lên bio hay SEO.
 
 ## Chạy & kiểm tra
 ```bash

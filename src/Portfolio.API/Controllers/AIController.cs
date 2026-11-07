@@ -201,7 +201,7 @@ public class AIController : ControllerBase
         {
             if (IsEnglishQuery(request.Message))
             {
-                replyContent = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer at Masan Group. How can I help you explore his projects or skills?";
+                replyContent = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer. How can I help you explore his projects or skills?";
             }
             else if (IsGreeting(request.Message))
             {
@@ -209,7 +209,7 @@ public class AIController : ControllerBase
             }
             else
             {
-                replyContent = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer (.NET Backend) tại Tập đoàn Masan nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
+                replyContent = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer làm .NET backend nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
             }
         }
 
@@ -434,7 +434,7 @@ public class AIController : ControllerBase
             string fallback;
             if (IsEnglishQuery(request.Message))
             {
-                fallback = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer at Masan Group. How can I help you explore his projects or skills?";
+                fallback = "Meow! I'm Sigma Cat 😼🐾, Mr. Khoi's AI assistant. Mr. Khoi (Dang Vy Khoi) is a .NET Software Engineer. How can I help you explore his projects or skills?";
             }
             else if (IsGreeting(request.Message))
             {
@@ -442,7 +442,7 @@ public class AIController : ControllerBase
             }
             else
             {
-                fallback = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer (.NET Backend) tại Tập đoàn Masan nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
+                fallback = "Anh Khôi (tên đầy đủ là Đặng Vỹ Khôi, sinh năm 2002) là Software Engineer làm .NET backend nha bạn 😼! Em là Sigma Cat trợ lý của ảnh nè, bạn cần xem dự án hay liên hệ ảnh hong?";
             }
 
             fullReplyBuilder.Clear();
@@ -603,7 +603,7 @@ public class AIController : ControllerBase
             || clean.Contains("khôi tên gì") || clean.Contains("khoi ten gi")
             || clean.Contains("tên đầy đủ") || clean.Contains("ten day du"))
         {
-            return "Anh Khôi (Đặng Vỹ Khôi, sinh 2002) là Software Engineer (.NET) tại Tập đoàn Masan nha bạn 😼! Bạn muốn tìm hiểu gì về ảnh hong?";
+            return "Anh Khôi (Đặng Vỹ Khôi, sinh 2002) là Software Engineer làm .NET backend nha bạn 😼! Bạn muốn tìm hiểu gì về ảnh hong?";
         }
 
         // 3. Liên hệ / SĐT / Email / Zalo
@@ -620,7 +620,7 @@ public class AIController : ControllerBase
             || clean.Contains("chuyên môn") || clean.Contains("chuyen mon")
             || clean.Contains("sở trường") || clean.Contains("so truong"))
         {
-            return "Sở trường của anh Khôi là C#/.NET 9, PostgreSQL, Docker và tối ưu hệ thống SaaS 🚀.";
+            return "Anh Khôi làm chủ yếu với C#/.NET, PostgreSQL, SQL Server và Docker 🚀.";
         }
 
         // 5. Kinh nghiệm làm việc
@@ -628,7 +628,7 @@ public class AIController : ControllerBase
             || clean.Contains("làm ở đâu") || clean.Contains("lam o dau")
             || clean.Contains("công ty nào") || clean.Contains("cong ty nao"))
         {
-            return "Anh Khôi có hơn 2 năm kinh nghiệm backend .NET, từng làm SaaS và hiện làm ở Masan Group 😼.";
+            return "Anh Khôi làm phần mềm được 3 năm, chủ yếu là .NET, từng làm hệ thống CRM/POS cho chuỗi salon cùng một team riêng 😼.";
         }
 
         // 6. Học vấn / Trường học
