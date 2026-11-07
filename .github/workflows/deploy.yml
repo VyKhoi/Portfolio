@@ -12,6 +12,9 @@ on:
       - "docs/**"
       - "**/CLAUDE.md"
 
+permissions:
+  contents: read
+
 jobs:
   deploy:
     runs-on: self-hosted

@@ -42,7 +42,10 @@ export const CatChatbot: React.FC = () => {
   useEffect(() => {
     let currentSessionId = localStorage.getItem('ai_chat_session_id');
     if (!currentSessionId) {
-      currentSessionId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 15);
+      // randomUUID only exists on HTTPS/localhost; plain-HTTP LAN visits use getRandomValues
+      currentSessionId = crypto.randomUUID
+        ? crypto.randomUUID()
+        : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
       localStorage.setItem('ai_chat_session_id', currentSessionId);
     }
     setSessionId(currentSessionId);
