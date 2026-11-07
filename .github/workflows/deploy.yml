@@ -119,7 +119,12 @@ jobs:
           docker image inspect dpage/pgadmin4:9 --format 'pgadmin4 {{index .Config.Labels "org.opencontainers.image.version"}} {{.Id}}' 2>/dev/null || true
           docker exec portfolio_postgres postgres --version 2>/dev/null || true
 
-      - name: Cleanup dangling images
+      - name: Cleanup Docker leftovers
         if: always()
         run: |
           docker image prune -f
+          # Also drop what the line above leaves behind: images from old versions, build cache and
+          # anonymous volumes. A week of grace keeps deploys fast and spares images about to be reused.
+          docker image prune -af --filter until=168h
+          docker builder prune -f --filter until=168h
+          docker volume prune -f
