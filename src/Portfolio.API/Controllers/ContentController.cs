@@ -61,7 +61,9 @@ public class ContentController : ControllerBase
         {
             profile.FullName = updatedProfile.FullName;
             profile.Title = updatedProfile.Title;
+            profile.TitleEn = updatedProfile.TitleEn;
             profile.Bio = updatedProfile.Bio;
+            profile.BioEn = updatedProfile.BioEn;
             profile.AvatarKey = updatedProfile.AvatarKey;
             profile.CvPdfKey = updatedProfile.CvPdfKey;
             profile.GithubLink = updatedProfile.GithubLink;
@@ -165,10 +167,15 @@ public class ContentController : ControllerBase
         if (exp == null) return NotFound();
 
         exp.Role = updatedExp.Role;
+        exp.RoleEn = updatedExp.RoleEn;
         exp.Company = updatedExp.Company;
+        exp.CompanyEn = updatedExp.CompanyEn;
         exp.Period = updatedExp.Period;
+        exp.PeriodEn = updatedExp.PeriodEn;
         exp.ProjectName = updatedExp.ProjectName;
+        exp.ProjectNameEn = updatedExp.ProjectNameEn;
         exp.Highlights = updatedExp.Highlights;
+        exp.HighlightsEn = updatedExp.HighlightsEn;
         exp.TechStack = updatedExp.TechStack;
         exp.Order = updatedExp.Order;
 

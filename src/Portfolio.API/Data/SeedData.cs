@@ -10,6 +10,71 @@ namespace Portfolio.API.Data;
 
 public static class SeedData
 {
+    private const string Bio = "Tôi là lập trình viên với 3 năm kinh nghiệm, chủ yếu làm việc với .NET. Ngoài công việc chính, tôi thích tự làm những sản phẩm nhỏ của riêng mình. Cảm ơn bạn đã ghé qua!";
+
+    private static List<Experience> BuildExperiences() => new()
+    {
+        new Experience
+        {
+            Id = Guid.NewGuid(),
+            Role = "Software Engineer (.NET)",
+            Company = "Masan Group",
+            Period = "05/2026 - Hiện tại",
+            ProjectName = "",
+            Order = 1
+        },
+        new Experience
+        {
+            Id = Guid.NewGuid(),
+            Role = "Software Engineer (.NET)",
+            Company = "Independent Team",
+            Period = "2024 - 2026",
+            ProjectName = "CRM/POS for Salon Chains",
+            Highlights = new List<string>
+            {
+                "Built the multi-tenant core shared by the POS, web and mobile apps.",
+                "Wrote .NET 8 APIs for booking, billing, payroll and reporting with EF Core and Dapper.",
+                "Kept tenant data separate across 100+ branches with row-level security and JWT auth.",
+                "Integrated CardPointe payments; automated payroll, SMS and commission jobs with Hangfire.",
+                "Synced dashboards, kiosks and mobile apps in real time with SignalR."
+            },
+            TechStack = new List<string> { ".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI" },
+            Order = 2
+        },
+        new Experience
+        {
+            Id = Guid.NewGuid(),
+            Role = "Backend Developer",
+            Company = "AEGONA Co., Ltd",
+            Period = "2023 - 2024",
+            ProjectName = "Outsourcing Projects (CRM, e-learning)",
+            Highlights = new List<string>
+            {
+                "Worked on the backend of CRM, e-learning and booking systems with ASP.NET Core and SQL Server.",
+                "Supported API development and service integration on monolith and microservices systems.",
+                "Helped refactor legacy server code and speed up SQL queries."
+            },
+            TechStack = new List<string> { "ASP.NET Core", "SQL Server", "Microservices" },
+            Order = 3
+        },
+        new Experience
+        {
+            Id = Guid.NewGuid(),
+            Role = "Full-stack Developer",
+            Company = "Personal Project",
+            Period = "2026 - Hiện tại",
+            ProjectName = "ChickenNote",
+            Highlights = new List<string>
+            {
+                "Online notes with no account: open a name, type, and it syncs between phone and PC right away.",
+                "Keeps working offline and merges the changes when the connection is back.",
+                "Go backend and plain JavaScript frontend, running on my home server."
+            },
+            TechStack = new List<string> { "Go", "JavaScript", "SSE", "Docker", "Linux" },
+            Order = 4
+        }
+    };
+
     public static async Task InitializeAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
@@ -53,7 +118,7 @@ public static class SeedData
                 Id = Guid.NewGuid(),
                 FullName = "ĐẶNG VỸ KHÔI",
                 Title = "Software Engineer | .NET Backend",
-                Bio = "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.",
+                Bio = Bio,
                 AvatarKey = "/profile.jpg",
                 CvPdfKey = "/cv.pdf",
                 GithubLink = "https://github.com/vykhoi",
@@ -64,65 +129,13 @@ public static class SeedData
         {
             existingProfile.FullName = "ĐẶNG VỸ KHÔI";
             existingProfile.Title = "Software Engineer | .NET Backend";
-            existingProfile.Bio = "Kỹ sư phần mềm với hơn 2 năm kinh nghiệm xây dựng các hệ thống SaaS tại Tập đoàn Masan (Masan Group), chuyên sâu về .NET 9, C#, PostgreSQL và kiến trúc hệ thống ổn định.";
+            existingProfile.Bio = Bio;
         }
 
         // 3. Seed Experiences
         if (!await context.Experiences.AnyAsync())
         {
-            context.Experiences.AddRange(new List<Experience>
-            {
-                new Experience
-                {
-                    Id = Guid.NewGuid(),
-                    Role = "Software Engineer (.NET)",
-                    Company = "SaaS Product Development (Independent Team)",
-                    Period = "2024 - Present",
-                    ProjectName = "Enterprise SaaS CRM/POS Ecosystem",
-                    Highlights = new List<string>
-                    {
-                        "Built a multi-tenant POS/Web/Mobile core, enabling scalable hybrid deployment from shared infrastructure.",
-                        "Developed high-performance .NET 8 APIs handling complex business logic, reporting, and high-volume transactions using Parallelism, Caching, EF Core, LINQ, and Dapper.",
-                        "Secured 100+ branches using RLS and JWT auth in a multi-tenant architecture.",
-                        "Integrated CardPointe; automated Payroll, SMS, and Commission workflows using Hangfire.",
-                        "Enabled real-time synchronization across dashboards, kiosks, and mobile apps using SignalR."
-                    },
-                    TechStack = new List<string> { ".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI" },
-                    Order = 1
-                },
-                new Experience
-                {
-                    Id = Guid.NewGuid(),
-                    Role = "Backend Developer",
-                    Company = "AEGONA Co., Ltd",
-                    Period = "2023 - 2024",
-                    ProjectName = "Outsourcing Projects (CRM, e-learning)",
-                    Highlights = new List<string>
-                    {
-                        "Contributed to backend development for CRM, e-learning, and booking systems using ASP.NET Core and SQL Server.",
-                        "Worked with both monolithic and microservices-based systems, supporting API development and service integration.",
-                        "Assisted in refactoring legacy server-side logic and optimizing SQL queries to improve system response time."
-                    },
-                    TechStack = new List<string> { "ASP.NET Core", "SQL Server", "Microservices" },
-                    Order = 2
-                },
-                new Experience
-                {
-                    Id = Guid.NewGuid(),
-                    Role = "Full-stack Developer",
-                    Company = "Personal Lab",
-                    Period = "2022 - 2023",
-                    ProjectName = "Family-SaaS: Billing & Task Orchestrator",
-                    Highlights = new List<string>
-                    {
-                        "Built a decoupled ecosystem (.NET 8, MAUI, React) with Repository Pattern and Unit Testing.",
-                        "Ran a 24/7 Ubuntu server on repurposed hardware with Docker and background jobs.",
-                        "Secured external access via Cloudflare (DNS/SSL) and NAT Port Forwarding."
-                    },
-                    TechStack = new List<string> { ".NET 8", "React", "Docker", "Linux", "CI/CD" },
-                    Order = 3
-                }
-            });
+            context.Experiences.AddRange(BuildExperiences());
         }
 
         // 4. Seed Skills

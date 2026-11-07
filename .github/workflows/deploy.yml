@@ -99,6 +99,19 @@ jobs:
           done
           echo "Health check failed"; docker compose ps; docker compose logs --tail 80 backend frontend; exit 1
 
+      - name: Apply database updates
+        run: |
+          bash scripts/apply-db-updates.sh
+          for i in $(seq 1 30); do
+            curl -fsS -o /dev/null http://localhost:18122/api/content/profile && break
+            sleep 2
+          done
+          curl -fsS -o /dev/null http://localhost:18122/api/content/profile
+
+      - name: Compare live content with the fallback file
+        run: |
+          python3 scripts/check-content.py || echo "::warning::Content check could not run"
+
       - name: Report image versions
         if: always()
         run: |

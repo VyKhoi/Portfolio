@@ -17,7 +17,9 @@ public class Profile
     public Guid Id { get; set; } = Guid.NewGuid();
     public string FullName { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+    public string TitleEn { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
+    public string BioEn { get; set; } = string.Empty;
     public string AvatarKey { get; set; } = string.Empty;
     public string CvPdfKey { get; set; } = string.Empty;
     public string GithubLink { get; set; } = string.Empty;
@@ -38,10 +40,15 @@ public class Experience
 {
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Role { get; set; } = string.Empty;
+    public string RoleEn { get; set; } = string.Empty;
     public string Company { get; set; } = string.Empty;
+    public string CompanyEn { get; set; } = string.Empty;
     public string Period { get; set; } = string.Empty;
+    public string PeriodEn { get; set; } = string.Empty;
     public string ProjectName { get; set; } = string.Empty;
+    public string ProjectNameEn { get; set; } = string.Empty;
     public List<string> Highlights { get; set; } = new();
+    public List<string> HighlightsEn { get; set; } = new();
     public List<string> TechStack { get; set; } = new();
     public int Order { get; set; }
 }

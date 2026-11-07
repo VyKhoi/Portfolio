@@ -123,7 +123,15 @@ namespace Portfolio.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("CompanyEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.PrimitiveCollection<List<string>>("Highlights")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.PrimitiveCollection<List<string>>("HighlightsEn")
                         .IsRequired()
                         .HasColumnType("text[]");
 
@@ -134,11 +142,23 @@ namespace Portfolio.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("PeriodEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("ProjectName")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ProjectNameEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleEn")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -165,6 +185,10 @@ namespace Portfolio.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("BioEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("CvPdfKey")
                         .IsRequired()
                         .HasColumnType("text");
@@ -182,6 +206,10 @@ namespace Portfolio.API.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TitleEn")
                         .IsRequired()
                         .HasColumnType("text");
 
