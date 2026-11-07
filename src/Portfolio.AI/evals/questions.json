@@ -1,5 +1,5 @@
 [
-  { "id": "who-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi làm nghề gì vậy?", "any": [".net", "software engineer", "lap trinh"] },
+  { "id": "who-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi làm nghề gì vậy?", "any": [".net", "software engineer", "lap trinh", "ky su phan mem"] },
   { "id": "who-en", "group": "fact", "lang": "en", "q": "What does Khoi do for a living?", "any": [".net", "software engineer", "developer"] },
   { "id": "name-vi", "group": "fact", "lang": "vi", "q": "Tên đầy đủ của anh Khôi có dấu là gì?", "exact": ["Đặng Vỹ Khôi"] },
   { "id": "birth-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi sinh năm bao nhiêu?", "all": ["2002"] },

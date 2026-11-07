@@ -21,7 +21,7 @@ def plain(text):
 
 
 def has_vietnamese(text):
-    return bool(re.search(r"[ăâêôơưđàáảãạèéẻẽẹìíỉĩịòóỏõọùúủũụỳýỷỹỵ]", text.replace("Đặng Vỹ Khôi", "").lower()))
+    return bool(re.search(r"[ăâêôơưđàáảãạèéẻẽẹìíỉĩịòóỏõọùúủũụỳýỷỹỵ]", text.replace("Đặng Vỹ Khôi", "").replace("Khôi", "").lower()))
 
 
 def score(case, reply, done_reason):
@@ -57,8 +57,7 @@ def score(case, reply, done_reason):
 def ask(args, system, case):
     messages = [{"role": "system", "content": system}] if system else []
     messages += [{"role": r, "content": c} for r, c in case.get("history", [])]
-    page = case.get("page", case["lang"])
-    question = case["q"] if args.no_system else f"{case['q']}\n\n[page language: {page}]"
+    question = case["q"]
     messages.append({"role": "user", "content": question})
     body = {"model": args.model, "stream": True, "think": False, "keep_alive": "-1m", "messages": messages,
             "options": json.loads(args.options)}
@@ -82,9 +81,10 @@ def main():
     parser.add_argument("--host")
     parser.add_argument("--model", default="qwen3.5:4b")
     parser.add_argument("--persona")
+    parser.add_argument("--env", action="append", default=[], help="Chat__Setting=value for the prompt")
     parser.add_argument("--no-system", action="store_true")
     parser.add_argument("--only", help="comma separated groups")
-    parser.add_argument("--options", default='{"temperature":0.3,"top_p":0.9,"top_k":40,"repeat_penalty":1.05,"num_predict":120,"num_ctx":4096,"num_thread":4}')
+    parser.add_argument("--options", default='{"temperature":0.3,"top_p":0.9,"top_k":40,"repeat_penalty":1.05,"num_predict":120,"num_ctx":2048,"num_thread":4,"num_gpu":20}')
     parser.add_argument("--out", default="eval-results.json")
     args = parser.parse_args()
 
@@ -92,7 +92,7 @@ def main():
         ["docker", "inspect", "portfolio_ollama", "-f", "{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}"], text=True).strip()
     system = ""
     if not args.no_system:
-        system = subprocess.run(["docker", "exec", "portfolio_backend", "dotnet", "Portfolio.API.dll", "--print-prompt"], capture_output=True, text=True, check=True).stderr.strip()
+        system = subprocess.run(["docker", "exec"] + [x for e in args.env for x in ("-e", e)] + ["portfolio_backend", "dotnet", "Portfolio.API.dll", "--print-prompt"], capture_output=True, text=True, check=True).stderr.strip()
         if args.persona:
             system = Path(args.persona).read_text(encoding="utf-8").strip() + "\n\n" + system[system.index(FACTS_MARKER):]
 

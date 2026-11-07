@@ -221,7 +221,7 @@ public class ChatServiceTests
     }
 
     [Fact]
-    public async Task Model_gets_the_prompt_recent_history_and_page_language()
+    public async Task Model_gets_the_prompt_and_recent_history()
     {
         var harness = new Harness(new ChatOptions { HistoryMessages = 2, QuickReplyWordDelayMs = 0 });
         await harness.SendAsync("first question here");

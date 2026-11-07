@@ -4,7 +4,7 @@
 
 | File | Vai trò |
 | :--- | :--- |
-| `persona.md` | Phần đầu system prompt: danh tính, tính cách, quy tắc. Viết tiếng Anh cho ít token. Giữ ngắn: Qwen3.5 luôn đọc lại ~510 token cuối prompt mỗi tin |
+| `persona.md` | Phần đầu system prompt: danh tính, tính cách, quy tắc. Viết tiếng Anh cho ít token. Giữ ngắn: Qwen3.5 luôn đọc lại ~510 token cuối prompt mỗi tin. Facts không kèm highlight để tiết kiệm token |
 | `replies.json` | Thông báo hệ thống vi + en (quota, bận, lỗi...), không lưu vào DB |
 | `quick-answers.json` | Câu trả lời tức thì. Chỉ khớp nguyên câu sau khi chuẩn hoá; `{{key}}` lấy từ `AssistantFacts`, không chép fact vào đây |
 | `evals/questions.json` | Bộ đánh giá cho `scripts/eval-sigma.py` |

@@ -114,7 +114,7 @@ public class ChatService
     private async Task<ReplyResult> StreamModelAsync(
         string sessionId, ChatMessage userMessage, string language, IChatOutput output, Stopwatch clock, CancellationToken cancellationToken)
     {
-        var messages = await BuildMessagesAsync(sessionId, userMessage, language, cancellationToken);
+        var messages = await BuildMessagesAsync(sessionId, userMessage, cancellationToken);
 
         if (!await _gate.TryEnterAsync(cancellationToken))
         {
@@ -152,7 +152,7 @@ public class ChatService
         return new ReplyResult(reply.ToString().Trim(), SourceModel, firstTokenMs);
     }
 
-    private async Task<List<LlmMessage>> BuildMessagesAsync(string sessionId, ChatMessage userMessage, string language, CancellationToken cancellationToken)
+    private async Task<List<LlmMessage>> BuildMessagesAsync(string sessionId, ChatMessage userMessage, CancellationToken cancellationToken)
     {
         var history = await _db.ChatMessages.AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.Id != userMessage.Id)
