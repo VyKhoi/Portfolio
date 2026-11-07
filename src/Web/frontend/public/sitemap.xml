@@ -3,15 +3,15 @@
   <url>
     <loc>https://dangvykhoi.com/</loc>
     <lastmod>2026-11-07</lastmod>
-    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/en" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/" />
   </url>
   <url>
-    <loc>https://dangvykhoi.com/en</loc>
+    <loc>https://dangvykhoi.com/vi</loc>
     <lastmod>2026-11-07</lastmod>
-    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/en" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/" />
   </url>
 </urlset>

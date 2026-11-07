@@ -10,8 +10,8 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 | Đường dẫn | Việc |
 | :--- | :--- |
 | `main.tsx` | Trang đã prerender (`data-prerendered`) thì `hydrateRoot`, còn lại (app shell) `createRoot`; prefetch content; bắt `vite:preloadError`; tải `oneko.js` lúc rảnh, chỉ khi có chuột |
-| `App.tsx` | `AppRoutes`: `/`, `/en` (Home), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
-| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/`, `/en` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
+| `App.tsx` | `AppRoutes`: `/`, `/vi` (Home), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
+| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/` (en), `/vi` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
 | `content/portfolio.json`, `content/seo.json` | Nội dung dự phòng (vi + en), title/description từng ngôn ngữ |
 | `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định, `pick(item, key, lang)` chọn cột `...En` |
 | `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsBento → Contact → Footer |

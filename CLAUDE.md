@@ -30,7 +30,7 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
 
 ## Song ngữ và nội dung
-- `/` tiếng Việt, `/en` tiếng Anh. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.
+- `/` tiếng Anh (mặc định), `/vi` tiếng Việt, `/en` chuyển 301 về `/`. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.
 - **Đổi dữ liệu bằng script:** thêm file mới đánh số trong `database/updates/` (`0002-ten.sql`), push. CI chạy `scripts/apply-db-updates.sh` sau khi backend healthy: mỗi file chạy đúng 1 lần trong 1 transaction, ghi vào bảng `applied_scripts`, rồi restart backend để xoá cache. Không sửa file đã chạy (bị chặn), không để secret trong đó (repo public).
 - **Đổi nội dung hiển thị thì sửa cả `src/Web/frontend/src/content/portfolio.json`**: file này là nội dung dự phòng và là HTML tĩnh cho Google. CI so API với file (`scripts/check-content.py`) và cảnh báo nếu lệch.
 - Viết mộc mạc, không buzzword; Masan chỉ nêu ngắn trong mục kinh nghiệm, không đưa lên bio hay SEO.

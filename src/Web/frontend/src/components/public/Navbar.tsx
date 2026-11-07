@@ -16,7 +16,7 @@ export function Navbar() {
 
   const languageLink = (
     <Link
-      to={lang === "vi" ? "/en" : "/"}
+      to={lang === "vi" ? "/" : "/vi"}
       hrefLang={lang === "vi" ? "en" : "vi"}
       lang={lang === "vi" ? "en" : "vi"}
       aria-label={`${lang === "vi" ? "EN" : "VI"}: ${t.switchLabel}`}

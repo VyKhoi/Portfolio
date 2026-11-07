@@ -1,5 +1,5 @@
 // Turns the Vite build into real HTML per language:
-//   dist/index.html (vi), dist/en/index.html (en), dist/app.html (login + admin shell), dist/404.html
+//   dist/index.html (en), dist/vi/index.html (vi), dist/app.html (login + admin shell), dist/404.html
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -7,7 +7,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dist = join(root, 'dist');
 const SITE = 'https://dangvykhoi.com';
-const PAGES = { vi: { path: '/', url: `${SITE}/` }, en: { path: '/en', url: `${SITE}/en` } };
+const PAGES = { en: { path: '/', url: `${SITE}/` }, vi: { path: '/vi', url: `${SITE}/vi` } };
 
 const seo = JSON.parse(readFileSync(join(root, 'src/content/seo.json'), 'utf8'));
 const { render } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
@@ -52,7 +52,7 @@ function jsonLd(lang) {
         url: `${SITE}/`,
         name: 'Đặng Vỹ Khôi',
         publisher: { '@id': `${SITE}/#person` },
-        inLanguage: ['vi-VN', 'en'],
+        inLanguage: ['en', 'vi-VN'],
       },
       {
         '@type': 'ProfilePage',
@@ -78,7 +78,7 @@ function head(lang) {
     `<link rel="canonical" href="${page}" />`,
     `<link rel="alternate" hreflang="vi" href="${PAGES.vi.url}" />`,
     `<link rel="alternate" hreflang="en" href="${PAGES.en.url}" />`,
-    `<link rel="alternate" hreflang="x-default" href="${PAGES.vi.url}" />`,
+    `<link rel="alternate" hreflang="x-default" href="${PAGES.en.url}" />`,
     `<meta property="og:type" content="profile" />`,
     `<meta property="og:site_name" content="Đặng Vỹ Khôi" />`,
     `<meta property="og:url" content="${page}" />`,
@@ -121,7 +121,7 @@ const appShell = replaceBetween(
 );
 
 const notFound = `<!doctype html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -139,17 +139,17 @@ const notFound = `<!doctype html>
 <body>
 <main>
   <h1>404</h1>
-  <p>Không tìm thấy trang này. / This page does not exist.</p>
-  <p><a href="/">Về trang chủ</a> · <a href="/en" lang="en">Back to home</a></p>
+  <p>This page does not exist. / <span lang="vi">Không tìm thấy trang này.</span></p>
+  <p><a href="/">Back to home</a> · <a href="/vi" lang="vi">Về trang chủ</a></p>
 </main>
 </body>
 </html>
 `;
 
 writeFileSync(join(dist, 'app.html'), appShell);
-writeFileSync(join(dist, 'index.html'), page('vi'));
-mkdirSync(join(dist, 'en'), { recursive: true });
-writeFileSync(join(dist, 'en/index.html'), page('en'));
+writeFileSync(join(dist, 'index.html'), page('en'));
+mkdirSync(join(dist, 'vi'), { recursive: true });
+writeFileSync(join(dist, 'vi/index.html'), page('vi'));
 writeFileSync(join(dist, '404.html'), notFound);
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true });
-console.log('Prerendered /, /en, app shell and 404');
+console.log('Prerendered /, /vi, app shell and 404');

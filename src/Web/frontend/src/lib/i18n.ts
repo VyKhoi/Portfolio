@@ -4,7 +4,7 @@ export type Lang = 'vi' | 'en';
 
 export function useLang(): Lang {
   const { pathname } = useLocation();
-  return pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'vi';
+  return pathname === '/vi' || pathname.startsWith('/vi/') ? 'vi' : 'en';
 }
 
 // Content rows carry both languages (bio / bioEn). Falls back to Vietnamese when the English field is empty.

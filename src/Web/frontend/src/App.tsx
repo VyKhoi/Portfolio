@@ -38,7 +38,7 @@ export function AppRoutes() {
       <MotionConfig reducedMotion="user">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/en" element={<Home />} />
+          <Route path="/vi" element={<Home />} />
           <Route path="/login" element={
             <Suspense fallback={adminFallback}>
               <Login />
