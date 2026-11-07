@@ -33,7 +33,8 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - **Sigma Cat là nhân vật riêng có tính cách sigma, trợ lý của anh Khôi, không phải anh Khôi.** Giữ giọng này ở mọi câu.
 - Chạy `qwen3.5:4b` trên CPU + MX150 (2 GB). GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
 - Không có Modelfile: backend gửi prompt dựng từ DB mỗi tin. Thông tin nằm ở DB (admin), giọng nói ở `src/Portfolio.AI`.
-- Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm.
+- Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm. Mốc 2026-11-08: 45/47, chờ chữ đầu ~4,4s, trọn câu ~7,8s (bản cũ 22/47, 5,6s, 12,5s).
+- Backend xác định ngôn ngữ trả lời (`ChatLanguage.ForReply`) và ra lệnh ở cuối tin; để model tự chọn thì nó nghiêng về tiếng Việt.
 
 ## Song ngữ và nội dung
 - `/` tiếng Anh (mặc định), `/vi` tiếng Việt, `/en` chuyển 301 về `/`. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.

@@ -225,13 +225,13 @@ public class ChatServiceTests
         var harness = new Harness(new ChatOptions { HistoryMessages = 2, QuickReplyWordDelayMs = 0 });
         await harness.SendAsync("first question here");
         await harness.SendAsync("second question here");
-        await harness.SendAsync("third question here", "vi");
+        await harness.SendAsync("third question here");
 
         var messages = harness.Llm.Calls.Last();
 
         Assert.Equal("system", messages[0].Role);
         Assert.Equal(new[] { "second question here", "Hello there" }, messages.Skip(1).Take(2).Select(m => m.Content));
-        Assert.Equal("third question here", messages.Last().Content);
+        Assert.Equal("third question here\n\n" + harness.Assets.Reply("replyLanguage", "en"), messages.Last().Content);
     }
 
     [Fact]
@@ -274,6 +274,14 @@ public class ChatServiceTests
         Assert.Equal("Does he surf?", turn.Question);
         Assert.False(harness.Notifications.Reader.TryRead(out _));
     }
+
+    [Theory]
+    [InlineData("Anh Khôi học trường nào?", "en", "vi")]
+    [InlineData("đi đâu", "en", "vi")]
+    [InlineData("Where did he study?", "en", "en")]
+    [InlineData("khoi hoc truong nao", "vi", "vi")]
+    public void Reply_language_follows_vietnamese_marks_then_the_page(string message, string page, string expected)
+        => Assert.Equal(expected, ChatLanguage.ForReply(message, page));
 
     [Theory]
     [InlineData("Liên hệ!!", "lien he")]

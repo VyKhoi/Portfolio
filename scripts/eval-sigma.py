@@ -10,6 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FACTS_MARKER = "# Facts"
+REPLIES = json.loads((ROOT / "src/Portfolio.AI/replies.json").read_text(encoding="utf-8"))
 PHONE_VOICE = ["toi rat vui", "rat vui duoc", "xin loi", "happy to help", "glad to help", "as an ai", "la mot ai",
                "duoi day la", "i apologize", "i'm sorry", "how may i assist", "quy khach"]
 OWNER_VOICE = ["toi la khoi", "toi la anh khoi", "minh la khoi", "i am khoi", "i'm khoi"]
@@ -49,6 +50,10 @@ def score(case, reply, done_reason):
         fails.append("too long")
     if case["lang"] == "vi" and not has_vietnamese(reply):
         fails.append("not vietnamese")
+    if case["lang"] == "en" and re.search(r"b(anh|em)b", text):
+        fails.append("vietnamese words in english")
+    if "masan" in text and "masan" not in plain(case["q"]) and case["id"] not in ("who-vi", "who-en"):
+        fails.append("unasked masan")
     if case["lang"] == "en" and has_vietnamese(reply):
         fails.append("not english")
     return fails
@@ -58,6 +63,10 @@ def ask(args, system, case):
     messages = [{"role": "system", "content": system}] if system else []
     messages += [{"role": r, "content": c} for r, c in case.get("history", [])]
     question = case["q"]
+    if not args.no_system:
+        marks = "đ" in question.lower() or any(unicodedata.category(c) == "Mn" for c in unicodedata.normalize("NFD", question))
+        language = "vi" if marks else case.get("page", case["lang"])
+        question += "\n\n" + REPLIES["replyLanguage"][language]
     messages.append({"role": "user", "content": question})
     body = {"model": args.model, "stream": True, "think": False, "keep_alive": "-1m", "messages": messages,
             "options": json.loads(args.options)}

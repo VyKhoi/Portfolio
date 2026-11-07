@@ -1,4 +1,8 @@
 {
+  "replyLanguage": {
+    "vi": "[Trả lời bằng tiếng Việt]",
+    "en": "[Reply in English. Call him Khoi, call yourself I.]"
+  },
   "honeypot": {
     "vi": "Em ghi nhận rồi 😼",
     "en": "Noted 😼"

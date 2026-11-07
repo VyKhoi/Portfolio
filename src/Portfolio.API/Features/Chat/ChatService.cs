@@ -114,7 +114,7 @@ public class ChatService
     private async Task<ReplyResult> StreamModelAsync(
         string sessionId, ChatMessage userMessage, string language, IChatOutput output, Stopwatch clock, CancellationToken cancellationToken)
     {
-        var messages = await BuildMessagesAsync(sessionId, userMessage, cancellationToken);
+        var messages = await BuildMessagesAsync(sessionId, userMessage, language, cancellationToken);
 
         if (!await _gate.TryEnterAsync(cancellationToken))
         {
@@ -152,7 +152,7 @@ public class ChatService
         return new ReplyResult(reply.ToString().Trim(), SourceModel, firstTokenMs);
     }
 
-    private async Task<List<LlmMessage>> BuildMessagesAsync(string sessionId, ChatMessage userMessage, CancellationToken cancellationToken)
+    private async Task<List<LlmMessage>> BuildMessagesAsync(string sessionId, ChatMessage userMessage, string pageLanguage, CancellationToken cancellationToken)
     {
         var history = await _db.ChatMessages.AsNoTracking()
             .Where(m => m.SessionId == sessionId && m.Id != userMessage.Id)
@@ -164,7 +164,9 @@ public class ChatService
 
         var messages = new List<LlmMessage> { new("system", await _prompt.BuildAsync(cancellationToken)) };
         messages.AddRange(history);
-        messages.Add(new LlmMessage("user", userMessage.Content));
+        // Goes after the message so the long system prompt stays identical and cached
+        var replyLanguage = _assets.Reply("replyLanguage", ChatLanguage.ForReply(userMessage.Content, pageLanguage));
+        messages.Add(new LlmMessage("user", $"{userMessage.Content}\n\n{replyLanguage}"));
         return messages;
     }
 

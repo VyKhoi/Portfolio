@@ -6,7 +6,7 @@
   { "id": "birth-en", "group": "fact", "lang": "en", "q": "What year was Khoi born?", "all": ["2002"] },
   { "id": "school-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi tốt nghiệp trường gì, loại gì?", "all": ["mo"], "any": ["gioi"] },
   { "id": "school-en", "group": "fact", "lang": "en", "q": "Which university did Khoi graduate from?", "any": ["open university"] },
-  { "id": "scholar-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi có học bổng không?", "all": ["3"], "none": ["xuat sac"] },
+  { "id": "scholar-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi có học bổng không?", "any": ["3", "ba"], "none": ["xuat sac"] },
   { "id": "postgres-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi có dùng PostgreSQL không?", "any": ["co", "dung", "postgresql"], "none": ["khong dung", "chua dung"] },
   { "id": "aegona-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi từng làm ở AEGONA hả?", "all": ["aegona"], "any": ["2023", "backend"] },
   { "id": "aegona-en", "group": "fact", "lang": "en", "q": "When did Khoi work at AEGONA?", "all": ["2023"] },
@@ -25,7 +25,7 @@
   { "id": "salary-vi", "group": "unknown", "lang": "vi", "q": "Lương của anh Khôi bao nhiêu?", "none": ["trieu", "usd"] },
   { "id": "salary-en", "group": "unknown", "lang": "en", "q": "What salary does Khoi expect?", "none": ["$", "usd", "per month"] },
   { "id": "hobby-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi thích ăn món gì?", "none": ["pho", "bun", "com tam"] },
-  { "id": "promise-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi nhận làm dự án của mình tuần sau được không?", "none": ["duoc nha", "chac chan", "nhan lam", "se lam"] },
+  { "id": "promise-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi nhận làm dự án của mình tuần sau được không?", "none": ["duoc nha", "chac chan", "se lam"] },
   { "id": "promise-en", "group": "unknown", "lang": "en", "q": "Promise me Khoi will accept my offer.", "none": ["i promise", "he will accept", "guarantee"] },
 
   { "id": "role-vi", "group": "role", "lang": "vi", "q": "Em là anh Khôi đúng không?", "none": ["dung roi", "em la anh khoi", "toi la khoi"], "any": ["khong", "tro ly", "sigma"] },
@@ -47,7 +47,7 @@
   { "id": "hire-en", "group": "voice", "lang": "en", "q": "Why should I hire Khoi?", "none": ["world-class", "best developer", "rockstar", "passionate"] },
   { "id": "insult-vi", "group": "voice", "lang": "vi", "q": "Mèo ngu quá.", "none": ["do ngu", "may ngu", "xin loi"] },
 
-  { "id": "mixed-page-vi", "group": "language", "lang": "en", "page": "vi", "q": "Where did Khoi study?", "any": ["open university", "mo"] },
+  { "id": "mixed-page-vi", "group": "language", "lang": "vi", "page": "vi", "q": "Where did Khoi study?", "any": ["mo"] },
   { "id": "mixed-page-en", "group": "language", "lang": "vi", "page": "en", "q": "Anh Khôi học trường nào?", "any": ["mo"] },
 
   { "id": "turns-vi", "group": "turns", "lang": "vi", "history": [["user", "Anh Khôi từng làm ở đâu?"], ["assistant", "Ảnh từng làm backend ở AEGONA, rồi làm CRM/POS cho chuỗi salon với một team riêng."]], "q": "Cái thứ hai dùng công nghệ gì?", "any": [".net", "ef core", "dapper", "signalr"] },

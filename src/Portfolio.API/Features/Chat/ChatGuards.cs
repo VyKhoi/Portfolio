@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
@@ -70,4 +72,15 @@ public static class ChatLanguage
     public const string Vietnamese = "vi";
 
     public static string Normalize(string? language) => language == Vietnamese ? Vietnamese : English;
+
+    /// <summary>
+    /// Language the reply must use. Vietnamese marks settle it; a plain-letter message follows the page,
+    /// because people also type Vietnamese without marks. The small model cannot be trusted to pick by itself.
+    /// </summary>
+    public static string ForReply(string message, string pageLanguage)
+    {
+        var hasVietnameseMarks = message.Contains('đ', StringComparison.OrdinalIgnoreCase)
+            || message.Normalize(NormalizationForm.FormD).Any(c => CharUnicodeInfo.GetUnicodeCategory(c) == UnicodeCategory.NonSpacingMark);
+        return hasVietnameseMarks ? Vietnamese : pageLanguage;
+    }
 }
