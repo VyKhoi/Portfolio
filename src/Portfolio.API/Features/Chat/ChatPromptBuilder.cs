@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Portfolio.API.Data;
 
 namespace Portfolio.API.Features.Chat;
@@ -17,13 +16,11 @@ public class ChatPromptBuilder
 
     private readonly PortfolioDbContext _db;
     private readonly ChatAssets _assets;
-    private readonly ChatOptions _options;
 
-    public ChatPromptBuilder(PortfolioDbContext db, ChatAssets assets, IOptions<ChatOptions> options)
+    public ChatPromptBuilder(PortfolioDbContext db, ChatAssets assets)
     {
         _db = db;
         _assets = assets;
-        _options = options.Value;
     }
 
     public async Task<string> BuildAsync(CancellationToken cancellationToken)
@@ -62,12 +59,6 @@ public class ChatPromptBuilder
             var project = First(job.ProjectNameEn, job.ProjectName);
             if (project.Length > 0) prompt.Append(", ").Append(project);
             if (job.TechStack.Count > 0) prompt.Append(". Tech: ").AppendJoin(", ", job.TechStack);
-
-            var highlights = job.HighlightsEn.Count > 0 ? job.HighlightsEn : job.Highlights;
-            foreach (var highlight in highlights.Take(_options.MaxHighlightsPerJob))
-            {
-                prompt.Append(' ').Append(highlight);
-            }
             prompt.Append('\n');
         }
 

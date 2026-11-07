@@ -9,3 +9,7 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+  backend:
+    environment:
+      # 20 of 33 layers fill the MX150's 2 GB; 22 runs out of memory
+      - Ollama__NumGpu=20

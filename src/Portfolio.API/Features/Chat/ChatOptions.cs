@@ -12,7 +12,6 @@ public class ChatOptions
     public int MaxConcurrentGenerations { get; set; } = 2;
     public int GenerationWaitSeconds { get; set; } = 15;
     public int QuickReplyWordDelayMs { get; set; } = 20;
-    public int MaxHighlightsPerJob { get; set; } = 2;
 }
 
 public class OllamaOptions
@@ -28,6 +27,9 @@ public class OllamaOptions
     public int TopK { get; set; } = 40;
     public double RepeatPenalty { get; set; } = 1.05;
     public int NumPredict { get; set; } = 120;
-    public int NumCtx { get; set; } = 4096;
+    public int NumCtx { get; set; } = 2048;
     public int NumThread { get; set; } = 4;
+
+    /// <summary>Layers to put on the GPU. Null lets Ollama decide, which is very cautious on a 2 GB card.</summary>
+    public int? NumGpu { get; set; }
 }

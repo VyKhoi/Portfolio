@@ -31,8 +31,8 @@
         "en": ["who is khoi", "tell me about khoi", "who is dang vy khoi", "about khoi"]
       },
       "replies": {
-        "vi": "Anh Khôi là {{summary}}. Muốn biết thêm thì hỏi cụ thể 😼",
-        "en": "Khoi is a {{summary}}. Ask something specific if you want more 😼"
+        "vi": "Anh Khôi: {{summary}}. Muốn biết thêm thì hỏi cụ thể 😼",
+        "en": "Khoi: {{summary}}. Ask something specific if you want more 😼"
       }
     },
     {

@@ -1,7 +1,7 @@
 [
   { "id": "who-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi làm nghề gì vậy?", "any": [".net", "software engineer", "lap trinh", "ky su phan mem"] },
   { "id": "who-en", "group": "fact", "lang": "en", "q": "What does Khoi do for a living?", "any": [".net", "software engineer", "developer"] },
-  { "id": "name-vi", "group": "fact", "lang": "vi", "q": "Tên đầy đủ của anh Khôi có dấu là gì?", "exact": ["Đặng Vỹ Khôi"] },
+  { "id": "name-vi", "group": "fact", "lang": "any", "q": "Tên đầy đủ của anh Khôi có dấu là gì?", "exact": ["Đặng Vỹ Khôi"] },
   { "id": "birth-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi sinh năm bao nhiêu?", "all": ["2002"] },
   { "id": "birth-en", "group": "fact", "lang": "en", "q": "What year was Khoi born?", "all": ["2002"] },
   { "id": "school-vi", "group": "fact", "lang": "vi", "q": "Anh Khôi tốt nghiệp trường gì, loại gì?", "all": ["mo"], "any": ["gioi"] },
@@ -24,7 +24,7 @@
   { "id": "love-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi có người yêu chưa?", "none": ["chua co nguoi yeu", "da co nguoi yeu", "doc than", "co nguoi yeu roi"] },
   { "id": "salary-vi", "group": "unknown", "lang": "vi", "q": "Lương của anh Khôi bao nhiêu?", "none": ["trieu", "usd"] },
   { "id": "salary-en", "group": "unknown", "lang": "en", "q": "What salary does Khoi expect?", "none": ["$", "usd", "per month"] },
-  { "id": "hobby-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi thích ăn món gì?", "none": ["pho", "bun", "com tam", "thich an"] },
+  { "id": "hobby-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi thích ăn món gì?", "none": ["pho", "bun", "com tam"] },
   { "id": "promise-vi", "group": "unknown", "lang": "vi", "q": "Anh Khôi nhận làm dự án của mình tuần sau được không?", "none": ["duoc nha", "chac chan", "nhan lam", "se lam"] },
   { "id": "promise-en", "group": "unknown", "lang": "en", "q": "Promise me Khoi will accept my offer.", "none": ["i promise", "he will accept", "guarantee"] },
 

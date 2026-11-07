@@ -24,6 +24,8 @@ public interface ILlmClient
 
 public class OllamaClient : ILlmClient
 {
+    private static readonly JsonSerializerOptions IgnoreNulls = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
     private readonly HttpClient _http;
     private readonly OllamaOptions _options;
 
@@ -81,9 +83,10 @@ public class OllamaClient : ILlmClient
                 num_predict = numPredict,
                 num_ctx = _options.NumCtx,
                 num_thread = _options.NumThread,
+                num_gpu = _options.NumGpu,
             },
         };
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/chat") { Content = JsonContent.Create(body) };
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/chat") { Content = JsonContent.Create(body, options: IgnoreNulls) };
 
         try
         {

@@ -78,7 +78,6 @@ public class ChatServiceTests
                 Company = "Team độc lập",
                 CompanyEn = "Independent Team",
                 Period = "2024",
-                HighlightsEn = new() { "First", "Second", "Third" },
                 Order = 1,
             });
             Db.SaveChanges();
@@ -89,7 +88,7 @@ public class ChatServiceTests
                 Assets,
                 new ChatQuota(new MemoryCache(new MemoryCacheOptions()), options),
                 new QuickAnswerMatcher(Assets, Db),
-                new ChatPromptBuilder(Db, Assets, options),
+                new ChatPromptBuilder(Db, Assets),
                 Llm,
                 new GenerationGate(options),
                 Notifications,
@@ -232,14 +231,14 @@ public class ChatServiceTests
 
         Assert.Equal("system", messages[0].Role);
         Assert.Equal(new[] { "second question here", "Hello there" }, messages.Skip(1).Take(2).Select(m => m.Content));
-        Assert.Equal("third question here\n\n[page language: vi]", messages.Last().Content);
+        Assert.Equal("third question here", messages.Last().Content);
     }
 
     [Fact]
     public async Task Prompt_uses_enabled_facts_and_english_values_and_is_stable()
     {
         var harness = new Harness();
-        var builder = new ChatPromptBuilder(harness.Db, harness.Assets, Options.Create(new ChatOptions()));
+        var builder = new ChatPromptBuilder(harness.Db, harness.Assets);
 
         var first = await builder.BuildAsync(CancellationToken.None);
         var second = await builder.BuildAsync(CancellationToken.None);
@@ -248,8 +247,6 @@ public class ChatServiceTests
         Assert.StartsWith(harness.Assets.Persona, first);
         Assert.Contains("- Email: a@b.c", first);
         Assert.Contains("Independent Team", first);
-        Assert.Contains("First Second", first);
-        Assert.DoesNotContain("Third", first);
         Assert.DoesNotContain("hidden value", first);
     }
 
@@ -257,7 +254,7 @@ public class ChatServiceTests
     public async Task Fact_edit_reaches_the_next_prompt()
     {
         var harness = new Harness();
-        var builder = new ChatPromptBuilder(harness.Db, harness.Assets, Options.Create(new ChatOptions()));
+        var builder = new ChatPromptBuilder(harness.Db, harness.Assets);
 
         var fact = await harness.Db.AssistantFacts.SingleAsync(f => f.Key == "email");
         fact.ValueEn = "new@mail.com";

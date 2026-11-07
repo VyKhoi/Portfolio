@@ -164,8 +164,7 @@ public class ChatService
 
         var messages = new List<LlmMessage> { new("system", await _prompt.BuildAsync(cancellationToken)) };
         messages.AddRange(history);
-        // The page language goes last so the long system prompt stays identical and cached
-        messages.Add(new LlmMessage("user", $"{userMessage.Content}\n\n[page language: {language}]"));
+        messages.Add(new LlmMessage("user", userMessage.Content));
         return messages;
     }
 

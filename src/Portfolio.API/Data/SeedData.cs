@@ -78,9 +78,9 @@ public static class SeedData
     private static List<AssistantFact> BuildAssistantFacts() => new()
     {
         new() { Key = "name", Label = "Full name", ValueVi = "Đặng Vỹ Khôi", ValueEn = "Đặng Vỹ Khôi (Dang Vy Khoi)", Order = 1 },
-        new() { Key = "summary", Label = "Summary", ValueVi = "Software Engineer làm phần mềm 3 năm, chủ yếu .NET", ValueEn = "Software Engineer with 3 years of experience, mostly .NET", Order = 2 },
+        new() { Key = "summary", Label = "Career", ValueVi = "Software Engineer, 3 năm kinh nghiệm, chủ yếu .NET", ValueEn = "Software Engineer, 3 years of experience, mostly .NET", Order = 2 },
         new() { Key = "born", Label = "Born", ValueVi = "2002", ValueEn = "2002", Order = 3 },
-        new() { Key = "location", Label = "Lives in", ValueVi = "Gò Vấp, TP.HCM", ValueEn = "Go Vap, Ho Chi Minh City (Gò Vấp, TP.HCM)", Order = 4 },
+        new() { Key = "location", Label = "Current location", ValueVi = "Gò Vấp, TP.HCM", ValueEn = "Gò Vấp, TP.HCM (Go Vap, Ho Chi Minh City)", Order = 4 },
         new() { Key = "education", Label = "Education", ValueVi = "Cử nhân CNTT, Đại học Mở TP.HCM (2020-2024), tốt nghiệp loại Giỏi, 3 học bổng khuyến khích học tập", ValueEn = "Bachelor of IT, Ho Chi Minh City Open University (Đại học Mở TP.HCM), 2020-2024, graduated with Distinction (loại Giỏi), 3 academic scholarships", Order = 5 },
         new() { Key = "email", Label = "Email", ValueVi = "dangvykhoi@gmail.com", ValueEn = "dangvykhoi@gmail.com", Order = 6 },
         new() { Key = "phone", Label = "Phone and Zalo", ValueVi = "0931 314 792", ValueEn = "0931 314 792", Order = 7 },
