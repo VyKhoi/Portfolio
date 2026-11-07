@@ -1,67 +1,66 @@
 # Frontend (`src/Web/frontend`)
 
-## 1. Tech stack (thực tế đang dùng)
+## 1. Tech stack
 
-- React 19 + TypeScript 6 + **Vite 8** (rolldown), lint bằng **oxlint**
+- React 19 + TypeScript 6 + **Vite 8** (rolldown), linted with **oxlint**
 - Tailwind CSS v4 (`@tailwindcss/vite`), Framer Motion, lucide-react
-- Zustand (auth, theme admin), TanStack Query (chỉ trong admin), `fetch` thuần (`lib/api.ts`)
+- Zustand (auth, admin theme), TanStack Query (admin only), plain `fetch` (`lib/api.ts`)
 - React Router DOM v7
-- Không dùng axios/SignalR (đã gỡ 2026-10-31); gọi API bằng `fetch`.
 
-## 2. Cấu trúc
+## 2. Structure
 
 ```
 src/
-├── main.tsx                 # prefetch content public + tự reload 1 lần khi chunk cũ bị xoá sau deploy
-├── App.tsx                  # Router: "/" (Home), "/login", "/dashboard/*" (lazy, ProtectedRoute), chatbot lazy sau 1.2s
-├── index.css                # Tailwind + theme admin (data-theme dark/light, class adm-*)
+├── main.tsx                 # prefetches public content; reloads once if an old chunk is gone after a deploy
+├── App.tsx                  # Router: "/" (Home), "/login", "/dashboard/*" (lazy, ProtectedRoute), chatbot lazy after 1.2s
+├── index.css                # Tailwind + admin themes (data-theme dark/light, adm-* classes)
 ├── pages/public/Home.tsx    # Navbar → Hero → About → ProjectsBento → Contact → Footer
 ├── components/
 │   ├── public/              # Hero (profile), About (skills), ProjectsBento (experiences), Contact (form + honeypot)
 │   ├── admin/               # AdminLayout (QueryClient + prefetch), Sidebar, DashboardOverview, ProfileSettings,
 │   │                        # ExperienceCRUD, SkillCRUD, ProjectCRUD, InboxTable, AIChatLogs, AdminLoader (skeleton)
-│   ├── ui/                  # Badge, Button, Card, Input (kiểu shadcn tự viết)
-│   └── CatChatbot.tsx       # Widget Sigma Cat, đọc SSE từ /api/ai/chat/stream
+│   ├── ui/                  # Badge, Button, Card, Input (hand-written, shadcn style)
+│   └── CatChatbot.tsx       # Sigma Cat widget, reads SSE from /api/ai/chat/stream
 ├── lib/
-│   ├── api.ts               # API_BASE_URL = '/api' (luôn relative), ContentApi, ContactApi
-│   ├── contentCache.ts      # cache localStorage "content-cache:v3:*", useCachedContent()
+│   ├── api.ts               # API_BASE_URL = '/api' (always relative), ContentApi, ContactApi
+│   ├── contentCache.ts      # localStorage cache "content-cache:v3:*", useCachedContent()
 │   └── utils.ts             # cn() = clsx + tailwind-merge
 └── store/
-    ├── authStore.ts         # token JWT trong localStorage['token']
-    └── adminThemeStore.ts   # dark/light cho admin
+    ├── authStore.ts         # JWT in localStorage['token']
+    └── adminThemeStore.ts   # dark/light for the admin console
 ```
 
-`public/` chứa: `cv.pdf`, ảnh profile/logo, favicon các cỡ, `robots.txt`, `sitemap.xml`, `site.webmanifest`, file xác minh Google Search Console, `oneko.js` + `oneko.gif` (mèo chạy theo chuột).
+`public/` holds `cv.pdf`, profile and logo images, favicons in several sizes, `robots.txt`, `sitemap.xml`, `site.webmanifest`, the Google Search Console verification file, and `oneko.js` + `oneko.gif` (the cat that follows the cursor).
 
-`index.html` chứa sẵn: meta SEO/OpenGraph, JSON-LD (Person, WebSite, ProfilePage, FAQPage), boot splash và nội dung HTML fallback cho Googlebot.
+`index.html` includes SEO/OpenGraph meta tags, JSON-LD (Person, WebSite, ProfilePage, FAQPage), the boot splash and fallback HTML content for Googlebot.
 
-## 3. Quy ước
+## 3. Conventions
 
-- Gọi API luôn bằng đường dẫn relative `/api/...` — dev thì Vite proxy sang `localhost:5000`, prod thì nginx của container frontend proxy sang `backend:8080`.
-- Trang public: dữ liệu qua `useCachedContent(key, fallback, isValid)` — luôn có fallback hardcode để không bao giờ trống.
-- Admin: dùng `useQuery` với key `profile | experiences | skills | projects | inbox | ai-sessions`; sau khi ghi thì `invalidateQueries`. (Cache `localStorage` của trang public tự làm mới ở lần tải sau nhờ stale-while-revalidate.)
-- Admin được code-split thành **một** bundle lazy để visitor không tải về.
-- Chatbot: `sessionId` lưu `localStorage['ai_chat_session_id']`, có honeypot `websiteTrap`.
+- Always call the API with a relative `/api/...` path: in dev Vite proxies to `localhost:5000`, in production the frontend container's Nginx proxies to `backend:8080`.
+- Public pages get data through `useCachedContent(key, fallback, isValid)`, always with a hardcoded fallback so a page is never empty.
+- Admin uses `useQuery` with the keys `profile | experiences | skills | projects | inbox | ai-sessions`, and calls `invalidateQueries` after a write. (The public `localStorage` cache refreshes on the next load through stale-while-revalidate.)
+- The admin console is code-split into **one** lazy bundle so visitors never download it.
+- Chatbot: `sessionId` is stored in `localStorage['ai_chat_session_id']`, with a `websiteTrap` honeypot.
 
-## 4. Nginx của container (`nginx.conf`)
+## 4. Container Nginx (`nginx.conf`)
 
-| Location | Việc làm |
+| Location | What it does |
 | :--- | :--- |
-| `/api/ai/` | rate limit POST 20 r/phút, tắt buffering cho SSE, timeout 120s |
-| `= /api/contact/messages` | rate limit POST 5 r/phút |
-| `= /api/auth/login` | rate limit POST 10 r/phút |
-| `/api/` | proxy thường |
-| `/assets/` | cache 1 năm immutable (file có hash) |
-| file tĩnh khác | cache 1 ngày + stale-while-revalidate |
+| `/api/ai/` | POST rate limit 20 r/min, buffering off for SSE, 120s timeout |
+| `= /api/contact/messages` | POST rate limit 5 r/min |
+| `= /api/auth/login` | POST rate limit 10 r/min |
+| `/api/` | plain proxy |
+| `/assets/` | cached 1 year, immutable (hashed files) |
+| other static files | cached 1 day + stale-while-revalidate |
 | `/login`, `/dashboard` | `X-Robots-Tag: noindex` |
-| `/` | SPA fallback `index.html`, `no-cache` |
+| `/` | SPA fallback to `index.html`, `no-cache` |
 
-## 5. Lệnh
+## 5. Commands
 
 ```bash
 cd src/Web/frontend
 npm install
-npm run dev      # http://localhost:5173, proxy /api → localhost:5000
+npm run dev      # http://localhost:5173, proxies /api → localhost:5000
 npm run build    # tsc -b && vite build → dist/
 npm run lint     # oxlint
 ```

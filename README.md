@@ -12,17 +12,17 @@
 
 </div>
 
-Trang cá nhân tự host trên home server: trang giới thiệu, trang quản trị nội dung và trợ lý AI chạy local **Sigma Cat** 😼.
+A personal website self-hosted on a home server: a public profile, an admin console for editing the content, and **Sigma Cat** 😼, an AI assistant that runs locally.
 
-| Trang chủ | Trợ lý AI Sigma Cat | Dashboard quản trị |
+| Home | Sigma Cat AI assistant | Admin dashboard |
 | :---: | :---: | :---: |
 | ![Home](docs/images/home.png) | ![Chat](docs/images/chat.png) | ![Admin](docs/images/admin.png) |
 
-## Kiến trúc
+## Architecture
 
 ```mermaid
 graph LR
-    U["Trình duyệt"] -->|"HTTPS"| CF["Cloudflare"]
+    U["Browser"] -->|"HTTPS"| CF["Cloudflare"]
     CF --> GW["Nginx gateway"]
     GW --> FE["Frontend: React 19 + Nginx"]
     FE -->|"/api"| BE["Backend: .NET 9 API"]
@@ -31,14 +31,14 @@ graph LR
     BE -.-> N["Gmail / Telegram"]
 ```
 
-- **Backend:** .NET 9 modular monolith, EF Core, JWT, cache in-memory, email gửi nền qua `System.Threading.Channels`.
-- **AI:** Ollama + Qwen2.5 1.5B chỉ chạy trong mạng nội bộ Docker. Kiến thức nằm ở `src/Portfolio.AI`, câu hỏi phổ biến được trả lời tức thì (Fast Intent), còn lại stream qua SSE.
-- **Frontend:** React 19, Vite, Tailwind, Framer Motion; SEO với JSON-LD, OpenGraph, sitemap.
-- **Bảo vệ:** rate limit, honeypot chống bot (không cần captcha), secret do server quản lý.
+- **Backend:** .NET 9 modular monolith, EF Core, JWT, in-memory cache, background email through `System.Threading.Channels`.
+- **AI:** Ollama + Qwen2.5 1.5B, reachable only inside the Docker network. Its knowledge lives in `src/Portfolio.AI`. Common questions get an instant answer (Fast Intent); the rest stream over SSE.
+- **Frontend:** React 19, Vite, Tailwind, Framer Motion; SEO with JSON-LD, OpenGraph and a sitemap.
+- **Protection:** rate limits, a honeypot against bots (no captcha), secrets managed on the server.
 
-Chi tiết: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/DEV_GUIDE.md](docs/DEV_GUIDE.md)
+More detail: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) · [docs/DEV_GUIDE.md](docs/DEV_GUIDE.md)
 
-## Chạy thử
+## Run it locally
 
 ```bash
 git clone https://github.com/vykhoi/Portfolio.git && cd Portfolio
@@ -48,8 +48,8 @@ docker compose up -d --build
 ./src/Portfolio.AI/scripts/build-model.sh      # Windows: .\src\Portfolio.AI\scripts\build-model.ps1
 ```
 
-Mở http://localhost:18122. pgAdmin (tuỳ chọn): `docker compose --profile tools up -d pgadmin` → http://127.0.0.1:5050.
+Open http://localhost:18122. pgAdmin (optional): `docker compose --profile tools up -d pgadmin` → http://127.0.0.1:5050.
 
-## Liên hệ
+## Contact
 
 📧 [dangvykhoi@gmail.com](mailto:dangvykhoi@gmail.com) · 🌐 [dangvykhoi.com](https://dangvykhoi.com) · 💼 [linkedin.com/in/vykhoi](https://linkedin.com/in/vykhoi)

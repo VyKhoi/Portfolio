@@ -1,37 +1,36 @@
-# 🧠 Portfolio.AI - Dedicated Local AI Knowledge Project
+# 🧠 Portfolio.AI - Local AI knowledge
 
-Dự án này là nơi lưu trữ toàn bộ tài nguyên tri thức (Knowledge Base), Persona và cấu hình của mô hình AI Local (**Sigma Cat 😼**), phục vụ trực tiếp cho website Portfolio.
+This folder holds the knowledge base, persona and configuration of the local AI model (**Sigma Cat 😼**) used by the Portfolio website. The knowledge files are in Vietnamese because the chatbot answers in Vietnamese.
 
-## 📁 Cấu trúc Thư mục
+## 📁 Structure
 
 ```text
 src/Portfolio.AI/
-├── knowledge/               # Nơi chứa tài liệu dạy AI (Markdown)
-│   ├── profile.md           # Thông tin cá nhân, học vấn, danh hiệu, liên hệ
-│   ├── experience.md        # Kinh nghiệm làm việc, dự án thực chiến
-│   ├── skills.md            # Kỹ năng chuyên môn, Tech Stack
-│   └── guidelines.md        # Persona Sigma Cat & quy tắc phản hồi (1-3 câu)
-├── Modelfile                # File đóng gói model được sinh tự động
+├── knowledge/               # Markdown files that teach the AI
+│   ├── profile.md           # Personal details, education, contact
+│   ├── experience.md        # Work experience and projects
+│   ├── skills.md            # Skills and tech stack
+│   └── guidelines.md        # Sigma Cat persona and reply rules
+├── Modelfile                # Generated model definition
 ├── scripts/
-│   ├── assemble.ps1         # Script ghép các file Markdown vào Modelfile
-│   ├── build-model.ps1      # Script tự động build model 'sigma-cat' trên Windows
-│   └── build-model.sh       # Script tự động build model 'sigma-cat' trên Linux/Docker
+│   ├── assemble.ps1         # Merges the Markdown files into the Modelfile
+│   ├── build-model.ps1      # Builds the 'sigma-cat' model on Windows
+│   └── build-model.sh       # Builds the 'sigma-cat' model on Linux/Docker
 └── README.md
 ```
 
-## 🚀 Cách Cập Nhật Tri Thức Mới Cho AI (Không Cần Sửa Code Backend C#)
+## 🚀 Updating the AI's knowledge (no C# changes needed)
 
-Khi bạn muốn cập nhật CV, thêm dự án mới hoặc kỹ năng mới:
-
-1. **Bước 1:** Mở các file tương ứng trong `knowledge/` (`experience.md`, `skills.md`...) và cập nhật nội dung.
-2. **Bước 2:** Chạy script build model:
-   - Trên Windows PowerShell:
+1. Edit the matching files in `knowledge/`.
+2. Regenerate the `Modelfile` and rebuild the model:
+   - Windows PowerShell:
      ```powershell
      .\scripts\build-model.ps1
      ```
-   - Hoặc bằng lệnh Docker trực tiếp:
+   - Or, with an up-to-date `Modelfile`, directly through Docker:
      ```bash
      docker exec -i portfolio_ollama ollama create sigma-cat -f /ai/Modelfile
      ```
+3. Commit both `knowledge/` and `Modelfile`: CI only runs `ollama create` on the committed `Modelfile`.
 
-Ngay lập tức, model `sigma-cat` trong Ollama sẽ được nạp tri thức mới. Backend `.NET` và Chatbot trên giao diện sẽ tự động phản hồi theo dữ liệu mới nhất mà **KHÔNG cần restart hay build lại Backend**!
+The `sigma-cat` model picks up the new knowledge right away, with no backend restart or rebuild. Answers hardcoded in Fast Intent (`Controllers/AIController.cs`) are separate and need their own edit.
