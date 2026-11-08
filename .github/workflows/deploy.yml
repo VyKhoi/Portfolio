@@ -63,6 +63,8 @@ jobs:
             echo "Backup saved: $FILE ($(du -h "$FILE" | cut -f1))"
             # Keep the 14 most recent backups
             ls -1t "$BACKUP_DIR"/portfolio_db_*.dump | tail -n +15 | xargs -r rm -f
+            # Deleted visitor data must not outlive the 14 days promised on /privacy
+            find "$BACKUP_DIR" -maxdepth 1 -name 'portfolio_db_*.dump' -mtime +14 -delete
           else
             echo "Postgres container is not running yet, skipping backup"
           fi

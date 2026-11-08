@@ -31,6 +31,7 @@ export const PRIVACY = {
         items: [
           'Địa chỉ IP chỉ được giữ tạm trong bộ nhớ để chống spam. Nhật ký máy chủ có IP và tự xoay vòng sau vài ngày.',
           'Trình duyệt của bạn lưu mã phiên chat và bản sao nội dung trang để tải nhanh hơn. Không có cookie theo dõi, không Google Analytics.',
+          'Cơ sở dữ liệu được sao lưu để phòng sự cố, mỗi bản giữ tối đa 14 ngày. Dữ liệu đã xoá còn trong bản sao lưu tới khi bản đó hết hạn.',
         ],
       },
       {
@@ -83,6 +84,7 @@ export const PRIVACY = {
         items: [
           'Your IP address is only held in memory to stop spam. Server logs include IP addresses and rotate out after a few days.',
           'Your browser stores the chat session ID and a copy of the page content so the site loads faster. No tracking cookies, no Google Analytics.',
+          'The database is backed up in case of failure, and each backup is kept for at most 14 days. Deleted data stays in a backup until that backup expires.',
         ],
       },
       {

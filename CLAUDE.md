@@ -30,7 +30,7 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
 
 ## Luật dữ liệu cá nhân (Luật 91/2025, Luật AI 134/2025) — đừng làm mất
-- Trang `/privacy` + `/vi/privacy` (`src/Web/frontend/src/content/privacy.ts`) hứa: chat giữ 90 ngày, tin liên hệ 12 tháng, thông báo không kèm dữ liệu khách, xử lý yêu cầu xoá trong 72h. Đổi hành vi thì sửa cả trang này.
+- Trang `/privacy` + `/vi/privacy` (`src/Web/frontend/src/content/privacy.ts`) hứa: chat giữ 90 ngày, tin liên hệ 12 tháng, bản backup DB tối đa 14 ngày (workflow xoá theo tuổi), thông báo không kèm dữ liệu khách, xử lý yêu cầu xoá trong 72h. Đổi hành vi thì sửa cả trang này.
 - `DataRetentionWorker` xoá chat > 90 ngày, tin liên hệ > 12 tháng.
 - Form liên hệ bắt buộc tick đồng ý (`consent`), backend từ chối nếu thiếu và lưu `ConsentedAt`.
 - Email và Telegram chỉ báo "có tin mới", **không** chép tên, email, nội dung khách (máy chủ Gmail/Telegram ở nước ngoài → sẽ phải lập hồ sơ chuyển dữ liệu xuyên biên giới). Không log email khách.
