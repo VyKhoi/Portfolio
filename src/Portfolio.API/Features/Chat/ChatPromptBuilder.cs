@@ -56,19 +56,17 @@ public class ChatPromptBuilder
         {
             prompt.Append("- Work: ")
                 .Append(First(job.PeriodEn, job.Period)).Append(", ")
-                .Append(First(job.RoleEn, job.Role)).Append(", ")
+                .Append(First(job.RoleEn, job.Role)).Append(" at ")
                 .Append(First(job.CompanyEn, job.Company));
 
+            // Labelled parts keep two similar jobs apart (the model mixed up the two CRM projects)
             var project = First(job.ProjectNameEn, job.ProjectName);
-            if (project.Length > 0) prompt.Append(", ").Append(project);
+            if (project.Length > 0) prompt.Append(". Project: ").Append(project);
             if (job.TechStack.Count > 0) prompt.Append(". Tech: ").AppendJoin(", ", job.TechStack);
 
             // Without the details the model has nothing concrete to say about the work
-            var highlights = job.HighlightsEn.Count > 0 ? job.HighlightsEn : job.Highlights;
-            foreach (var highlight in highlights.Take(_options.MaxHighlightsPerJob))
-            {
-                prompt.Append(' ').Append(highlight);
-            }
+            var highlights = (job.HighlightsEn.Count > 0 ? job.HighlightsEn : job.Highlights).Take(_options.MaxHighlightsPerJob).ToList();
+            if (highlights.Count > 0) prompt.Append(". Done: ").AppendJoin(" ", highlights);
             prompt.Append('\n');
         }
 

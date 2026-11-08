@@ -200,7 +200,7 @@ public class ChatServiceTests
         Assert.Equal(first, second);
         Assert.StartsWith(harness.Assets.Persona, first);
         Assert.Contains("- Email: a@b.c", first);
-        Assert.Contains("Independent Team", first);
+        Assert.Contains("Dev at Independent Team", first);
         Assert.Contains("First Second Third", first);
         Assert.DoesNotContain("Fourth", first);
         Assert.DoesNotContain("hidden value", first);
