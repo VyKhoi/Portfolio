@@ -65,6 +65,9 @@ export const STRINGS = {
     sentNote: 'Cảm ơn bạn, tôi sẽ trả lời sớm.',
     tooMany: 'Bạn vừa gửi tin nhắn rồi, vui lòng đợi một lát rồi gửi tiếp.',
     sendFailed: 'Gửi chưa được. Bạn thử lại sau hoặc gửi email trực tiếp giúp tôi nhé.',
+    privacy: 'Chính sách quyền riêng tư',
+    consent: ['Tôi đồng ý để anh Khôi lưu tên, email và nội dung này để trả lời tôi, theo ', 'chính sách quyền riêng tư', '.'],
+    consentNeeded: 'Bạn tick ô đồng ý giúp tôi trước khi gửi nhé.',
     chat: {
       bubble: 'Muốn hỏi về anh Khôi? Bấm đi 😼',
       open: 'Mở chat với Sigma Cat',
@@ -78,6 +81,8 @@ export const STRINGS = {
       wait: 'Vui lòng đợi 3s',
       rateLimited: 'Chậm thôi sen. Đợi vài giây rồi hỏi tiếp 😼',
       failed: 'Não em đang ngủ. Lát quay lại nhé 😼',
+      notice: 'Sigma Cat là AI, có thể trả lời sai. Tin nhắn được lưu 90 ngày, đừng gửi thông tin nhạy cảm.',
+      privacy: 'Chính sách',
     },
   },
   en: {
@@ -128,6 +133,9 @@ export const STRINGS = {
     sentNote: "Thanks, I'll get back to you soon.",
     tooMany: 'You just sent a message. Please wait a moment before sending another.',
     sendFailed: "That didn't go through. Please try again later or email me directly.",
+    privacy: 'Privacy Policy',
+    consent: ['I agree that Khoi keeps my name, email and message to reply to me, as described in the ', 'privacy policy', '.'],
+    consentNeeded: 'Please tick the consent box before sending.',
     chat: {
       bubble: 'Curious about Khoi? Click 😼',
       open: 'Open chat with Sigma Cat',
@@ -141,6 +149,8 @@ export const STRINGS = {
       wait: 'Please wait 3s',
       rateLimited: 'Slow down. Wait a few seconds, then ask again 😼',
       failed: 'My brain is napping. Come back later 😼',
+      notice: 'Sigma Cat is an AI and can be wrong. Chats are kept for 90 days, so skip anything sensitive.',
+      privacy: 'Privacy',
     },
   },
 };

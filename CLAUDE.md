@@ -26,8 +26,15 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Contact: email hợp lệ, 3 tin/giờ/IP (429), tối đa 30 email/ngày (dư thì chỉ lưu inbox), hàng đợi giới hạn 100.
 - Login: sai 5 lần/IP → khoá 15 phút (429). JWT 3 ngày, claim `pwd_ver` → đổi mật khẩu thu hồi token cũ.
 - Telegram tối đa 30 tin/giờ, `parse_mode: HTML` → nội dung động phải qua `TelegramNotifier.Escape`.
-- Chat log > 90 ngày tự xoá (`ChatRetentionWorker`). Backend chạy user non-root `app`.
+- Backend chạy user non-root `app`.
 - Thiếu `JwtSettings:Secret` hoặc connection string → app **dừng lúc khởi động** (secret < 32 ký tự chỉ cảnh báo trong log). Dev local dùng `appsettings.Development.json` + `launchSettings.json`.
+
+## Luật dữ liệu cá nhân (Luật 91/2025, Luật AI 134/2025) — đừng làm mất
+- Trang `/privacy` + `/vi/privacy` (`src/Web/frontend/src/content/privacy.ts`) hứa: chat giữ 90 ngày, tin liên hệ 12 tháng, thông báo không kèm dữ liệu khách, xử lý yêu cầu xoá trong 72h. Đổi hành vi thì sửa cả trang này.
+- `DataRetentionWorker` xoá chat > 90 ngày, tin liên hệ > 12 tháng.
+- Form liên hệ bắt buộc tick đồng ý (`consent`), backend từ chối nếu thiếu và lưu `ConsentedAt`.
+- Email và Telegram chỉ báo "có tin mới", **không** chép tên, email, nội dung khách (máy chủ Gmail/Telegram ở nước ngoài → sẽ phải lập hồ sơ chuyển dữ liệu xuyên biên giới). Không log email khách.
+- Chatbot ghi rõ là AI, có thể sai, lưu 90 ngày. Yêu cầu xoá: admin xoá được tin liên hệ (Inbox) và phiên chat (AI logs).
 
 ## AI trên server
 - **Sigma Cat là nhân vật riêng có tính cách sigma, trợ lý của anh Khôi, không phải anh Khôi.** Giữ giọng này ở mọi câu.

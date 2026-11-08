@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { ContactApi } from '../../lib/api';
-import { useT } from '../../lib/i18n';
+import { useLang, useT } from '../../lib/i18n';
+import { PRIVACY_PATH } from '../../content/privacy';
 
 export function ContactSection() {
   const t = useT();
+  const lang = useLang();
+  const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -15,17 +19,23 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) return;
+    if (!consent) {
+      setError(t.consentNeeded);
+      return;
+    }
 
     setLoading(true);
     setError('');
     try {
       await ContactApi.submitMessage({
         ...formData,
+        consent,
         companyTrap
       });
       setSuccess(true);
       setFormData({ name: '', email: '', message: '' });
       setCompanyTrap('');
+      setConsent(false);
       setTimeout(() => setSuccess(false), 5000);
     } catch (err: any) {
       console.error("Failed to submit contact message:", err);
@@ -140,6 +150,21 @@ export function ContactSection() {
                 {t.message}
               </label>
             </div>
+
+            <label className="flex items-start gap-3 text-xs sm:text-sm text-text-muted font-body leading-relaxed cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => { setConsent(e.target.checked); if (e.target.checked) setError(''); }}
+                required
+                className="mt-0.5 h-4 w-4 shrink-0 accent-[#DEFF9A] cursor-pointer"
+              />
+              <span>
+                {t.consent[0]}
+                <Link to={PRIVACY_PATH[lang]} className="text-primary underline underline-offset-2 hover:opacity-80">{t.consent[1]}</Link>
+                {t.consent[2]}
+              </span>
+            </label>
 
             <Button
               type="submit"

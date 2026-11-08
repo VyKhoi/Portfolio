@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -59,48 +58,21 @@ public class EmailService
             return;
         }
 
-        // Visitor input goes into HTML: encode it so it renders as text
-        var name = WebUtility.HtmlEncode(contact.Name);
-        var email = WebUtility.HtmlEncode(contact.Email);
-        var subject = WebUtility.HtmlEncode(contact.Subject);
-        var body = WebUtility.HtmlEncode(contact.Message);
-
+        // No visitor data in the email: Gmail's servers are abroad, and sending personal data there would need a
+        // cross-border transfer assessment (Personal Data Protection Law 91/2025). The message is read in the admin inbox.
         var htmlTemplate = $@"
         <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;'>
-            <div style='background-color: #0A0A0C; color: #DEFF9A; padding: 20px; text-align: center; border-bottom: 2px solid #27272A;'>
-                <h2 style='margin: 0;'>🚀 New Portfolio Contact Request</h2>
-                <p style='margin: 5px 0 0 0; color: #A1A1AA;'>Bạn có tin nhắn mới từ trang web Portfolio cá nhân!</p>
-            </div>
-            <div style='padding: 20px; background-color: #121215; color: #FFFFFF;'>
-                <table style='width: 100%; border-collapse: collapse;'>
-                    <tr>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; width: 100px; color: #DEFF9A;'>Họ tên:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{name}</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; color: #DEFF9A;'>Email:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #00E5FF;'><a href='mailto:{email}' style='color: #00E5FF; text-decoration: none;'>{email}</a></td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; font-weight: bold; color: #DEFF9A;'>Chủ đề:</td>
-                        <td style='padding: 10px; border-bottom: 1px solid #27272A; color: #FFFFFF;'>{subject}</td>
-                    </tr>
-                    <tr>
-                        <td style='padding: 10px; font-weight: bold; vertical-align: top; color: #DEFF9A;'>Tin nhắn:</td>
-                        <td style='padding: 10px; color: #FFFFFF; white-space: pre-wrap; background-color: #18181C; border-radius: 6px; border: 1px solid #27272A;'>{body}</td>
-                    </tr>
-                </table>
-            </div>
-            <div style='background-color: #0A0A0C; padding: 15px; text-align: center; font-size: 12px; color: #71717A;'>
-                <p style='margin: 0;'>Thời gian nhận: {contact.CreatedAt:yyyy-MM-dd HH:mm:ss} UTC</p>
-                <p style='margin: 5px 0 0 0;'>Tin nhắn tự động từ Portfolio Backend .NET 9.</p>
+            <div style='background-color: #0A0A0C; color: #DEFF9A; padding: 20px; text-align: center;'>
+                <h2 style='margin: 0;'>📬 Có tin liên hệ mới</h2>
+                <p style='margin: 8px 0 0 0; color: #A1A1AA;'>Đọc và trả lời trong <a href='https://dangvykhoi.com/dashboard/inbox' style='color: #00E5FF;'>dangvykhoi.com/dashboard/inbox</a></p>
+                <p style='margin: 8px 0 0 0; font-size: 12px; color: #71717A;'>Nhận lúc {contact.CreatedAt:yyyy-MM-dd HH:mm} UTC</p>
             </div>
         </div>";
 
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress("Portfolio Notification", fromEmail));
         message.To.Add(new MailboxAddress("Khoi Dang", toEmail));
-        message.Subject = $"🎉 [Portfolio Contact] {contact.Name} vừa liên hệ!";
+        message.Subject = "📬 [Portfolio] Có tin liên hệ mới";
         message.Body = new BodyBuilder { HtmlBody = htmlTemplate }.ToMessageBody();
 
         if (string.IsNullOrEmpty(password))

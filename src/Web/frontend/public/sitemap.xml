@@ -14,4 +14,18 @@
     <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/" />
   </url>
+  <url>
+    <loc>https://dangvykhoi.com/privacy</loc>
+    <lastmod>2026-11-08</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/privacy" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/privacy" />
+  </url>
+  <url>
+    <loc>https://dangvykhoi.com/vi/privacy</loc>
+    <lastmod>2026-11-08</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/privacy" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/privacy" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/privacy" />
+  </url>
 </urlset>

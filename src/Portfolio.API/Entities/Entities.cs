@@ -80,6 +80,8 @@ public class ContactMessage
     public string Message { get; set; } = string.Empty;
     public string Status { get; set; } = "Pending"; // Pending, Read, Replied
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    /// <summary>When the visitor ticked the privacy consent box (Personal Data Protection Law 91/2025). Null for messages sent before the box existed.</summary>
+    public DateTime? ConsentedAt { get; set; }
 }
 
 public class ChatSession

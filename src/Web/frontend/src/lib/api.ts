@@ -27,7 +27,7 @@ export const ContentApi = {
 };
 
 export const ContactApi = {
-  submitMessage: (data: { name: string; email: string; message: string; companyTrap?: string }) =>
+  submitMessage: (data: { name: string; email: string; message: string; consent: boolean; companyTrap?: string }) =>
     request<any>('/contact/messages', {
       method: 'POST',
       body: JSON.stringify(data),

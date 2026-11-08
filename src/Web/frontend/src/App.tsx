@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion'
 import { Suspense, lazy, useEffect, useState } from 'react'
 import { Home } from './pages/public/Home'
+import { Privacy } from './pages/public/Privacy'
 
 // Login and admin stay out of the public bundle
 const AdminEntry = lazy(() => import('./components/admin/AdminEntry').then(m => ({ default: m.AdminEntry })))
@@ -39,6 +40,8 @@ export function AppRoutes() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/vi" element={<Home />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/vi/privacy" element={<Privacy />} />
           <Route path="/login" element={
             <Suspense fallback={adminFallback}>
               <Login />

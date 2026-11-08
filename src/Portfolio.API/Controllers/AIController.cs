@@ -66,6 +66,21 @@ public class AIController : ControllerBase
     public async Task<IActionResult> GetSessionMessages(string id)
         => Ok(await _db.ChatMessages.AsNoTracking().Where(m => m.SessionId == id).OrderBy(m => m.Id).ToListAsync());
 
+    /// <summary>Deletes one visitor's conversation, for a deletion request under the data protection law.</summary>
+    [HttpDelete("sessions/{id}")]
+    [Authorize]
+    public async Task<IActionResult> DeleteSession(string id)
+    {
+        var messages = await _db.ChatMessages.Where(m => m.SessionId == id).ToListAsync();
+        var session = await _db.ChatSessions.FirstOrDefaultAsync(s => s.SessionId == id);
+        if (session == null && messages.Count == 0) return NotFound();
+
+        _db.ChatMessages.RemoveRange(messages);
+        if (session != null) _db.ChatSessions.Remove(session);
+        await _db.SaveChangesAsync();
+        return Ok(new { success = true, deletedMessages = messages.Count });
+    }
+
     [HttpGet("stats")]
     [Authorize]
     public async Task<IActionResult> GetStats()

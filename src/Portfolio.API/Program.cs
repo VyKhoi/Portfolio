@@ -112,7 +112,7 @@ builder.Services.AddSingleton<ChatNotificationChannel>();
 builder.Services.AddScoped<ChatPromptBuilder>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddHttpClient<ILlmClient, OllamaClient>();
-builder.Services.AddHostedService<ChatRetentionWorker>();
+builder.Services.AddHostedService<DataRetentionWorker>();
 builder.Services.AddHostedService<ChatNotificationWorker>();
 builder.Services.AddHostedService<LlmWarmupService>();
 

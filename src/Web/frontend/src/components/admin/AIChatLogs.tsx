@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuthStore } from "../../store/authStore"
-import { MessageSquare, Bot, User, Clock, ArrowLeft } from "lucide-react"
+import { MessageSquare, Bot, User, Clock, ArrowLeft, Trash2, Loader2 } from "lucide-react"
 import { AdminLoader } from "./AdminLoader"
 
 interface ChatSession {
@@ -26,6 +26,7 @@ export function AIChatLogs() {
   const token = useAuthStore((state) => state.token)
   const [selectedSession, setSelectedSession] = useState<string | null>(null)
   const baseUrl = "/api"
+  const queryClient = useQueryClient()
 
   const { data: sessions = [], isLoading: loadingSessions } = useQuery({
     queryKey: ["ai-sessions"],
@@ -65,6 +66,19 @@ export function AIChatLogs() {
       return res.json()
     },
     enabled: !!selectedSession,
+  })
+
+  // A visitor may ask for their chat to be deleted (Personal Data Protection Law 91/2025)
+  const deleteSession = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const res = await fetch(`${baseUrl}/ai/sessions/${sessionId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    },
+    onSuccess: () => setSelectedSession(null),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["ai-sessions"] }),
   })
 
   if (loadingSessions) {
@@ -166,6 +180,19 @@ export function AIChatLogs() {
               </p>
             </div>
           </div>
+          {selectedSession && (
+            <button
+              type="button"
+              disabled={deleteSession.isPending}
+              onClick={() => {
+                if (window.confirm("Xoá vĩnh viễn phiên chat này?")) deleteSession.mutate(selectedSession)
+              }}
+              title="Delete this session"
+              className="adm-btn-icon adm-btn-icon-danger disabled:opacity-50 shrink-0"
+            >
+              {deleteSession.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 adm-scroll">

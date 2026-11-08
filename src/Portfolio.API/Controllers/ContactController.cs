@@ -44,6 +44,8 @@ public class ContactController : ControllerBase
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
+        // The visitor ticked the privacy consent box. Required: silence is not consent under the data protection law.
+        public bool Consent { get; set; }
         // Honeypot trap: hidden input autofilled by bots, left empty by real humans
         public string? CompanyTrap { get; set; }
     }
@@ -72,6 +74,11 @@ public class ContactController : ControllerBase
             return BadRequest(new { error = "Email không hợp lệ." });
         }
 
+        if (!request.Consent)
+        {
+            return BadRequest(new { error = "Vui lòng đồng ý với chính sách quyền riêng tư trước khi gửi." });
+        }
+
         // Per-IP cap so one sender cannot flood the inbox (the gateway rate limit is per minute only)
         var quotaKey = $"contact_quota_{HttpContext.Connection.RemoteIpAddress}";
         var sent = _cache.GetOrCreate(quotaKey, entry =>
@@ -94,7 +101,8 @@ public class ContactController : ControllerBase
             Subject = "New Contact from Portfolio",
             Message = request.Message.Trim(),
             Status = "Pending",
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            ConsentedAt = DateTime.UtcNow
         };
 
         _db.ContactMessages.Add(contact);

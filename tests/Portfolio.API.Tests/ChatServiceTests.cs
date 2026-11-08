@@ -227,7 +227,9 @@ public class ChatServiceTests
         await harness.SendAsync("Does he surf?");
 
         Assert.True(harness.Notifications.Reader.TryRead(out var turn));
-        Assert.Equal("Does he surf?", turn.Question);
+        Assert.Equal("model", turn.Source);
+        // The visitor's words must not leave the server through Telegram
+        Assert.DoesNotContain("surf", turn.ToString());
         Assert.False(harness.Notifications.Reader.TryRead(out _));
     }
 

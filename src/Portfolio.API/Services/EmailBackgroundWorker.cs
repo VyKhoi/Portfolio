@@ -28,7 +28,7 @@ public class EmailBackgroundWorker : BackgroundService
             try
             {
                 var contact = await _channel.Reader.ReadAsync(stoppingToken);
-                _logger.LogInformation("Received contact message from queue: {Id} - {Email}", contact.Id, contact.Email);
+                _logger.LogInformation("Received contact message from queue: {Id}", contact.Id);
                 await _emailService.SendContactNotificationAsync(contact);
             }
             catch (OperationCanceledException)

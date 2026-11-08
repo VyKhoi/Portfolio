@@ -4,14 +4,15 @@ Chi tiết: `docs/FRONTEND.md`.
 
 ## Stack
 React 19, TypeScript ~6, Vite 8 (rolldown, `manualChunks` tách vendor-motion / vendor-query / vendor-react), Tailwind 4, Framer Motion, lucide-react, Zustand, TanStack Query (chỉ admin), React Router 7, oxlint. Alias `@` → `src/`.
-Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` trong `CatChatbot.tsx`).
+Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` trong `CatChatbot.tsx`). Dưới ô chat luôn có dòng báo là AI + lưu 90 ngày + link chính sách.
 
 ## src/
 | Đường dẫn | Việc |
 | :--- | :--- |
 | `main.tsx` | Trang đã prerender (`data-prerendered`) thì `hydrateRoot`, còn lại (app shell) `createRoot`; prefetch content; bắt `vite:preloadError`; tải `oneko.js` lúc rảnh, chỉ khi có chuột |
-| `App.tsx` | `AppRoutes`: `/`, `/vi` (Home), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
-| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/` (en), `/vi` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
+| `App.tsx` | `AppRoutes`: `/`, `/vi` (Home), `/privacy`, `/vi/privacy` (Privacy), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
+| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/` (en), `/vi`, `/privacy`, `/vi/privacy` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
+| `content/privacy.ts` | Chính sách quyền riêng tư vi + en, `PRIVACY_PATH`. Phải khớp hành vi backend (thời hạn giữ, thông báo) |
 | `content/portfolio.json`, `content/seo.json` | Nội dung dự phòng (vi + en), title/description từng ngôn ngữ |
 | `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định, `pick(item, key, lang)` chọn cột `...En` |
 | `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsBento → Contact → Footer |
@@ -40,8 +41,8 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 | `HeroSection.tsx` | Tên, chức danh, avatar (`fetchPriority="high"` cho LCP) | `useCachedContent('profile')` |
 | `AboutSection.tsx` | Giới thiệu + nhóm kỹ năng | `useCachedContent('skills')` + danh sách fallback hardcode |
 | `ProjectsBento.tsx` | Lưới bento các dự án | `useCachedContent('experiences')` + fallback hardcode (bảng `Projects` trong DB hiện **không** được trang public dùng) |
-| `ContactSection.tsx` | Form liên hệ có honeypot `companyTrap` | `ContactApi.submitMessage` |
-| `Footer.tsx` | Footer | tĩnh |
+| `ContactSection.tsx` | Form liên hệ có honeypot `companyTrap` + ô đồng ý bắt buộc (link `/privacy`) | `ContactApi.submitMessage` |
+| `Footer.tsx` | Footer + link chính sách | tĩnh |
 
 Quy ước: luôn có fallback để trang không bao giờ trống khi API lỗi; style tối (`#0A0A0C`), màu nhấn `#DEFF9A`.
 
@@ -60,7 +61,7 @@ Toàn bộ thư mục là **một** bundle lazy (import từ `App.tsx`). Gọi A
 | `ProjectCRUD.tsx` | CRUD project | `content/projects[/{id}]` |
 | `InboxTable.tsx` | Hộp thư liên hệ: đổi trạng thái, xoá | `contact/messages[/{id}[/status]]` |
 | `SigmaCatFacts.tsx` | Sửa fact của Sigma Cat + số liệu 7 ngày (thời gian trả lời) | `ai/facts[/{id}]`, `ai/stats` |
-| `AIChatLogs.tsx` | Xem các phiên chat kèm nguồn trả lời và thời gian | `ai/sessions`, `ai/sessions/{id}/messages` |
+| `AIChatLogs.tsx` | Xem các phiên chat kèm nguồn trả lời và thời gian, xoá 1 phiên | `ai/sessions`, `ai/sessions/{id}/messages`, `DELETE ai/sessions/{id}` |
 | `AdminLoader.tsx` | Skeleton loader + `RefreshingBadge` | — |
 
 Query key: `profile`, `experiences`, `skills`, `projects`, `inbox`, `ai-sessions`. Sau mutation gọi `queryClient.invalidateQueries({ queryKey: [...] })`.

@@ -3,7 +3,8 @@ using Portfolio.API.Services;
 
 namespace Portfolio.API.Features.Chat;
 
-public record ChatNotification(string SessionId, string Question, string Reply, string Source);
+/// <summary>Only says that a turn happened. The visitor's words stay in the database: Telegram's servers are abroad.</summary>
+public record ChatNotification(string SessionId, string Source);
 
 public class ChatNotificationChannel
 {
@@ -35,9 +36,7 @@ public class ChatNotificationWorker : BackgroundService
             var telegram = scope.ServiceProvider.GetRequiredService<TelegramNotifier>();
             var session = turn.SessionId.Length > 8 ? turn.SessionId[..8] : turn.SessionId;
             await telegram.SendMessageAsync(
-                $"😼 <b>Sigma Cat</b> ({turn.Source}) <code>{TelegramNotifier.Escape(session)}</code>\n" +
-                $"👤 {TelegramNotifier.Escape(turn.Question)}\n" +
-                $"💬 {TelegramNotifier.Escape(turn.Reply)}");
+                $"😼 <b>Sigma Cat</b> ({TelegramNotifier.Escape(turn.Source)}): phiên <code>{TelegramNotifier.Escape(session)}</code> có tin mới, đọc trong /dashboard/ai-logs");
         }
     }
 }

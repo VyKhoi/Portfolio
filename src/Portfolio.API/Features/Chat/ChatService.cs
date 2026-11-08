@@ -78,7 +78,7 @@ public class ChatService
         if (result.Text.Length == 0) return;
 
         await SaveReplyAsync(sessionId, result, clock.ElapsedMilliseconds);
-        _notifications.Publish(new ChatNotification(sessionId, message, result.Text, result.Source));
+        _notifications.Publish(new ChatNotification(sessionId, result.Source));
         _logger.LogInformation("Chat reply source={Source} firstTokenMs={FirstTokenMs} totalMs={TotalMs}",
             result.Source, result.FirstTokenMs, clock.ElapsedMilliseconds);
     }

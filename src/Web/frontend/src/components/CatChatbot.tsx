@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useLang, useT } from '../lib/i18n';
+import { PRIVACY_PATH } from '../content/privacy';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -394,6 +396,10 @@ export const CatChatbot: React.FC = () => {
                 )}
               </button>
             </form>
+            <p className="px-3 pb-2.5 pt-0 bg-[#18181C] text-[11px] leading-snug text-zinc-500">
+              {t.chat.notice}{' '}
+              <Link to={PRIVACY_PATH[lang]} className="underline underline-offset-2 hover:text-[#DEFF9A]">{t.chat.privacy}</Link>
+            </p>
           </m.div>
         )}
       </AnimatePresence>

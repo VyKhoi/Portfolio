@@ -38,11 +38,11 @@ Build từ **root repo** (`context: .`), restore csproj → publish Release → 
 - POST project tự sinh `Slug` = title-lowercase + 4 ký tự GUID nếu trống.
 
 ### ContactController — `api/contact`
-- `POST messages` `{name, email, message, companyTrap}` — `companyTrap` có giá trị = bot → trả OK giả, không lưu. Giới hạn 100/100/1000 ký tự, email phải hợp lệ (`MailAddress`), 3 tin/giờ/IP → 429. Lưu DB rồi `ContactChannel.PublishAsync` để gửi mail nền.
+- `POST messages` `{name, email, message, consent, companyTrap}` — thiếu `consent=true` → 400, lưu `ConsentedAt`. `companyTrap` có giá trị = bot → trả OK giả, không lưu. Giới hạn 100/100/1000 ký tự, email phải hợp lệ (`MailAddress`), 3 tin/giờ/IP → 429. Lưu DB rồi `ContactChannel.PublishAsync` để gửi mail nền.
 - 🔒 `GET messages`, 🔒 `PATCH messages/{id}/status` `{status}` (chỉ `Pending|Read|Replied`), 🔒 `DELETE messages/{id}`.
 
 ### AIController — `api/ai`
-Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu trả lời, `{notice}` là thông báo hệ thống, kết thúc `[DONE]`), `GET history/{sessionId}` (public), 🔒 `sessions`, `sessions/{id}/messages`, `stats`, CRUD `facts`.
+Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu trả lời, `{notice}` là thông báo hệ thống, kết thúc `[DONE]`), `GET history/{sessionId}` (public), 🔒 `sessions`, `sessions/{id}/messages`, `DELETE sessions/{id}` (yêu cầu xoá), `stats`, CRUD `facts`.
 
 ## Features/Chat (Sigma Cat)
 | File | Việc |
@@ -52,8 +52,7 @@ Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu tr
 | `OllamaClient.cs` | `ILlmClient`. Lỗi là `LlmUnavailableException`, không bao giờ trả câu lỗi như câu chat |
 | `ChatAssets.cs` | Đọc `src/Portfolio.AI` (được copy vào `ai/` khi build) |
 | `ChatGuards.cs` | `GenerationGate`, `ChatQuota`, `ChatSessionId`, `ChatLanguage` |
-| `ChatWorkers.cs` | Gửi Telegram qua channel (1 tin mỗi lượt), `LlmWarmupService` nạp model lúc khởi động |
-| `ChatRetentionWorker.cs` | Xoá chat cũ hơn 90 ngày |
+| `ChatWorkers.cs` | Gửi Telegram qua channel (1 tin mỗi lượt, chỉ mã phiên, không nội dung), `LlmWarmupService` nạp model lúc khởi động |
 
 Không viết câu trả lời, fact hay từ khoá trong C#. Thông báo hệ thống không lưu vào DB.
 
@@ -64,7 +63,8 @@ Không viết câu trả lời, fact hay từ khoá trong C#. Thông báo hệ t
 | `JwtService.cs` | Singleton | `GenerateToken(user)`: HS256, claim `NameIdentifier/Name/Role/pwd_ver`, hạn **3 ngày**; `GetValidatedSecret`, `PasswordStamp` |
 | `ContactChannel.cs` | Singleton | `Channel<ContactMessage>` bounded 100, `DropOldest` (nhiều writer, 1 reader) |
 | `EmailBackgroundWorker.cs` | HostedService | Vòng lặp đọc channel → `EmailService`; lỗi thì log + chờ 1s. Hàng đợi chỉ trong RAM (restart là mất, nhưng message đã nằm trong DB) |
-| `EmailService.cs` | Transient | Dựng email HTML (dark theme) → MailKit Gmail `smtp.gmail.com:587` StartTLS. Mật khẩu từ `Mail:Password` hoặc `MAIL_APP_PASSWORD`; thiếu → chỉ log warning. Trường khách nhập được `HtmlEncode`; tối đa 30 email/ngày |
+| `DataRetentionWorker.cs` | HostedService | Mỗi ngày xoá chat > 90 ngày, tin liên hệ > 12 tháng (khớp trang `/privacy`) |
+| `EmailService.cs` | Transient | Email chỉ báo "có tin liên hệ mới" + link inbox, không chứa dữ liệu khách → MailKit Gmail `smtp.gmail.com:587` StartTLS. Mật khẩu từ `Mail:Password` hoặc `MAIL_APP_PASSWORD`; thiếu → chỉ log warning. tối đa 30 email/ngày |
 | `TelegramNotifier.cs` | Typed HttpClient | `SendMessageAsync(html)` → Bot API `sendMessage`, `parse_mode: HTML`, tối đa 30 tin/giờ (tin thứ 30 kèm thông báo tạm ngưng). Nội dung động phải qua `TelegramNotifier.Escape`. Thiếu token/chatId → bỏ qua |
 
 ## Data (+ Entities, Migrations)
@@ -77,7 +77,7 @@ Không viết câu trả lời, fact hay từ khoá trong C#. Thông báo hệ t
 | `Skill` | Guid | `Name, Category, IconSvgKey, ProficiencyLevel, Order` |
 | `Experience` | Guid | `Role, Company, Period, ProjectName, Highlights text[], TechStack text[], Order` |
 | `Project` | Guid | `Slug` (unique), `Summary, DescriptionMdx, CoverImageKey, TechStack` (chuỗi JSON), `DemoUrl, GithubUrl, Order, IsFeatured, Status, ViewCount` |
-| `ContactMessage` | Guid | `Name, Email, Subject, Message, Status` (Pending/Read/Replied) |
+| `ContactMessage` | Guid | `Name, Email, Subject, Message, Status` (Pending/Read/Replied), `ConsentedAt` |
 | `ChatSession` | int | `SessionId` (string, unique), `StartedAt, LastMessageAt` |
 | `ChatMessage` | int | `SessionId` (index), `Role` user/assistant, `Content`, `Source` (model), `FirstTokenMs`, `TotalMs` |
 | `AssistantFact` | Guid | `Key` (unique), `Label`, `ValueVi`, `ValueEn`, `Order`, `Enabled`: fact riêng của Sigma Cat, sửa ở admin |
@@ -92,7 +92,7 @@ DbSet cho từng entity + khai báo key/index ở `OnModelCreating`. Không có 
 4. Experiences / Skills: chỉ seed khi bảng trống.
 
 ### Migrations
-Hiện có `20261024145452_InitialCreate`, `20261107055905_AddEnglishContent`. Thay đổi **dữ liệu** thì dùng `database/updates/` (xem `CLAUDE.md` ở root). Thay đổi **schema**:
+Hiện có `InitialCreate`, `AddEnglishContent`, `AddSigmaCatFacts`, `AddContactConsent`. Thay đổi **dữ liệu** thì dùng `database/updates/` (xem `CLAUDE.md` ở root). Thay đổi **schema**:
 ```bash
 dotnet ef migrations add <TenMigration> --project src/Portfolio.API
 ```

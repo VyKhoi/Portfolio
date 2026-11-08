@@ -1,5 +1,5 @@
 // Turns the Vite build into real HTML per language:
-//   dist/index.html (en), dist/vi/index.html (vi), dist/app.html (login + admin shell), dist/404.html
+//   dist/index.html (en), dist/vi/index.html (vi), dist/privacy/index.html + dist/vi/privacy/index.html, dist/app.html (login + admin shell), dist/404.html
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -10,7 +10,7 @@ const SITE = 'https://dangvykhoi.com';
 const PAGES = { en: { path: '/', url: `${SITE}/` }, vi: { path: '/vi', url: `${SITE}/vi` } };
 
 const seo = JSON.parse(readFileSync(join(root, 'src/content/seo.json'), 'utf8'));
-const { render } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
+const { render, PRIVACY, PRIVACY_PATH } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 
 const escapeAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -114,6 +114,26 @@ function page(lang) {
   return inlineCss(html).replace('<div id="root">', '<div id="root" data-prerendered="true">');
 }
 
+// Privacy policy: plain head, no JSON-LD or image preloads
+function privacyPage(lang) {
+  const p = PRIVACY[lang];
+  const url = (l) => `${SITE}${PRIVACY_PATH[l]}`;
+  const title = `${p.title} | Đặng Vỹ Khôi`;
+  const headHtml = [
+    `<title>${escapeAttr(title)}</title>`,
+    `<meta name="description" content="${escapeAttr(p.description)}" />`,
+    `<link rel="canonical" href="${url(lang)}" />`,
+    `<link rel="alternate" hreflang="vi" href="${url('vi')}" />`,
+    `<link rel="alternate" hreflang="en" href="${url('en')}" />`,
+    `<link rel="alternate" hreflang="x-default" href="${url('en')}" />`,
+    ...fonts.map((f) => `<link rel="preload" as="font" type="font/woff2" href="/assets/${f}" crossorigin />`),
+  ].join('\n    ');
+  let html = template.replace('<html lang="vi">', `<html lang="${lang}">`);
+  html = replaceBetween(html, 'head', headHtml);
+  html = replaceBetween(html, 'app', render(PRIVACY_PATH[lang]));
+  return inlineCss(html).replace('<div id="root">', '<div id="root" data-prerendered="true">');
+}
+
 const appShell = replaceBetween(
   template,
   'head',
@@ -150,6 +170,11 @@ writeFileSync(join(dist, 'app.html'), appShell);
 writeFileSync(join(dist, 'index.html'), page('en'));
 mkdirSync(join(dist, 'vi'), { recursive: true });
 writeFileSync(join(dist, 'vi/index.html'), page('vi'));
+for (const lang of ['en', 'vi']) {
+  const dir = join(dist, PRIVACY_PATH[lang].slice(1));
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, 'index.html'), privacyPage(lang));
+}
 writeFileSync(join(dist, '404.html'), notFound);
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true });
-console.log('Prerendered /, /vi, app shell and 404');
+console.log('Prerendered /, /vi, /privacy, /vi/privacy, app shell and 404');
