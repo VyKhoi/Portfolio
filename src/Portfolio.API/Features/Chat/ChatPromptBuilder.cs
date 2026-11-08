@@ -62,6 +62,8 @@ public class ChatPromptBuilder
             // Labelled parts keep two similar jobs apart (the model mixed up the two CRM projects)
             var project = First(job.ProjectNameEn, job.ProjectName);
             if (project.Length > 0) prompt.Append(". Project: ").Append(project);
+            // The Vietnamese name keeps the model from translating it loosely ("salon" became "spa")
+            if (job.ProjectName.Length > 0 && job.ProjectName != project) prompt.Append(" (").Append(job.ProjectName).Append(')');
             if (job.TechStack.Count > 0) prompt.Append(". Tech: ").AppendJoin(", ", job.TechStack);
 
             // Without the details the model has nothing concrete to say about the work
