@@ -34,6 +34,7 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - Chạy `qwen3:4b-instruct` trên CPU + MX150 (2 GB, 22 layer). Chọn sau khi so với `qwen3.5:4b` và `gemma3:4b` (2026-11-08): nhanh nhất và đúng nhất. Không dùng model lai như Qwen3.5: cache prompt chỉ giữ được một phần nên chờ chữ đầu ~4s. GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
 - Không có Modelfile: backend gửi prompt dựng từ DB mỗi tin. Thông tin nằm ở DB (admin), giọng nói ở `src/Portfolio.AI`.
 - Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm.
+- Mốc 2026-11-08: 45/47, chờ chữ đầu ~1,4s, trọn câu ~6,8s, ~21 từ mỗi câu (`qwen3.5:4b` cũ: 43/47, 4,3s, 8,1s).
 - Mọi câu trả lời do model sinh ra, không có câu soạn sẵn (Khôi chốt). Chỉ thông báo hệ thống (quota, bận, lỗi) là cố định.
 - Backend xác định ngôn ngữ trả lời (`ChatLanguage.ForReply`) và ra lệnh ở cuối tin; để model tự chọn thì nó nghiêng về tiếng Việt.
 
