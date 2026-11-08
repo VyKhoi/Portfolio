@@ -11,7 +11,7 @@ public class ChatOptions
     public int QuotaWindowMinutes { get; set; } = 10;
     public int MaxConcurrentGenerations { get; set; } = 2;
     public int GenerationWaitSeconds { get; set; } = 15;
-    public int QuickReplyWordDelayMs { get; set; } = 20;
+    public int MaxHighlightsPerJob { get; set; } = 3;
 }
 
 public class OllamaOptions
@@ -19,7 +19,7 @@ public class OllamaOptions
     public const string Section = "Ollama";
 
     public string BaseUrl { get; set; } = "http://localhost:11434";
-    public string Model { get; set; } = "qwen3.5:4b";
+    public string Model { get; set; } = "qwen3:4b-instruct";
     public string KeepAlive { get; set; } = "-1m";
     public int FirstByteTimeoutSeconds { get; set; } = 90;
     public double Temperature { get; set; } = 0.3;

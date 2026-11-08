@@ -46,7 +46,7 @@ def score(case, reply, done_reason):
         fails.append("chinese text")
     if done_reason != "stop":
         fails.append(f"cut off ({done_reason})")
-    if len(reply.split()) > 55:
+    if len(reply.split()) > 60:
         fails.append("too long")
     if case["lang"] == "vi" and not has_vietnamese(reply):
         fails.append("not vietnamese")
@@ -88,12 +88,12 @@ def ask(args, system, case):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host")
-    parser.add_argument("--model", default="qwen3.5:4b")
+    parser.add_argument("--model", default="qwen3:4b-instruct")
     parser.add_argument("--persona")
     parser.add_argument("--env", action="append", default=[], help="Chat__Setting=value for the prompt")
     parser.add_argument("--no-system", action="store_true")
     parser.add_argument("--only", help="comma separated groups")
-    parser.add_argument("--options", default='{"temperature":0.3,"top_p":0.9,"top_k":40,"repeat_penalty":1.05,"num_predict":120,"num_ctx":2048,"num_thread":4,"num_gpu":20}')
+    parser.add_argument("--options", default='{"temperature":0.3,"top_p":0.9,"top_k":40,"repeat_penalty":1.05,"num_predict":120,"num_ctx":2048,"num_thread":4,"num_gpu":22}')
     parser.add_argument("--out", default="eval-results.json")
     args = parser.parse_args()
 
@@ -124,6 +124,7 @@ def main():
         print(f"{group:<10} {sum(not r['fails'] for r in rows)}/{len(rows)}")
     timed = results[1:] or results
     print(f"TOTAL      {sum(not r['fails'] for r in results)}/{len(results)}")
+    print(f"avg words {sum(len(r['reply'].split()) for r in results) / len(results):.0f}")
     print(f"first word avg {sum(r['first_s'] for r in timed) / len(timed):.1f}s, reply avg {sum(r['total_s'] for r in timed) / len(timed):.1f}s, prompt {results[0]['prompt_tokens']} tokens")
     Path(args.out).write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
 

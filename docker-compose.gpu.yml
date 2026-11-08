@@ -11,5 +11,5 @@ services:
               capabilities: [gpu]
   backend:
     environment:
-      # 20 of 33 layers fill the MX150's 2 GB; 22 runs out of memory
-      - Ollama__NumGpu=20
+      # Highest layer count that fits the MX150's 2 GB with qwen3:4b-instruct (measured 2026-11-08)
+      - Ollama__NumGpu=22

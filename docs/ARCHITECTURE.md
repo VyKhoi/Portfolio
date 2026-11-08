@@ -10,7 +10,7 @@ The personal site **dangvykhoi.com** has 3 parts in one repo:
 | :--- | :--- | :--- |
 | Backend | `src/Portfolio.API` | .NET 9 Web API (modular monolith): content CMS, contact inbox, admin auth, AI chat proxy |
 | Frontend | `src/Web/frontend` | React 19 SPA: public pages + `/login` + `/dashboard` (admin console). Built to static files and served by Nginx |
-| AI | `src/Portfolio.AI` | Sigma Cat's persona, fixed replies, quick answers and evaluation questions (model: Qwen3.5 4B) |
+| AI | `src/Portfolio.AI` | Sigma Cat's persona, system notices and evaluation questions (model: Qwen3 4B) |
 
 ## 2. Runtime (docker-compose)
 
@@ -19,7 +19,7 @@ graph TD
     GW["Gateway nginx (WebServer repo)"] -->|host:18122| FE["portfolio_frontend<br/>nginx + React build"]
     FE -->|"/api/* → backend:8080"| BE["portfolio_backend<br/>.NET 9 API"]
     BE -->|EF Core / Npgsql| PG[("portfolio_postgres<br/>PostgreSQL 16 · portfolio_db")]
-    BE -->|"HTTP :11434 (internal only)"| OL["portfolio_ollama<br/>qwen3.5:4b"]
+    BE -->|"HTTP :11434 (internal only)"| OL["portfolio_ollama<br/>qwen3:4b-instruct"]
     BE -.->|SMTP StartTLS| GM[Gmail]
     BE -.->|Bot API| TG[Telegram]
     PGA["portfolio_pgadmin :5050"] --> PG
@@ -40,7 +40,7 @@ graph TD
 
 1. **Public pages:** `main.tsx` prefetches `/api/content/{profile,experience,skills}` on load → caches them in `localStorage` (stale-while-revalidate) → the page renders without jumping.
 2. **Contact form:** `POST /api/contact/messages` → saved to the database → pushed to `ContactChannel` (in memory) → `EmailBackgroundWorker` sends the email through Gmail SMTP.
-3. **Sigma Cat chat:** `POST /api/ai/chat/stream` (SSE) → message saved → a quick answer if the whole message is a known question, otherwise the prompt is built from the database and the reply streams from Ollama → reply saved with its timing → one Telegram alert.
+3. **Sigma Cat chat:** `POST /api/ai/chat/stream` (SSE) → message saved → the prompt is built from the database and the reply streams from Ollama → reply saved with its timing → one Telegram alert.
 4. **Admin:** `/login` → `POST /api/auth/login` → JWT (3 days) stored in `localStorage` → `/dashboard` calls the `[Authorize]` APIs.
 
 ## 4. Architecture decisions

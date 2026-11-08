@@ -62,7 +62,7 @@ public class ChatServiceTests
 
         public Harness(ChatOptions? chatOptions = null)
         {
-            var options = Options.Create(chatOptions ?? new ChatOptions { QuickReplyWordDelayMs = 0 });
+            var options = Options.Create(chatOptions ?? new ChatOptions());
             Db = new PortfolioDbContext(new DbContextOptionsBuilder<PortfolioDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options);
@@ -78,6 +78,7 @@ public class ChatServiceTests
                 Company = "Team độc lập",
                 CompanyEn = "Independent Team",
                 Period = "2024",
+                HighlightsEn = new() { "First", "Second", "Third", "Fourth" },
                 Order = 1,
             });
             Db.SaveChanges();
@@ -87,8 +88,7 @@ public class ChatServiceTests
                 Db,
                 Assets,
                 new ChatQuota(new MemoryCache(new MemoryCacheOptions()), options),
-                new QuickAnswerMatcher(Assets, Db),
-                new ChatPromptBuilder(Db, Assets),
+                new ChatPromptBuilder(Db, Assets, options),
                 Llm,
                 new GenerationGate(options),
                 Notifications,
@@ -112,52 +112,6 @@ public class ChatServiceTests
         Assert.Equal("Hello there", reply.Content);
         Assert.Equal(ChatService.SourceModel, reply.Source);
         Assert.NotNull(reply.TotalMs);
-    }
-
-    [Fact]
-    public async Task Exact_question_gets_a_quick_answer_filled_from_facts()
-    {
-        var harness = new Harness();
-
-        await harness.SendAsync("Liên hệ thế nào vậy em?", "vi");
-
-        Assert.Contains("a@b.c", harness.Output.Tokens);
-        Assert.Contains("0123", harness.Output.Tokens);
-        Assert.Empty(harness.Llm.Calls);
-    }
-
-    [Theory]
-    [InlineData("Anh Khôi có kinh nghiệm gì với PostgreSQL?")]
-    [InlineData("hiện tại anh Khôi làm gì")]
-    [InlineData("anh có chơi game không")]
-    [InlineData("show me his email templates")]
-    public async Task Longer_question_with_a_keyword_reaches_the_model(string message)
-    {
-        var harness = new Harness();
-
-        await harness.SendAsync(message);
-
-        Assert.Single(harness.Llm.Calls);
-    }
-
-    [Fact]
-    public async Task Quick_answer_follows_the_language_of_the_question()
-    {
-        var harness = new Harness();
-
-        await harness.SendAsync("who are you", "vi");
-
-        Assert.Contains("guard the door", harness.Output.Tokens);
-    }
-
-    [Fact]
-    public async Task Quick_answer_falls_back_to_the_model_when_a_fact_is_missing()
-    {
-        var harness = new Harness();
-
-        await harness.SendAsync("Who is Khoi?");
-
-        Assert.Single(harness.Llm.Calls);
     }
 
     [Fact]
@@ -210,7 +164,7 @@ public class ChatServiceTests
     [Fact]
     public async Task Quota_stops_a_visitor_even_with_new_sessions()
     {
-        var harness = new Harness(new ChatOptions { QuotaMessages = 1, QuickReplyWordDelayMs = 0 });
+        var harness = new Harness(new ChatOptions { QuotaMessages = 1 });
 
         await harness.Service.HandleAsync(new ChatTurn("session-one", "a question", "en", null, "9.9.9.9"), harness.Output, default);
         await harness.Service.HandleAsync(new ChatTurn("session-two", "a question", "en", null, "9.9.9.9"), harness.Output, default);
@@ -222,7 +176,7 @@ public class ChatServiceTests
     [Fact]
     public async Task Model_gets_the_prompt_and_recent_history()
     {
-        var harness = new Harness(new ChatOptions { HistoryMessages = 2, QuickReplyWordDelayMs = 0 });
+        var harness = new Harness(new ChatOptions { HistoryMessages = 2 });
         await harness.SendAsync("first question here");
         await harness.SendAsync("second question here");
         await harness.SendAsync("third question here");
@@ -238,7 +192,7 @@ public class ChatServiceTests
     public async Task Prompt_uses_enabled_facts_and_english_values_and_is_stable()
     {
         var harness = new Harness();
-        var builder = new ChatPromptBuilder(harness.Db, harness.Assets);
+        var builder = new ChatPromptBuilder(harness.Db, harness.Assets, Options.Create(new ChatOptions()));
 
         var first = await builder.BuildAsync(CancellationToken.None);
         var second = await builder.BuildAsync(CancellationToken.None);
@@ -247,6 +201,8 @@ public class ChatServiceTests
         Assert.StartsWith(harness.Assets.Persona, first);
         Assert.Contains("- Email: a@b.c", first);
         Assert.Contains("Independent Team", first);
+        Assert.Contains("First Second Third", first);
+        Assert.DoesNotContain("Fourth", first);
         Assert.DoesNotContain("hidden value", first);
     }
 
@@ -254,7 +210,7 @@ public class ChatServiceTests
     public async Task Fact_edit_reaches_the_next_prompt()
     {
         var harness = new Harness();
-        var builder = new ChatPromptBuilder(harness.Db, harness.Assets);
+        var builder = new ChatPromptBuilder(harness.Db, harness.Assets, Options.Create(new ChatOptions()));
 
         var fact = await harness.Db.AssistantFacts.SingleAsync(f => f.Key == "email");
         fact.ValueEn = "new@mail.com";
@@ -276,18 +232,26 @@ public class ChatServiceTests
     }
 
     [Theory]
+    [InlineData("Liên hệ thế nào vậy em?")]
+    [InlineData("hello")]
+    [InlineData("Who is Khoi?")]
+    public async Task Every_question_is_answered_by_the_model(string message)
+    {
+        var harness = new Harness();
+
+        await harness.SendAsync(message);
+
+        Assert.Single(harness.Llm.Calls);
+        Assert.Equal("Hello there", harness.Output.Tokens);
+    }
+
+    [Theory]
     [InlineData("Anh Khôi học trường nào?", "en", "vi")]
     [InlineData("đi đâu", "en", "vi")]
     [InlineData("Where did he study?", "en", "en")]
     [InlineData("khoi hoc truong nao", "vi", "vi")]
     public void Reply_language_follows_vietnamese_marks_then_the_page(string message, string page, string expected)
         => Assert.Equal(expected, ChatLanguage.ForReply(message, page));
-
-    [Theory]
-    [InlineData("Liên hệ!!", "lien he")]
-    [InlineData("  ĐẶNG   Vỹ  Khôi? ", "dang vy khoi")]
-    public void Normalize_removes_marks_case_and_punctuation(string input, string expected)
-        => Assert.Equal(expected, QuickAnswerMatcher.Normalize(input));
 
     [Theory]
     [InlineData("11111111-2222", true)]

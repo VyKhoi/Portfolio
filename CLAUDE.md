@@ -3,13 +3,13 @@
 Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kinh nghiệm, kỹ năng, liên hệ), admin console `/dashboard` để sửa nội dung, và chatbot AI local "Sigma Cat".
 
 ## Stack
-.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama (Qwen3.5 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
+.NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama (Qwen3 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
 
 ## Bản đồ module
 | Thư mục | Vai trò | Chi tiết |
 | :--- | :--- | :--- |
 | `src/Portfolio.API/` | Backend: Program.cs, Controllers, Features/Chat (Sigma Cat), Services (JWT, email, Telegram), Data/Entities/Migrations | `src/Portfolio.API/CLAUDE.md` |
-| `src/Portfolio.AI/` | Persona, câu cố định, quick answer, bộ đánh giá Sigma Cat | `src/Portfolio.AI/CLAUDE.md` |
+| `src/Portfolio.AI/` | Persona, thông báo hệ thống, bộ đánh giá Sigma Cat | `src/Portfolio.AI/CLAUDE.md` |
 | `src/Web/frontend/` | SPA React (public + admin + chatbot) và nginx của container | `src/Web/frontend/CLAUDE.md` |
 | `scripts/` | `generate-favicons.ps1`, `generate-small-images.ps1` (từ `logo.png`), `init-databases.sql`, `servers.json` cho pgAdmin | — |
 | `database/updates/` | Script SQL đổi dữ liệu, CI tự chạy (xem mục dưới) | — |
@@ -31,9 +31,10 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 
 ## AI trên server
 - **Sigma Cat là nhân vật riêng có tính cách sigma, trợ lý của anh Khôi, không phải anh Khôi.** Giữ giọng này ở mọi câu.
-- Chạy `qwen3.5:4b` trên CPU + MX150 (2 GB). GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
+- Chạy `qwen3:4b-instruct` trên CPU + MX150 (2 GB, 22 layer). Chọn sau khi so với `qwen3.5:4b` và `gemma3:4b` (2026-11-08): nhanh nhất và đúng nhất. Không dùng model lai như Qwen3.5: cache prompt chỉ giữ được một phần nên chờ chữ đầu ~4s. GPU bật qua `docker-compose.gpu.yml`, workflow ghi `COMPOSE_FILE` vào `.env`; máy không có NVIDIA chỉ dùng `docker-compose.yml`.
 - Không có Modelfile: backend gửi prompt dựng từ DB mỗi tin. Thông tin nằm ở DB (admin), giọng nói ở `src/Portfolio.AI`.
-- Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm. Mốc 2026-11-08: 45/47, chờ chữ đầu ~4,4s, trọn câu ~7,8s (bản cũ 22/47, 5,6s, 12,5s).
+- Đổi prompt / model: chạy `python3 scripts/eval-sigma.py` trên server trước và sau để so điểm.
+- Mọi câu trả lời do model sinh ra, không có câu soạn sẵn (Khôi chốt). Chỉ thông báo hệ thống (quota, bận, lỗi) là cố định.
 - Backend xác định ngôn ngữ trả lời (`ChatLanguage.ForReply`) và ra lệnh ở cuối tin; để model tự chọn thì nó nghiêng về tiếng Việt.
 
 ## Song ngữ và nội dung

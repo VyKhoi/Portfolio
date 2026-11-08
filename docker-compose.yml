@@ -80,7 +80,7 @@ services:
       - JwtSettings__Secret=${JWT_SECRET_KEY}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - Ollama__BaseUrl=http://ollama:11434
-      - Ollama__Model=qwen3.5:4b
+      - Ollama__Model=qwen3:4b-instruct
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - MAIL_APP_PASSWORD=${MAIL_APP_PASSWORD}

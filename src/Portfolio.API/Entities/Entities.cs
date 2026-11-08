@@ -96,7 +96,7 @@ public class ChatMessage
     public string SessionId { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty; // user | assistant
     public string Content { get; set; } = string.Empty;
-    public string? Source { get; set; } // quick | model, assistant messages only
+    public string? Source { get; set; } // model, assistant messages only
     public int? FirstTokenMs { get; set; }
     public int? TotalMs { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

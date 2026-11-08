@@ -89,8 +89,8 @@ jobs:
       - name: Download AI model
         run: |
           for i in $(seq 1 30); do docker exec portfolio_ollama ollama list >/dev/null 2>&1 && break; sleep 2; done
-          docker exec -i portfolio_ollama ollama pull qwen3.5:4b
-          for old in sigma-cat meo-code qwen2.5:3b qwen2.5:1.5b qwen3.5:2b-q4_K_M; do docker exec -i portfolio_ollama ollama rm "$old" || true; done
+          docker exec -i portfolio_ollama ollama pull qwen3:4b-instruct
+          for old in sigma-cat meo-code qwen2.5:3b qwen2.5:1.5b qwen3.5:2b-q4_K_M qwen3.5:4b gemma3:4b; do docker exec -i portfolio_ollama ollama rm "$old" || true; done
 
       - name: Health check
         run: |

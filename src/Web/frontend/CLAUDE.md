@@ -59,7 +59,7 @@ Toàn bộ thư mục là **một** bundle lazy (import từ `App.tsx`). Gọi A
 | `SkillCRUD.tsx` | CRUD kỹ năng | `content/skills[/{id}]` |
 | `ProjectCRUD.tsx` | CRUD project | `content/projects[/{id}]` |
 | `InboxTable.tsx` | Hộp thư liên hệ: đổi trạng thái, xoá | `contact/messages[/{id}[/status]]` |
-| `SigmaCatFacts.tsx` | Sửa fact của Sigma Cat + số liệu 7 ngày | `ai/facts[/{id}]`, `ai/stats` |
+| `SigmaCatFacts.tsx` | Sửa fact của Sigma Cat + số liệu 7 ngày (thời gian trả lời) | `ai/facts[/{id}]`, `ai/stats` |
 | `AIChatLogs.tsx` | Xem các phiên chat kèm nguồn trả lời và thời gian | `ai/sessions`, `ai/sessions/{id}/messages` |
 | `AdminLoader.tsx` | Skeleton loader + `RefreshingBadge` | — |
 

@@ -110,7 +110,6 @@ builder.Services.AddSingleton<ChatQuota>();
 builder.Services.AddSingleton<GenerationGate>();
 builder.Services.AddSingleton<ChatNotificationChannel>();
 builder.Services.AddScoped<ChatPromptBuilder>();
-builder.Services.AddScoped<QuickAnswerMatcher>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddHttpClient<ILlmClient, OllamaClient>();
 builder.Services.AddHostedService<ChatRetentionWorker>();

@@ -18,13 +18,11 @@ public interface IChatOutput
 
 public class ChatService
 {
-    public const string SourceQuick = "quick";
     public const string SourceModel = "model";
 
     private readonly PortfolioDbContext _db;
     private readonly ChatAssets _assets;
     private readonly ChatQuota _quota;
-    private readonly QuickAnswerMatcher _quickAnswers;
     private readonly ChatPromptBuilder _prompt;
     private readonly ILlmClient _llm;
     private readonly GenerationGate _gate;
@@ -36,7 +34,6 @@ public class ChatService
         PortfolioDbContext db,
         ChatAssets assets,
         ChatQuota quota,
-        QuickAnswerMatcher quickAnswers,
         ChatPromptBuilder prompt,
         ILlmClient llm,
         GenerationGate gate,
@@ -47,7 +44,6 @@ public class ChatService
         _db = db;
         _assets = assets;
         _quota = quota;
-        _quickAnswers = quickAnswers;
         _prompt = prompt;
         _llm = llm;
         _gate = gate;
@@ -77,10 +73,7 @@ public class ChatService
         var userMessage = await SaveUserMessageAsync(sessionId, message);
         var clock = Stopwatch.StartNew();
 
-        var quick = await _quickAnswers.MatchAsync(message, language, cancellationToken);
-        var result = quick != null
-            ? await StreamQuickAsync(quick, output, clock, cancellationToken)
-            : await StreamModelAsync(sessionId, userMessage, language, output, clock, cancellationToken);
+        var result = await StreamModelAsync(sessionId, userMessage, language, output, clock, cancellationToken);
 
         if (result.Text.Length == 0) return;
 
@@ -91,25 +84,6 @@ public class ChatService
     }
 
     private sealed record ReplyResult(string Text, string Source, int? FirstTokenMs);
-
-    private async Task<ReplyResult> StreamQuickAsync(string reply, IChatOutput output, Stopwatch clock, CancellationToken cancellationToken)
-    {
-        var firstTokenMs = (int)clock.ElapsedMilliseconds;
-        var words = reply.Split(' ');
-        try
-        {
-            for (var i = 0; i < words.Length; i++)
-            {
-                await output.TokenAsync(i == 0 ? words[i] : " " + words[i], cancellationToken);
-                await Task.Delay(_options.QuickReplyWordDelayMs, cancellationToken);
-            }
-        }
-        catch (Exception ex) when (ex is OperationCanceledException or IOException)
-        {
-            _logger.LogInformation("Visitor left during a quick reply.");
-        }
-        return new ReplyResult(reply, SourceQuick, firstTokenMs);
-    }
 
     private async Task<ReplyResult> StreamModelAsync(
         string sessionId, ChatMessage userMessage, string language, IChatOutput output, Stopwatch clock, CancellationToken cancellationToken)

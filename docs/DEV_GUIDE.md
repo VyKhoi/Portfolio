@@ -13,7 +13,7 @@ The system runs lightweight Docker containers:
 2. **Backend**: .NET 9 Modular Monolith Web API (`portfolio_backend`, internal port `8080`, not published)
 3. **Database**: PostgreSQL 16 Alpine (`portfolio_postgres`, `127.0.0.1:5432`)
 4. **Database UI**: pgAdmin 4 (`portfolio_pgadmin`, `127.0.0.1:5050`, only with `--profile tools`)
-5. **Local AI**: Ollama running `qwen3.5:4b` (`portfolio_ollama`, internal network only)
+5. **Local AI**: Ollama running `qwen3:4b-instruct` (`portfolio_ollama`, internal network only)
 
 Total memory footprint: ~1.5 GB RAM.
 
@@ -65,7 +65,7 @@ docker compose up --build -d
 - The Ollama container is internal-only to prevent public spam and abuse.
 - Download the model once:
   ```bash
-  docker exec -it portfolio_ollama ollama pull qwen3.5:4b
+  docker exec -it portfolio_ollama ollama pull qwen3:4b-instruct
   ```
 
 ### Sigma Cat

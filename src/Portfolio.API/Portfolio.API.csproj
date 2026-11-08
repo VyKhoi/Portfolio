@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="../Portfolio.AI/persona.md;../Portfolio.AI/replies.json;../Portfolio.AI/quick-answers.json" Link="ai/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../Portfolio.AI/persona.md;../Portfolio.AI/replies.json" Link="ai/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>

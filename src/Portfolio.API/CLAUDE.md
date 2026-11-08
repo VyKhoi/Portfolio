@@ -47,9 +47,8 @@ Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu tr
 ## Features/Chat (Sigma Cat)
 | File | Việc |
 | :--- | :--- |
-| `ChatService.cs` | Một luồng duy nhất: từ chối (honeypot, rỗng, quá dài, quota) → lưu tin → quick answer → model → lưu reply + thời gian → Telegram |
-| `QuickAnswerMatcher.cs` | Chỉ khớp **nguyên câu** sau khi chuẩn hoá, câu dài hơn luôn tới model. Thiếu fact thì để model trả lời |
-| `ChatPromptBuilder.cs` | Persona + facts từ DB, dựng mỗi tin nên admin sửa là có hiệu lực. Không đưa dữ liệu thay đổi theo tin nhắn vào đây (hỏng cache prompt) |
+| `ChatService.cs` | Một luồng duy nhất: từ chối (honeypot, rỗng, quá dài, quota) → lưu tin → model → lưu reply + thời gian → Telegram. Không có câu trả lời soạn sẵn |
+| `ChatPromptBuilder.cs` | Persona + facts + tối đa `MaxHighlightsPerJob` chi tiết mỗi công việc từ DB, dựng mỗi tin nên admin sửa là có hiệu lực. Không đưa dữ liệu thay đổi theo tin nhắn vào đây (hỏng cache prompt) |
 | `OllamaClient.cs` | `ILlmClient`. Lỗi là `LlmUnavailableException`, không bao giờ trả câu lỗi như câu chat |
 | `ChatAssets.cs` | Đọc `src/Portfolio.AI` (được copy vào `ai/` khi build) |
 | `ChatGuards.cs` | `GenerationGate`, `ChatQuota`, `ChatSessionId`, `ChatLanguage` |
@@ -80,7 +79,7 @@ Không viết câu trả lời, fact hay từ khoá trong C#. Thông báo hệ t
 | `Project` | Guid | `Slug` (unique), `Summary, DescriptionMdx, CoverImageKey, TechStack` (chuỗi JSON), `DemoUrl, GithubUrl, Order, IsFeatured, Status, ViewCount` |
 | `ContactMessage` | Guid | `Name, Email, Subject, Message, Status` (Pending/Read/Replied) |
 | `ChatSession` | int | `SessionId` (string, unique), `StartedAt, LastMessageAt` |
-| `ChatMessage` | int | `SessionId` (index), `Role` user/assistant, `Content`, `Source` quick/model, `FirstTokenMs`, `TotalMs` |
+| `ChatMessage` | int | `SessionId` (index), `Role` user/assistant, `Content`, `Source` (model), `FirstTokenMs`, `TotalMs` |
 | `AssistantFact` | Guid | `Key` (unique), `Label`, `ValueVi`, `ValueEn`, `Order`, `Enabled`: fact riêng của Sigma Cat, sửa ở admin |
 
 ### PortfolioDbContext.cs
