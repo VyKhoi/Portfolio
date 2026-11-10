@@ -20,12 +20,6 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-export const ContentApi = {
-  getProfile: () => request<any>('/content/profile'),
-  getExperiences: () => request<any[]>('/content/experience'),
-  getSkills: () => request<any[]>('/content/skills'),
-};
-
 export const ContactApi = {
   submitMessage: (data: { name: string; email: string; message: string; consent: boolean; companyTrap?: string }) =>
     request<any>('/contact/messages', {

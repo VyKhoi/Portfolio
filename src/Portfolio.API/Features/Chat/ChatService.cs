@@ -7,7 +7,8 @@ using Portfolio.API.Entities;
 
 namespace Portfolio.API.Features.Chat;
 
-public record ChatTurn(string? SessionId, string? Message, string? Language, string? WebsiteTrap, string ClientIp);
+/// <param name="IsTest">Asked from the admin console ("Hỏi thử"): no quota, no Telegram, left out of the stats.</param>
+public record ChatTurn(string? SessionId, string? Message, string? Language, string? WebsiteTrap, string ClientIp, bool IsTest = false);
 
 /// <summary>Where a reply goes. Tokens are the answer; notices are system messages that are never stored.</summary>
 public interface IChatOutput
@@ -61,7 +62,7 @@ public class ChatService
         var refusal = !string.IsNullOrEmpty(turn.WebsiteTrap) ? "honeypot"
             : message.Length == 0 ? "empty"
             : message.Length > _options.MaxMessageLength ? "tooLong"
-            : !_quota.TryConsume(turn.ClientIp) ? "quota"
+            : !turn.IsTest && !_quota.TryConsume(turn.ClientIp) ? "quota"
             : null;
         if (refusal != null)
         {
@@ -70,7 +71,7 @@ public class ChatService
         }
 
         var sessionId = ChatSessionId.Normalize(turn.SessionId);
-        var userMessage = await SaveUserMessageAsync(sessionId, message);
+        var userMessage = await SaveUserMessageAsync(sessionId, message, turn.IsTest);
         var clock = Stopwatch.StartNew();
 
         var result = await StreamModelAsync(sessionId, userMessage, language, output, clock, cancellationToken);
@@ -78,7 +79,7 @@ public class ChatService
         if (result.Text.Length == 0) return;
 
         await SaveReplyAsync(sessionId, result, clock.ElapsedMilliseconds);
-        _notifications.Publish(new ChatNotification(sessionId, result.Source));
+        if (!turn.IsTest) _notifications.Publish(new ChatNotification(sessionId, result.Source));
         _logger.LogInformation("Chat reply source={Source} firstTokenMs={FirstTokenMs} totalMs={TotalMs}",
             result.Source, result.FirstTokenMs, clock.ElapsedMilliseconds);
     }
@@ -144,13 +145,13 @@ public class ChatService
         return messages;
     }
 
-    private async Task<ChatMessage> SaveUserMessageAsync(string sessionId, string text)
+    private async Task<ChatMessage> SaveUserMessageAsync(string sessionId, string text, bool isTest)
     {
         var now = DateTime.UtcNow;
         var session = await _db.ChatSessions.FirstOrDefaultAsync(s => s.SessionId == sessionId);
         if (session == null)
         {
-            _db.ChatSessions.Add(new ChatSession { SessionId = sessionId, StartedAt = now, LastMessageAt = now });
+            _db.ChatSessions.Add(new ChatSession { SessionId = sessionId, StartedAt = now, LastMessageAt = now, IsTest = isTest });
         }
         else
         {

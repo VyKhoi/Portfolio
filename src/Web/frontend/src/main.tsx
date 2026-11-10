@@ -3,15 +3,9 @@ import { createRoot, hydrateRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import { AppRoutes } from './App.tsx'
-import { prefetchPublicContent } from './lib/contentCache'
 
 const root = document.getElementById('root')!
 const prerendered = root.dataset.prerendered === 'true'
-
-// Public pages: start refreshing content right away, the static HTML is already on screen
-if (prerendered) {
-  prefetchPublicContent()
-}
 
 // After a redeploy, old hashed chunks are removed. If a tab opened before the deploy
 // tries to lazy-load one, reload once to fetch the fresh build instead of breaking.

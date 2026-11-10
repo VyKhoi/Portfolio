@@ -53,22 +53,30 @@ public class Experience
     public int Order { get; set; }
 }
 
+/// <summary>
+/// One of Khoi's own products, shown on the home page and at /projects/&lt;slug&gt;. <see cref="Content"/> holds the
+/// whole page as JSON in the shape of src/Web/frontend/src/content/projects.json (year, links, images, vi/en copy).
+/// The slug is part of the URL (nginx + Google), so the admin console cannot change it.
+/// </summary>
 public class Project
 {
     public Guid Id { get; set; } = Guid.NewGuid();
-    public string Title { get; set; } = string.Empty;
     public string Slug { get; set; } = string.Empty;
-    public string Summary { get; set; } = string.Empty;
-    public string DescriptionMdx { get; set; } = string.Empty;
-    public string CoverImageKey { get; set; } = string.Empty;
-    public string TechStack { get; set; } = "[]"; // JSON string
-    public string? DemoUrl { get; set; }
-    public string? GithubUrl { get; set; }
     public int Order { get; set; }
-    public bool IsFeatured { get; set; }
-    public string Status { get; set; } = "Published";
-    public int ViewCount { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public string Content { get; set; } = "{}";
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
+
+/// <summary>One line of the "Now" section on the home page.</summary>
+public class NowItem
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Label { get; set; } = string.Empty;
+    public string LabelEn { get; set; } = string.Empty;
+    public string Text { get; set; } = string.Empty;
+    public string TextEn { get; set; } = string.Empty;
+    public int Order { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
 public class ContactMessage
@@ -90,6 +98,8 @@ public class ChatSession
     public string SessionId { get; set; } = string.Empty;
     public DateTime StartedAt { get; set; } = DateTime.UtcNow;
     public DateTime LastMessageAt { get; set; } = DateTime.UtcNow;
+    /// <summary>Started from "Ask a test question" in the admin console: no quota, left out of the stats.</summary>
+    public bool IsTest { get; set; }
 }
 
 public class ChatMessage

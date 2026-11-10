@@ -247,6 +247,17 @@ for (const project of PROJECTS) {
 }
 writeFileSync(join(dist, '404.html'), notFoundPage());
 
+// What this build was made from, exactly as the API returned it at build time. The admin console compares it with
+// the live API to show "published" or "waiting for the next publish"; scripts/publish-content.sh does the same.
+const portfolio = JSON.parse(readFileSync(join(root, 'src/content/portfolio.json'), 'utf8'));
+writeFileSync(
+  join(dist, 'content-snapshot.json'),
+  JSON.stringify({
+    builtAt: new Date().toISOString(),
+    content: { ...portfolio, projects: JSON.parse(readFileSync(join(root, 'src/content/projects.json'), 'utf8')) },
+  }),
+);
+
 // Sitemap from the same page list, so a new page can never be forgotten; lastmod = this build (deploys only happen on changes)
 const today = new Date().toISOString().slice(0, 10);
 const pairs = [

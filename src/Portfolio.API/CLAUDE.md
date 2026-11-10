@@ -31,18 +31,23 @@ Build từ **root repo** (`context: .`), restore csproj → publish Release → 
 - Không có đăng ký — chỉ có user `admin` do seed tạo.
 
 ### ContentController — `api/content`
-- `profile` GET / 🔒PUT (1 bản ghi duy nhất, PUT tạo mới nếu chưa có).
-- `skills`, `experience` (alias `experiences`), `projects`: GET list (sắp theo `Order`), 🔒POST, 🔒PUT `{id}`, 🔒DELETE `{id}`.
-- PUT copy **từng field** sang entity đang track — thêm field mới vào entity thì nhớ thêm dòng copy ở đây.
-- Cache `IMemoryCache` key `content:profile|skills|experiences|projects` 30 phút; mọi thao tác ghi đều `Remove` key.
-- POST project tự sinh `Slug` = title-lowercase + 4 ký tự GUID nếu trống.
+Nguồn nội dung duy nhất của site (frontend build từ các GET này qua `scripts/export-content.py`). Ghi nhận **request DTO** trong `ContentRequests.cs` (không nhận entity), kiểm tra bằng `ContentRules` và trả `{error}` **tiếng Việt** (admin hiện nguyên văn): độ dài, link chỉ `https://`, nhóm kỹ năng thuộc 5 nhóm cố định, ảnh dự án chỉ `/projects/<file>.webp|jpg`.
+- `profile` GET / 🔒PUT (ảnh + CV không sửa qua API: file trong repo).
+- `skills`: GET, 🔒POST (thêm cuối), 🔒PUT `{id}` (tên, nhóm), 🔒DELETE, 🔒PUT `skills/order` `{ids}` (phải đúng đủ các id).
+- `experiences` (GET thêm alias `experience`): GET, 🔒POST (lên đầu dòng thời gian), 🔒PUT `{id}`, 🔒DELETE, 🔒PUT `experiences/order`.
+- `projects`: GET trả đúng hình `content/projects.json` (`[{slug, year, url, image, thumb, ogImage, schemaType, copy: {en, vi}}]`); 🔒PUT `projects/{slug}` sửa chữ / link. Không tạo / xoá / đổi slug qua API (cần nginx + ảnh).
+- `now`: GET `{updated (ngày VN), items: [{label, labelEn, text, textEn}]}`, 🔒PUT `{items}` thay cả danh sách (1–6 dòng), ngày cập nhật = lúc lưu.
+- Cache `IMemoryCache` key `content:*` 30 phút; mọi thao tác ghi đều `Remove` key.
+
+### AdminController — `api/admin` 🔒
+`GET status`: tin chưa đọc, phiên chat 7 ngày (không tính phiên thử), trung vị thời gian trả lời, số lượt bị chặn quota (`ChatQuota.RefusedSince`, trong RAM), 7 ngày theo giờ VN, Ollama `/api/ps` (model nạp chưa, % trên GPU), `BUILD_COMMIT`/`BUILD_TIME` (env do workflow ghi).
 
 ### ContactController — `api/contact`
 - `POST messages` `{name, email, message, consent, companyTrap}` — thiếu `consent=true` → 400, lưu `ConsentedAt`. `companyTrap` có giá trị = bot → trả OK giả, không lưu. Giới hạn 100/100/1000 ký tự, email phải hợp lệ (`MailAddress`), 3 tin/giờ/IP → 429. Lưu DB rồi `ContactChannel.PublishAsync` để gửi mail nền.
 - 🔒 `GET messages`, 🔒 `PATCH messages/{id}/status` `{status}` (chỉ `Pending|Read|Replied`), 🔒 `DELETE messages/{id}`.
 
 ### AIController — `api/ai`
-Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu trả lời, `{notice}` là thông báo hệ thống, kết thúc `[DONE]`), `GET history/{sessionId}` (public), 🔒 `sessions`, `sessions/{id}/messages`, `DELETE sessions/{id}` (yêu cầu xoá), `stats`, CRUD `facts`.
+Mỏng, không chứa logic chat. `POST chat/stream` (SSE: `{token}` là câu trả lời, `{notice}` là thông báo hệ thống, kết thúc `[DONE]`), `GET history/{sessionId}` (public), 🔒 `sessions`, `sessions/{id}/messages`, `DELETE sessions/{id}` (yêu cầu xoá), `stats` (bỏ phiên thử), CRUD `facts`. Gửi kèm token admin + header `X-Admin-Test: 1` → `ChatTurn.IsTest`: không quota, không Telegram, phiên đánh dấu `IsTest` (tab "Hỏi thử" trong admin).
 
 ## Features/Chat (Sigma Cat)
 | File | Việc |
@@ -76,9 +81,10 @@ Không viết câu trả lời, fact hay từ khoá trong C#. Thông báo hệ t
 | `Profile` | Guid | `FullName, Title, Bio, AvatarKey, CvPdfKey, GithubLink, LinkedinLink` (1 dòng) |
 | `Skill` | Guid | `Name, Category, IconSvgKey, ProficiencyLevel, Order` |
 | `Experience` | Guid | `Role, Company, Period, ProjectName, Highlights text[], TechStack text[], Order` |
-| `Project` | Guid | `Slug` (unique), `Summary, DescriptionMdx, CoverImageKey, TechStack` (chuỗi JSON), `DemoUrl, GithubUrl, Order, IsFeatured, Status, ViewCount` |
+| `Project` | Guid | `Slug` (unique), `Order`, `Content` (jsonb: cả trang dự án, hình như `projects.json` trừ slug), `UpdatedAt` |
+| `NowItem` | Guid | `Label, LabelEn, Text, TextEn, Order, UpdatedAt` (mục Now) |
 | `ContactMessage` | Guid | `Name, Email, Subject, Message, Status` (Pending/Read/Replied), `ConsentedAt` |
-| `ChatSession` | int | `SessionId` (string, unique), `StartedAt, LastMessageAt` |
+| `ChatSession` | int | `SessionId` (string, unique), `StartedAt, LastMessageAt`, `IsTest` (hỏi thử từ admin) |
 | `ChatMessage` | int | `SessionId` (index), `Role` user/assistant, `Content`, `Source` (model), `FirstTokenMs`, `TotalMs` |
 | `AssistantFact` | Guid | `Key` (unique), `Label`, `ValueVi`, `ValueEn`, `Order`, `Enabled`: fact riêng của Sigma Cat, sửa ở admin |
 
@@ -90,9 +96,10 @@ DbSet cho từng entity + khai báo key/index ở `OnModelCreating`. Không có 
 2. User `admin`: chưa có → tạo với `ADMIN_PASSWORD` (hoặc mật khẩu ngẫu nhiên nếu không set). Đã có mà `ADMIN_PASSWORD` khác hash → **ghi đè** mật khẩu theo env (đổi mật khẩu trong UI sẽ bị reset ở lần deploy sau nếu env vẫn set).
 3. Profile: tạo nếu chưa có; nâng cấp tên không dấu cũ → có dấu.
 4. Experiences / Skills: chỉ seed khi bảng trống.
+5. Projects / NowItems: bảng trống thì nạp từ `content/projects.json` + `portfolio.json` của frontend (nhúng vào DLL lúc build, `SeedContent.cs`).
 
 ### Migrations
-Hiện có `InitialCreate`, `AddEnglishContent`, `AddSigmaCatFacts`, `AddContactConsent`. Thay đổi **dữ liệu** thì dùng `database/updates/` (xem `CLAUDE.md` ở root). Thay đổi **schema**:
+Hiện có `InitialCreate`, `AddEnglishContent`, `AddSigmaCatFacts`, `AddContactConsent`, `AdminV2` (Projects thành jsonb, xoá 2 dòng mẫu cũ, thêm `NowItems`, `ChatSessions.IsTest`). Thay đổi **dữ liệu** thì dùng `database/updates/` (xem `CLAUDE.md` ở root). Thay đổi **schema**:
 ```bash
 dotnet ef migrations add <TenMigration> --project src/Portfolio.API
 ```

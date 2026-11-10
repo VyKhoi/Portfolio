@@ -1,26 +1,23 @@
 import React, { Suspense, lazy } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
-import { useAdminThemeStore } from '../../store/adminThemeStore'
-import { AdminLoader } from './AdminLoader'
 
-// Code-split: the entire Admin console is loaded as a single cohesive bundle on /dashboard
-// so public visitors don't download it, while switching between admin tabs is 0ms instant.
-const AdminLayout = lazy(() => import('./AdminLayout').then(m => ({ default: m.AdminLayout })))
+// The whole admin console is one lazy bundle: public visitors never download it
+const AdminLayout = lazy(() => import('./AdminLayout').then((m) => ({ default: m.AdminLayout })))
 
-function AdminBootFallback() {
-  const theme = useAdminThemeStore(state => state.theme)
+function BootFallback() {
   return (
-    <div data-theme={theme} className="admin-theme min-h-dvh p-4 sm:p-8">
-      <div className="max-w-6xl mx-auto pt-4 sm:pt-8">
-        <AdminLoader label="INITIALIZING_ADMIN_CONSOLE..." variant="grid" rows={6} />
+    <div className="min-h-dvh bg-obsidian lg:pl-64">
+      <div className="mx-auto max-w-[1100px] space-y-3 px-4 py-10 sm:px-6 lg:px-10" aria-busy="true" aria-label="Đang tải trang quản trị">
+        <div className="h-10 w-48 animate-pulse bg-surface" />
+        {Array.from({ length: 4 }, (_, i) => <div key={i} className="h-24 animate-pulse border border-border bg-surface" />)}
       </div>
     </div>
   )
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = useAuthStore(state => state.token)
+  const token = useAuthStore((s) => s.token)
   if (!token) return <Navigate to="/login" />
   return <>{children}</>
 }
@@ -28,7 +25,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 export function AdminEntry() {
   return (
     <ProtectedRoute>
-      <Suspense fallback={<AdminBootFallback />}>
+      <Suspense fallback={<BootFallback />}>
         <AdminLayout />
       </Suspense>
     </ProtectedRoute>

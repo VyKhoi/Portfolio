@@ -15,6 +15,11 @@ on:
 permissions:
   contents: read
 
+# Never two builds at once on the home server (publish.yml rebuilds the frontend on its own)
+concurrency:
+  group: portfolio-server
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: self-hosted
@@ -45,6 +50,9 @@ jobs:
               # Ollama gets at most half of the server's cores so the other sites stay responsive
               echo "OLLAMA_CPUS=$(( $(nproc) / 2 > 0 ? $(nproc) / 2 : 1 ))"
               echo "COMPOSE_FILE=docker-compose.yml:docker-compose.gpu.yml"
+              # Shown on the admin overview
+              echo "BUILD_COMMIT=${GITHUB_SHA::7}"
+              echo "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
             } > .env
           )
 
@@ -68,6 +76,12 @@ jobs:
           else
             echo "Postgres container is not running yet, skipping backup"
           fi
+
+      - name: Take the static pages' content from the database
+        run: |
+          # The pages are built from what the running site's API holds; on a first deploy (or an API that
+          # does not answer in the expected shape) the files in the repo are used and publish runs at the end.
+          python3 scripts/export-content.py || echo "::warning::Using the content files from the repo"
 
       - name: Build images
         run: |
@@ -113,9 +127,9 @@ jobs:
           done
           curl -fsS -o /dev/null http://localhost:18122/api/content/profile
 
-      - name: Compare live content with the fallback file
+      - name: Publish content the static pages do not show yet
         run: |
-          python3 scripts/check-content.py || echo "::warning::Content check could not run"
+          bash scripts/publish-content.sh
 
       - name: Report image versions
         if: always()

@@ -100,6 +100,7 @@ builder.Services.AddHostedService<EmailBackgroundWorker>();
 
 // 6. External Clients
 builder.Services.AddHttpClient<TelegramNotifier>();
+builder.Services.AddHttpClient(); // AdminController checks Ollama with a plain client
 builder.Services.AddSingleton<JwtService>();
 
 // 6b. Sigma Cat

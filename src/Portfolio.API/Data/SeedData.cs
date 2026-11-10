@@ -176,42 +176,14 @@ public static class SeedData
             context.AssistantFacts.AddRange(BuildAssistantFacts());
         }
 
-        // 6. Seed Projects (Bento grid showcase)
+        // 6. Projects and the Now section: first fill from the files the site shipped with, then the admin console owns them
         if (!await context.Projects.AnyAsync())
         {
-            context.Projects.AddRange(new List<Project>
-            {
-                new Project
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Enterprise SaaS CRM/POS Ecosystem",
-                    Slug = "enterprise-saas-crm-pos",
-                    Summary = "Hệ sinh thái SaaS CRM/POS Multi-tenant xử lý giao dịch cao cho chuỗi cửa hàng.",
-                    DescriptionMdx = "Hệ thống quản lý chuỗi salon với kiến trúc Multi-tenant (RLS), xử lý thanh toán realtime và automation workflow.",
-                    CoverImageKey = "/images/project-pos.png",
-                    TechStack = "[\".NET 8\", \"C#\", \"PostgreSQL\", \"SignalR\", \"Hangfire\", \"React\"]",
-                    DemoUrl = "https://khoi.dev",
-                    GithubUrl = "https://github.com/vykhoi",
-                    Order = 1,
-                    IsFeatured = true,
-                    Status = "Published"
-                },
-                new Project
-                {
-                    Id = Guid.NewGuid(),
-                    Title = "Personal Portfolio & Local AI Lab",
-                    Slug = "personal-portfolio-lab",
-                    Summary = "Hệ thống Portfolio tinh gọn tích hợp trợ lý AI cục bộ (Ollama) và Dark Cyber UI.",
-                    DescriptionMdx = "Refactor từ Microservices sang Modular Monolith hiệu suất cao, tự host AI model phục vụ tuyển dụng.",
-                    CoverImageKey = "/images/project-portfolio.png",
-                    TechStack = "[\".NET 9\", \"React 19\", \"Ollama\", \"PostgreSQL\", \"Docker\"]",
-                    DemoUrl = "https://khoi.dev",
-                    GithubUrl = "https://github.com/vykhoi/Portfolio",
-                    Order = 2,
-                    IsFeatured = true,
-                    Status = "Published"
-                }
-            });
+            context.Projects.AddRange(SeedContent.Projects());
+        }
+        if (!await context.NowItems.AnyAsync())
+        {
+            context.NowItems.AddRange(SeedContent.NowItems());
         }
 
         await context.SaveChangesAsync();

@@ -1,12 +1,12 @@
 import { Link } from "react-router-dom"
 import { Badge } from "../ui/Badge"
 import { m } from "framer-motion"
-import { useCachedContent } from '../../lib/contentCache';
 import { pick, useLang, useT } from '../../lib/i18n';
 import portfolio from '../../content/portfolio.json';
 import { projectPath } from '../../content/projects';
 
-const DEFAULT_EXPERIENCES = portfolio.experiences;
+// Built into the page from the database (scripts/export-content.py), no request at runtime
+const experiences: any[] = portfolio.experiences;
 
 // Experience rows that have their own project page
 const PROJECT_PAGES: Record<string, string> = {
@@ -16,11 +16,6 @@ const PROJECT_PAGES: Record<string, string> = {
 export function ProjectsBento() {
   const lang = useLang();
   const t = useT();
-  const experiences = useCachedContent<any[]>(
-    'experiences',
-    DEFAULT_EXPERIENCES,
-    data => Array.isArray(data) && data.length > 0,
-  );
 
   if (!experiences.length) return null;
 

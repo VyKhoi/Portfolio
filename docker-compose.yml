@@ -84,6 +84,8 @@ services:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
       - MAIL_APP_PASSWORD=${MAIL_APP_PASSWORD}
+      - BUILD_COMMIT=${BUILD_COMMIT:-}
+      - BUILD_TIME=${BUILD_TIME:-}
       - DOTNET_gcServer=0
     depends_on:
       postgres:

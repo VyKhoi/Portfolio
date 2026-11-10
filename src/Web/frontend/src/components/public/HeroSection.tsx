@@ -1,18 +1,13 @@
 import { m } from 'framer-motion';
 import { Badge } from "../ui/Badge";
 import { Download } from "lucide-react";
-import { useCachedContent } from "../../lib/contentCache";
 import { pick, useLang, useT } from "../../lib/i18n";
 import portfolio from "../../content/portfolio.json";
 
-const DEFAULT_PROFILE = portfolio.profile;
+// Built into the page from the database (scripts/export-content.py), no request at runtime
+const profile: any = portfolio.profile;
 
 export function HeroSection() {
-  const profile = useCachedContent<any>(
-    'profile',
-    DEFAULT_PROFILE,
-    data => Boolean(data && data.fullName),
-  );
 
   const lang = useLang();
   const t = useT();

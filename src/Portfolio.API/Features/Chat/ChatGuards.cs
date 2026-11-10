@@ -44,6 +44,15 @@ public class ChatQuota
         _options = options.Value;
     }
 
+    // When visitors were turned away for asking too fast, for the admin overview (kept 7 days, in memory)
+    private readonly System.Collections.Concurrent.ConcurrentQueue<DateTime> _refused = new();
+
+    public int RefusedSince(DateTime sinceUtc)
+    {
+        while (_refused.TryPeek(out var oldest) && oldest < DateTime.UtcNow.AddDays(-7)) _refused.TryDequeue(out _);
+        return _refused.Count(t => t >= sinceUtc);
+    }
+
     public bool TryConsume(string clientIp)
     {
         var counter = _cache.GetOrCreate($"chat-quota:{clientIp}", entry =>
@@ -51,7 +60,9 @@ public class ChatQuota
             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_options.QuotaWindowMinutes);
             return new Counter();
         })!;
-        return Interlocked.Increment(ref counter.Count) <= _options.QuotaMessages;
+        var allowed = Interlocked.Increment(ref counter.Count) <= _options.QuotaMessages;
+        if (!allowed) _refused.Enqueue(DateTime.UtcNow);
+        return allowed;
     }
 }
 

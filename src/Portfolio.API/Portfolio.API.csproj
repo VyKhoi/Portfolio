@@ -10,6 +10,12 @@
     <Content Include="../Portfolio.AI/persona.md;../Portfolio.AI/replies.json" Link="ai/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <!-- First fill of the Projects and Now tables: the same files the site falls back to in development -->
+  <ItemGroup>
+    <EmbeddedResource Include="../Web/frontend/src/content/projects.json" LogicalName="seed.projects.json" />
+    <EmbeddedResource Include="../Web/frontend/src/content/portfolio.json" LogicalName="seed.portfolio.json" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageReference Include="MailKit" Version="4.17.0" />

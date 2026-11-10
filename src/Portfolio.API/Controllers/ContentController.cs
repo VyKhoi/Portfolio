@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +9,11 @@ using Portfolio.API.Entities;
 
 namespace Portfolio.API.Controllers;
 
+/// <summary>
+/// Everything the public site shows. The site is built from these endpoints (scripts/export-content.py),
+/// so the database is the only place content lives; the JSON files in the repo are a development fallback.
+/// GETs are public, writes need the admin token and pass <see cref="ContentRules"/>.
+/// </summary>
 [ApiController]
 [Route("api/content")]
 public class ContentController : ControllerBase
@@ -22,6 +25,8 @@ public class ContentController : ControllerBase
     private const string SkillsCacheKey = "content:skills";
     private const string ExperiencesCacheKey = "content:experiences";
     private const string ProjectsCacheKey = "content:projects";
+    private const string NowCacheKey = "content:now";
+    private static readonly TimeSpan CacheFor = TimeSpan.FromMinutes(30);
 
     public ContentController(PortfolioDbContext db, IMemoryCache cache)
     {
@@ -29,97 +34,86 @@ public class ContentController : ControllerBase
         _cache = cache;
     }
 
+    private static BadRequestObjectResult Invalid(string error) => new(new { error });
+
+    private async Task<T> CachedAsync<T>(string key, Func<Task<T>> load)
+    {
+        if (_cache.TryGetValue(key, out T? value) && value != null) return value;
+        value = await load();
+        _cache.Set(key, value, CacheFor);
+        return value;
+    }
+
     // ─── PROFILE ─────────────────────────────────────────────
     [HttpGet("profile")]
     public async Task<IActionResult> GetProfile()
     {
-        if (!_cache.TryGetValue(ProfileCacheKey, out Profile? profile))
-        {
-            profile = await _db.Profiles.FirstOrDefaultAsync();
-            if (profile != null)
-            {
-                _cache.Set(ProfileCacheKey, profile, TimeSpan.FromMinutes(30));
-            }
-        }
-
-        if (profile == null) return NotFound(new { error = "Profile not found." });
-        return Ok(profile);
+        var profile = await CachedAsync(ProfileCacheKey, () => _db.Profiles.AsNoTracking().FirstOrDefaultAsync());
+        return profile == null ? NotFound(new { error = "Profile not found." }) : Ok(profile);
     }
 
     [HttpPut("profile")]
     [Authorize]
-    public async Task<IActionResult> UpdateProfile([FromBody] Profile updatedProfile)
+    public async Task<IActionResult> UpdateProfile([FromBody] ProfileRequest request)
     {
+        if (request.Validate() is { } error) return Invalid(error);
+
         var profile = await _db.Profiles.FirstOrDefaultAsync();
         if (profile == null)
         {
-            updatedProfile.Id = Guid.NewGuid();
-            _db.Profiles.Add(updatedProfile);
-            profile = updatedProfile;
+            // Photo and CV are files in the repo (public/profile.jpg, public/cv.pdf), not editable here
+            profile = new Profile { AvatarKey = "/profile.jpg", CvPdfKey = "/cv.pdf" };
+            _db.Profiles.Add(profile);
         }
-        else
-        {
-            profile.FullName = updatedProfile.FullName;
-            profile.Title = updatedProfile.Title;
-            profile.TitleEn = updatedProfile.TitleEn;
-            profile.Bio = updatedProfile.Bio;
-            profile.BioEn = updatedProfile.BioEn;
-            profile.AvatarKey = updatedProfile.AvatarKey;
-            profile.CvPdfKey = updatedProfile.CvPdfKey;
-            profile.GithubLink = updatedProfile.GithubLink;
-            profile.LinkedinLink = updatedProfile.LinkedinLink;
-        }
+
+        profile.FullName = request.FullName.Trim();
+        profile.Title = request.Title.Trim();
+        profile.TitleEn = request.TitleEn?.Trim() ?? "";
+        profile.Bio = request.Bio.Trim();
+        profile.BioEn = request.BioEn?.Trim() ?? "";
+        profile.GithubLink = request.GithubLink?.Trim() ?? "";
+        profile.LinkedinLink = request.LinkedinLink?.Trim() ?? "";
 
         await _db.SaveChangesAsync();
         _cache.Remove(ProfileCacheKey);
-        _cache.Set(ProfileCacheKey, profile, TimeSpan.FromMinutes(30));
-
         return Ok(profile);
     }
 
     // ─── SKILLS ──────────────────────────────────────────────
     [HttpGet("skills")]
     public async Task<IActionResult> GetSkills()
-    {
-        if (!_cache.TryGetValue(SkillsCacheKey, out List<Skill>? skills))
-        {
-            skills = await _db.Skills.OrderBy(s => s.Order).ToListAsync();
-            _cache.Set(SkillsCacheKey, skills, TimeSpan.FromMinutes(30));
-        }
-
-        return Ok(skills ?? new List<Skill>());
-    }
+        => Ok(await CachedAsync(SkillsCacheKey, () => _db.Skills.AsNoTracking().OrderBy(s => s.Order).ToListAsync()));
 
     [HttpPost("skills")]
     [Authorize]
-    public async Task<IActionResult> AddSkill([FromBody] Skill skill)
+    public async Task<IActionResult> AddSkill([FromBody] SkillRequest request)
     {
-        if (skill.Id == Guid.Empty) skill.Id = Guid.NewGuid();
+        if (request.Validate() is { } error) return Invalid(error);
+
+        var last = await _db.Skills.Select(s => (int?)s.Order).MaxAsync() ?? 0;
+        var skill = new Skill { Name = request.Name.Trim(), Category = request.Category, Order = last + 1 };
         _db.Skills.Add(skill);
         await _db.SaveChangesAsync();
         _cache.Remove(SkillsCacheKey);
         return Ok(skill);
     }
 
-    [HttpPut("skills/{id}")]
+    [HttpPut("skills/{id:guid}")]
     [Authorize]
-    public async Task<IActionResult> UpdateSkill(Guid id, [FromBody] Skill updatedSkill)
+    public async Task<IActionResult> UpdateSkill(Guid id, [FromBody] SkillRequest request)
     {
+        if (request.Validate() is { } error) return Invalid(error);
         var skill = await _db.Skills.FindAsync(id);
         if (skill == null) return NotFound();
 
-        skill.Name = updatedSkill.Name;
-        skill.Category = updatedSkill.Category;
-        skill.IconSvgKey = updatedSkill.IconSvgKey;
-        skill.ProficiencyLevel = updatedSkill.ProficiencyLevel;
-        skill.Order = updatedSkill.Order;
-
+        skill.Name = request.Name.Trim();
+        skill.Category = request.Category;
         await _db.SaveChangesAsync();
         _cache.Remove(SkillsCacheKey);
         return Ok(skill);
     }
 
-    [HttpDelete("skills/{id}")]
+    [HttpDelete("skills/{id:guid}")]
     [Authorize]
     public async Task<IActionResult> DeleteSkill(Guid id)
     {
@@ -132,60 +126,55 @@ public class ContentController : ControllerBase
         return Ok(new { success = true });
     }
 
+    [HttpPut("skills/order")]
+    [Authorize]
+    public async Task<IActionResult> OrderSkills([FromBody] OrderRequest request)
+    {
+        var skills = await _db.Skills.ToListAsync();
+        if (!SameIds(request.Ids, skills.Select(s => s.Id))) return Invalid("Danh sách không khớp, tải lại trang rồi thử lại.");
+        foreach (var skill in skills) skill.Order = request.Ids.IndexOf(skill.Id) + 1;
+        await _db.SaveChangesAsync();
+        _cache.Remove(SkillsCacheKey);
+        return Ok(new { success = true });
+    }
+
     // ─── EXPERIENCES ─────────────────────────────────────────
     [HttpGet("experience")]
     [HttpGet("experiences")]
     public async Task<IActionResult> GetExperiences()
-    {
-        if (!_cache.TryGetValue(ExperiencesCacheKey, out List<Experience>? experiences))
-        {
-            experiences = await _db.Experiences.OrderBy(e => e.Order).ToListAsync();
-            _cache.Set(ExperiencesCacheKey, experiences, TimeSpan.FromMinutes(30));
-        }
+        => Ok(await CachedAsync(ExperiencesCacheKey, () => _db.Experiences.AsNoTracking().OrderBy(e => e.Order).ToListAsync()));
 
-        return Ok(experiences ?? new List<Experience>());
-    }
-
-    [HttpPost("experience")]
     [HttpPost("experiences")]
     [Authorize]
-    public async Task<IActionResult> AddExperience([FromBody] Experience exp)
+    public async Task<IActionResult> AddExperience([FromBody] ExperienceRequest request)
     {
-        if (exp.Id == Guid.Empty) exp.Id = Guid.NewGuid();
+        if (request.Validate() is { } error) return Invalid(error);
+
+        // New jobs go to the top of the timeline
+        foreach (var other in await _db.Experiences.ToListAsync()) other.Order++;
+        var exp = new Experience { Order = 1 };
+        Apply(exp, request);
         _db.Experiences.Add(exp);
         await _db.SaveChangesAsync();
         _cache.Remove(ExperiencesCacheKey);
         return Ok(exp);
     }
 
-    [HttpPut("experience/{id}")]
-    [HttpPut("experiences/{id}")]
+    [HttpPut("experiences/{id:guid}")]
     [Authorize]
-    public async Task<IActionResult> UpdateExperience(Guid id, [FromBody] Experience updatedExp)
+    public async Task<IActionResult> UpdateExperience(Guid id, [FromBody] ExperienceRequest request)
     {
+        if (request.Validate() is { } error) return Invalid(error);
         var exp = await _db.Experiences.FindAsync(id);
         if (exp == null) return NotFound();
 
-        exp.Role = updatedExp.Role;
-        exp.RoleEn = updatedExp.RoleEn;
-        exp.Company = updatedExp.Company;
-        exp.CompanyEn = updatedExp.CompanyEn;
-        exp.Period = updatedExp.Period;
-        exp.PeriodEn = updatedExp.PeriodEn;
-        exp.ProjectName = updatedExp.ProjectName;
-        exp.ProjectNameEn = updatedExp.ProjectNameEn;
-        exp.Highlights = updatedExp.Highlights;
-        exp.HighlightsEn = updatedExp.HighlightsEn;
-        exp.TechStack = updatedExp.TechStack;
-        exp.Order = updatedExp.Order;
-
+        Apply(exp, request);
         await _db.SaveChangesAsync();
         _cache.Remove(ExperiencesCacheKey);
         return Ok(exp);
     }
 
-    [HttpDelete("experience/{id}")]
-    [HttpDelete("experiences/{id}")]
+    [HttpDelete("experiences/{id:guid}")]
     [Authorize]
     public async Task<IActionResult> DeleteExperience(Guid id)
     {
@@ -198,69 +187,107 @@ public class ContentController : ControllerBase
         return Ok(new { success = true });
     }
 
+    [HttpPut("experiences/order")]
+    [Authorize]
+    public async Task<IActionResult> OrderExperiences([FromBody] OrderRequest request)
+    {
+        var experiences = await _db.Experiences.ToListAsync();
+        if (!SameIds(request.Ids, experiences.Select(e => e.Id))) return Invalid("Danh sách không khớp, tải lại trang rồi thử lại.");
+        foreach (var exp in experiences) exp.Order = request.Ids.IndexOf(exp.Id) + 1;
+        await _db.SaveChangesAsync();
+        _cache.Remove(ExperiencesCacheKey);
+        return Ok(new { success = true });
+    }
+
+    private static void Apply(Experience exp, ExperienceRequest request)
+    {
+        exp.Role = request.Role.Trim();
+        exp.RoleEn = request.RoleEn?.Trim() ?? "";
+        exp.Company = request.Company.Trim();
+        exp.CompanyEn = request.CompanyEn?.Trim() ?? "";
+        exp.Period = request.Period.Trim();
+        exp.PeriodEn = request.PeriodEn?.Trim() ?? "";
+        exp.ProjectName = request.ProjectName?.Trim() ?? "";
+        exp.ProjectNameEn = request.ProjectNameEn?.Trim() ?? "";
+        exp.Highlights = ContentRules.Clean(request.Highlights);
+        exp.HighlightsEn = ContentRules.Clean(request.HighlightsEn);
+        exp.TechStack = ContentRules.Clean(request.TechStack);
+    }
+
+    private static bool SameIds(List<Guid>? ids, IEnumerable<Guid> existing)
+        => ids != null && ids.Count == ids.Distinct().Count() && ids.ToHashSet().SetEquals(existing);
+
     // ─── PROJECTS ────────────────────────────────────────────
+    /// <summary>Same shape as content/projects.json: <c>[{ slug, year, url, image, ... copy: { en, vi } }]</c>.</summary>
     [HttpGet("projects")]
     public async Task<IActionResult> GetProjects()
     {
-        if (!_cache.TryGetValue(ProjectsCacheKey, out List<Project>? projects))
+        var json = await CachedAsync(ProjectsCacheKey, async () =>
         {
-            projects = await _db.Projects.OrderBy(p => p.Order).ToListAsync();
-            _cache.Set(ProjectsCacheKey, projects, TimeSpan.FromMinutes(30));
-        }
-
-        return Ok(projects ?? new List<Project>());
+            var rows = await _db.Projects.AsNoTracking().OrderBy(p => p.Order).ToListAsync();
+            var list = new JsonArray();
+            foreach (var row in rows)
+            {
+                var item = new JsonObject { ["slug"] = row.Slug };
+                foreach (var (key, value) in JsonNode.Parse(row.Content)!.AsObject()) item[key] = value?.DeepClone();
+                list.Add(item);
+            }
+            return list.ToJsonString();
+        });
+        return Content(json, "application/json; charset=utf-8");
     }
 
-    [HttpPost("projects")]
+    /// <summary>Edits the words, links and images of an existing project. New projects and slugs go through the repo (nginx needs them).</summary>
+    [HttpPut("projects/{slug}")]
     [Authorize]
-    public async Task<IActionResult> AddProject([FromBody] Project project)
+    public async Task<IActionResult> UpdateProject(string slug, [FromBody] ProjectRequest request)
     {
-        if (project.Id == Guid.Empty) project.Id = Guid.NewGuid();
-        if (string.IsNullOrWhiteSpace(project.Slug))
+        if (request.Validate() is { } error) return Invalid(error);
+        var project = await _db.Projects.FirstOrDefaultAsync(p => p.Slug == slug);
+        if (project == null) return NotFound(new { error = "Không có dự án này." });
+
+        project.Content = JsonSerializer.Serialize(request.Cleaned(), ContentRules.Json);
+        project.UpdatedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        _cache.Remove(ProjectsCacheKey);
+        return Ok(new { success = true });
+    }
+
+    // ─── NOW ─────────────────────────────────────────────────
+    /// <summary><c>{ updated: "yyyy-MM-dd", items: [{ label, labelEn, text, textEn }] }</c>, same as portfolio.json "now".</summary>
+    [HttpGet("now")]
+    public async Task<IActionResult> GetNow()
+        => Ok(await CachedAsync(NowCacheKey, async () =>
         {
-            project.Slug = project.Title.ToLower().Replace(" ", "-") + "-" + Guid.NewGuid().ToString().Substring(0, 4);
-        }
+            var items = await _db.NowItems.AsNoTracking().OrderBy(n => n.Order).ToListAsync();
+            var updated = items.Count == 0 ? DateTime.UtcNow : items.Max(n => n.UpdatedAt);
+            return new
+            {
+                // Vietnam date: an edit at 06:00 on the 11th is "the 11th", not the UTC 10th
+                updated = updated.AddHours(7).ToString("yyyy-MM-dd"),
+                items = items.Select(n => new { label = n.Label, labelEn = n.LabelEn, text = n.Text, textEn = n.TextEn }),
+            } as object;
+        }));
 
-        _db.Projects.Add(project);
-        await _db.SaveChangesAsync();
-        _cache.Remove(ProjectsCacheKey);
-        return Ok(project);
-    }
-
-    [HttpPut("projects/{id}")]
+    [HttpPut("now")]
     [Authorize]
-    public async Task<IActionResult> UpdateProject(Guid id, [FromBody] Project updatedProject)
+    public async Task<IActionResult> UpdateNow([FromBody] NowRequest request)
     {
-        var project = await _db.Projects.FindAsync(id);
-        if (project == null) return NotFound();
+        if (request.Validate() is { } error) return Invalid(error);
 
-        project.Title = updatedProject.Title;
-        project.Slug = updatedProject.Slug;
-        project.Summary = updatedProject.Summary;
-        project.DescriptionMdx = updatedProject.DescriptionMdx;
-        project.CoverImageKey = updatedProject.CoverImageKey;
-        project.TechStack = updatedProject.TechStack;
-        project.DemoUrl = updatedProject.DemoUrl;
-        project.GithubUrl = updatedProject.GithubUrl;
-        project.Order = updatedProject.Order;
-        project.IsFeatured = updatedProject.IsFeatured;
-        project.Status = updatedProject.Status;
-
+        _db.NowItems.RemoveRange(await _db.NowItems.ToListAsync());
+        var now = DateTime.UtcNow;
+        _db.NowItems.AddRange(request.Items.Select((i, index) => new NowItem
+        {
+            Label = i.Label.Trim(),
+            LabelEn = i.LabelEn?.Trim() ?? "",
+            Text = i.Text.Trim(),
+            TextEn = i.TextEn?.Trim() ?? "",
+            Order = index + 1,
+            UpdatedAt = now,
+        }));
         await _db.SaveChangesAsync();
-        _cache.Remove(ProjectsCacheKey);
-        return Ok(project);
-    }
-
-    [HttpDelete("projects/{id}")]
-    [Authorize]
-    public async Task<IActionResult> DeleteProject(Guid id)
-    {
-        var project = await _db.Projects.FindAsync(id);
-        if (project == null) return NotFound();
-
-        _db.Projects.Remove(project);
-        await _db.SaveChangesAsync();
-        _cache.Remove(ProjectsCacheKey);
+        _cache.Remove(NowCacheKey);
         return Ok(new { success = true });
     }
 }

@@ -1,17 +1,12 @@
 import { m } from "framer-motion"
-import { useCachedContent } from '../../lib/contentCache';
 import { useT } from '../../lib/i18n';
 import portfolio from '../../content/portfolio.json';
 
-const DEFAULT_SKILLS = portfolio.skills;
+// Built into the page from the database (scripts/export-content.py), no request at runtime
+const skills = portfolio.skills;
 
 export function AboutSection() {
   const t = useT();
-  const skills = useCachedContent<any[]>(
-    'skills',
-    DEFAULT_SKILLS,
-    data => Array.isArray(data) && data.length > 0,
-  );
 
   // Group skills by category
   const categories = skills.reduce((acc, skill) => {

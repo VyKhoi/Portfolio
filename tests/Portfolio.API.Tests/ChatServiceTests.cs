@@ -174,6 +174,19 @@ public class ChatServiceTests
     }
 
     [Fact]
+    public async Task Admin_test_questions_skip_the_quota_and_are_marked()
+    {
+        var harness = new Harness(new ChatOptions { QuotaMessages = 1 });
+
+        await harness.Service.HandleAsync(new ChatTurn("test-session-1", "a question", "en", null, "9.9.9.9", IsTest: true), harness.Output, default);
+        await harness.Service.HandleAsync(new ChatTurn("test-session-1", "another question", "en", null, "9.9.9.9", IsTest: true), harness.Output, default);
+
+        Assert.Empty(harness.Output.Notices);
+        Assert.Equal(2, harness.Llm.Calls.Count);
+        Assert.True(Assert.Single(harness.Db.ChatSessions).IsTest);
+    }
+
+    [Fact]
     public async Task Model_gets_the_prompt_and_recent_history()
     {
         var harness = new Harness(new ChatOptions { HistoryMessages = 2 });

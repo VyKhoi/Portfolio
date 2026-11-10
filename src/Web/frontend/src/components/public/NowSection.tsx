@@ -1,9 +1,15 @@
 import { m } from "framer-motion"
-import { useT } from "../../lib/i18n"
+import { pick, useLang, useT } from "../../lib/i18n"
+import portfolio from "../../content/portfolio.json"
 
-// A few lines on what Khoi is up to; update the text and date in lib/i18n.ts
+const now = portfolio.now
+// "2026-11-10" → "11/2026"
+const updated = now.updated.slice(5, 7) + "/" + now.updated.slice(0, 4)
+
+// A few lines on what Khoi is up to: edited in the admin console (Now), built into the page
 export function NowSection() {
   const t = useT()
+  const lang = useLang()
 
   return (
     <section id="now" className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 bg-obsidian overflow-hidden border-t border-border">
@@ -16,13 +22,13 @@ export function NowSection() {
             </h2>
           </div>
           <p className="font-mono text-xs font-bold tracking-widest text-text-muted uppercase pl-11 sm:pl-[5.5rem]">
-            {t.now.updated}
+            {t.now.updated} {updated}
           </p>
         </div>
 
         <div className="lg:col-span-8 grid sm:grid-cols-2 gap-px bg-border border border-border">
-          {t.now.items.map((item, idx) => (
-            <div key={item.label} className="bg-obsidian p-6 sm:p-8 hover:bg-surface transition-colors">
+          {now.items.map((item, idx) => (
+            <div key={idx} className="bg-obsidian p-6 sm:p-8 hover:bg-surface transition-colors">
               <m.div
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -30,9 +36,9 @@ export function NowSection() {
                 transition={{ delay: idx * 0.08 }}
               >
                 <div className="mb-3 font-mono text-xs font-bold tracking-widest text-primary uppercase">
-                  {`${String(idx + 1).padStart(2, "0")} // ${item.label}`}
+                  {`${String(idx + 1).padStart(2, "0")} // ${pick(item, "label", lang)}`}
                 </div>
-                <p className="font-body text-base sm:text-lg leading-relaxed text-text-main">{item.text}</p>
+                <p className="font-body text-base sm:text-lg leading-relaxed text-text-main">{pick(item, "text", lang)}</p>
               </m.div>
             </div>
           ))}

@@ -44,7 +44,13 @@
         "Keeps working offline and merges the changes when the connection is back.",
         "Go backend and plain JavaScript frontend."
       ],
-      "techStack": ["Go", "JavaScript", "SSE", "Docker", "Linux"],
+      "techStack": [
+        "Go",
+        "JavaScript",
+        "SSE",
+        "Docker",
+        "Linux"
+      ],
       "order": 2
     },
     {
@@ -70,7 +76,15 @@
         "Integrated CardPointe payments; automated payroll, SMS and commission jobs with Hangfire.",
         "Synced dashboards, kiosks and mobile apps in real time with SignalR."
       ],
-      "techStack": [".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI"],
+      "techStack": [
+        ".NET 8",
+        "C#",
+        "EF Core",
+        "Dapper",
+        "SignalR",
+        "Hangfire",
+        "MAUI"
+      ],
       "order": 3
     },
     {
@@ -92,21 +106,87 @@
         "Supported API development and service integration on monolith and microservices systems.",
         "Helped refactor legacy server code and speed up SQL queries."
       ],
-      "techStack": ["ASP.NET Core", "SQL Server", "Microservices"],
+      "techStack": [
+        "ASP.NET Core",
+        "SQL Server",
+        "Microservices"
+      ],
       "order": 4
     }
   ],
   "skills": [
-    { "category": "Backend & Core", "name": ".NET 8 / 9" },
-    { "category": "Backend & Core", "name": "C#" },
-    { "category": "Backend & Core", "name": "Concurrency" },
-    { "category": "Backend & Core", "name": "REST APIs" },
-    { "category": "Backend & Core", "name": "SignalR" },
-    { "category": "Architecture & Sec", "name": "Multi-tenant & RLS" },
-    { "category": "Architecture & Sec", "name": "Clean Architecture" },
-    { "category": "Databases", "name": "SQL Server & PostgreSQL" },
-    { "category": "Databases", "name": "EF Core & Dapper" },
-    { "category": "Frontend", "name": "React & TypeScript" },
-    { "category": "DevOps & Cloud", "name": "Docker & Linux" }
-  ]
+    {
+      "category": "Backend & Core",
+      "name": ".NET 8 / 9"
+    },
+    {
+      "category": "Backend & Core",
+      "name": "C#"
+    },
+    {
+      "category": "Backend & Core",
+      "name": "Concurrency"
+    },
+    {
+      "category": "Backend & Core",
+      "name": "REST APIs"
+    },
+    {
+      "category": "Backend & Core",
+      "name": "SignalR"
+    },
+    {
+      "category": "Architecture & Sec",
+      "name": "Multi-tenant & RLS"
+    },
+    {
+      "category": "Architecture & Sec",
+      "name": "Clean Architecture"
+    },
+    {
+      "category": "Databases",
+      "name": "SQL Server & PostgreSQL"
+    },
+    {
+      "category": "Databases",
+      "name": "EF Core & Dapper"
+    },
+    {
+      "category": "Frontend",
+      "name": "React & TypeScript"
+    },
+    {
+      "category": "DevOps & Cloud",
+      "name": "Docker & Linux"
+    }
+  ],
+  "now": {
+    "updated": "2026-11-10",
+    "items": [
+      {
+        "label": "Công việc",
+        "labelEn": "Work",
+        "text": "Làm backend .NET ở công việc chính.",
+        "textEn": "Building .NET backends at my day job."
+      },
+      {
+        "label": "Buổi tối",
+        "labelEn": "Evenings",
+        "text": "Chăm chút ChickenNote và chính trang này.",
+        "textEn": "Polishing ChickenNote and this site."
+      },
+      {
+        "label": "Home lab",
+        "labelEn": "Home lab",
+        "text": "Chạy mọi dự án của mình trên một chiếc laptop cũ ở nhà.",
+        "textEn": "Running all my projects on an old laptop at home."
+      },
+      {
+        "label": "Đang học",
+        "labelEn": "Learning",
+        "text": "Cho model AI nhỏ chạy mượt trên máy cấu hình thấp.",
+        "textEn": "Getting small AI models to run well on modest hardware."
+      }
+    ]
+  }
 }

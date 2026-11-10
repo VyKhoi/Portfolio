@@ -1,0 +1,42 @@
+name: Publish content
+
+# Content is edited in the admin console (database). This rebuilds the static pages when the database holds
+# something they do not show yet, so Google and first-time visitors see the edit within half an hour.
+# Runs on the self-hosted runner at home; push / schedule / manual only, never pull requests (public repo).
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Rebuild even if nothing changed"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-server
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        with:
+          # Keep the .env the last deploy wrote (compose reads it); tracked files are still reset
+          clean: false
+
+      - name: Publish if the content changed
+        env:
+          FORCE: ${{ inputs.force && '1' || '0' }}
+        run: |
+          bash scripts/publish-content.sh
+
+      - name: Cleanup Docker leftovers
+        if: always()
+        run: |
+          docker image prune -f

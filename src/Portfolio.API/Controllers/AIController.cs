@@ -34,7 +34,9 @@ public class AIController : ControllerBase
         Response.Headers.CacheControl = "no-cache";
 
         var clientIp = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-        var turn = new ChatTurn(request.SessionId, request.Message, request.Lang, request.WebsiteTrap, clientIp);
+        // The admin console's "Hỏi thử" sends its token and this header; anyone else is a normal visitor
+        var isTest = User.Identity?.IsAuthenticated == true && Request.Headers["X-Admin-Test"] == "1";
+        var turn = new ChatTurn(request.SessionId, request.Message, request.Lang, request.WebsiteTrap, clientIp, isTest);
         await _chat.HandleAsync(turn, new SseChatOutput(Response), cancellationToken);
 
         if (!cancellationToken.IsCancellationRequested)
@@ -88,6 +90,7 @@ public class AIController : ControllerBase
         var since = DateTime.UtcNow.AddDays(-7);
         var stats = await _db.ChatMessages.AsNoTracking()
             .Where(m => m.Role == "assistant" && m.Source != null && m.CreatedAt >= since)
+            .Where(m => _db.ChatSessions.Any(c => c.SessionId == m.SessionId && !c.IsTest))
             .GroupBy(m => m.Source)
             .Select(g => new
             {

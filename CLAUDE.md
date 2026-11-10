@@ -48,9 +48,9 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 ## Song ngữ và nội dung
 - `/` tiếng Anh (mặc định), `/vi` tiếng Việt, `/en` chuyển 301 về `/`. Chữ cố định ở `src/Web/frontend/src/lib/i18n.ts`; dữ liệu DB có cột `...En` (profile: `TitleEn`, `BioEn`; experience: `RoleEn`, `CompanyEn`, `PeriodEn`, `ProjectNameEn`, `HighlightsEn`), API trả cả hai, frontend chọn bằng `pick()`. Sửa được trong admin.
 - **Đổi dữ liệu bằng script:** thêm file mới đánh số trong `database/updates/` (`0002-ten.sql`), push. CI chạy `scripts/apply-db-updates.sh` sau khi backend healthy: mỗi file chạy đúng 1 lần trong 1 transaction, ghi vào bảng `applied_scripts`, rồi restart backend để xoá cache. Không sửa file đã chạy (bị chặn), không để secret trong đó (repo public).
-- **Đổi nội dung hiển thị thì sửa cả `src/Web/frontend/src/content/portfolio.json`**: file này là nội dung dự phòng và là HTML tĩnh cho Google. CI so API với file (`scripts/check-content.py`) và cảnh báo nếu lệch.
+- **Một nguồn nội dung = DB, sửa trong admin** (`/dashboard`): hồ sơ, kinh nghiệm, kỹ năng, dự án, Now, fact Sigma Cat. Trang public không gọi API nội dung lúc chạy: lúc build, `scripts/export-content.py` lấy từ API ghi ra `src/Web/frontend/src/content/{portfolio,projects}.json` rồi prerender. `scripts/publish-content.sh` chạy cuối mỗi deploy và mỗi 30 phút (`.github/workflows/publish.yml`): API khác `/content-snapshot.json` của bản đang chạy → build lại riêng container frontend. JSON trong repo chỉ là dự phòng cho máy dev / lần deploy đầu (export lỗi thì dùng nó).
 - Viết mộc mạc, không buzzword; Masan chỉ nêu ngắn trong mục kinh nghiệm, không đưa lên bio hay SEO.
-- Mục **Projects** + trang `/projects/<slug>` chỉ cho sản phẩm riêng của Khôi (ChickenNote, dangvykhoi.com), nội dung ở `src/Web/frontend/src/content/projects.ts` (không dùng bảng `Projects` trong DB). Kể ý tưởng, không khoe công nghệ; ChickenNote ghi thẳng là vibe code. Mục **Now** sửa ở `lib/i18n.ts`.
+- Mục **Projects** + trang `/projects/<slug>` chỉ cho sản phẩm riêng của Khôi (ChickenNote, dangvykhoi.com). Kể ý tưởng, không khoe công nghệ; ChickenNote ghi thẳng là vibe code. Chữ sửa trong admin; thêm dự án / đổi slug / đổi ảnh thì qua repo (nginx location + `public/projects/` + dòng DB).
 
 ## Chạy & kiểm tra
 ```bash

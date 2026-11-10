@@ -60,12 +60,15 @@ public class EmailService
 
         // No visitor data in the email: Gmail's servers are abroad, and sending personal data there would need a
         // cross-border transfer assessment (Personal Data Protection Law 91/2025). The message is read in the admin inbox.
+        // Same look as the site: black, one orange accent, square corners. Time shown in Vietnam time.
+        var receivedVn = contact.CreatedAt.AddHours(7);
         var htmlTemplate = $@"
-        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;'>
-            <div style='background-color: #0A0A0C; color: #DEFF9A; padding: 20px; text-align: center;'>
-                <h2 style='margin: 0;'>📬 Có tin liên hệ mới</h2>
-                <p style='margin: 8px 0 0 0; color: #A1A1AA;'>Đọc và trả lời trong <a href='https://dangvykhoi.com/dashboard/inbox' style='color: #00E5FF;'>dangvykhoi.com/dashboard/inbox</a></p>
-                <p style='margin: 8px 0 0 0; font-size: 12px; color: #71717A;'>Nhận lúc {contact.CreatedAt:yyyy-MM-dd HH:mm} UTC</p>
+        <div style='font-family: Arial, Helvetica, sans-serif; max-width: 560px; margin: 0 auto; background-color: #050505; border: 1px solid #1f1f22; border-top: 3px solid #FF5C00;'>
+            <div style='padding: 28px 28px 24px 28px;'>
+                <p style='margin: 0 0 12px 0; font-family: Consolas, monospace; font-size: 12px; letter-spacing: 2px; color: #FF5C00;'>DANGVYKHOI.COM // HỘP THƯ</p>
+                <h2 style='margin: 0 0 12px 0; font-size: 22px; color: #FFFFFF;'>Có tin liên hệ mới</h2>
+                <p style='margin: 0 0 24px 0; font-size: 14px; line-height: 1.6; color: #8E8E93;'>Nhận lúc {receivedVn:HH:mm dd/MM/yyyy}. Nội dung chỉ xem trong trang quản trị.</p>
+                <a href='https://dangvykhoi.com/dashboard/inbox' style='display: inline-block; background-color: #FF5C00; color: #000000; padding: 12px 20px; font-family: Consolas, monospace; font-size: 13px; font-weight: bold; letter-spacing: 1px; text-decoration: none;'>MỞ HỘP THƯ →</a>
             </div>
         </div>";
 

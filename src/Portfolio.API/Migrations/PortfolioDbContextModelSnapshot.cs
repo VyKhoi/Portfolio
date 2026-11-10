@@ -106,6 +106,9 @@ namespace Portfolio.API.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("IsTest")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("LastMessageAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -219,6 +222,39 @@ namespace Portfolio.API.Migrations
                     b.ToTable("Experiences");
                 });
 
+            modelBuilder.Entity("Portfolio.API.Entities.NowItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LabelEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TextEn")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NowItems");
+                });
+
             modelBuilder.Entity("Portfolio.API.Entities.Profile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -272,25 +308,9 @@ namespace Portfolio.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CoverImageKey")
+                    b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("DemoUrl")
-                        .HasColumnType("text");
-
-                    b.Property<string>("DescriptionMdx")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("GithubUrl")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsFeatured")
-                        .HasColumnType("boolean");
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("Order")
                         .HasColumnType("integer");
@@ -299,24 +319,8 @@ namespace Portfolio.API.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Summary")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TechStack")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ViewCount")
-                        .HasColumnType("integer");
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 

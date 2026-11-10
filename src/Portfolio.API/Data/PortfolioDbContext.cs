@@ -14,6 +14,7 @@ public class PortfolioDbContext : DbContext
     public DbSet<Skill> Skills => Set<Skill>();
     public DbSet<Experience> Experiences => Set<Experience>();
     public DbSet<Project> Projects => Set<Project>();
+    public DbSet<NowItem> NowItems => Set<NowItem>();
     public DbSet<ContactMessage> ContactMessages => Set<ContactMessage>();
     public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
@@ -48,6 +49,12 @@ public class PortfolioDbContext : DbContext
         {
             entity.HasKey(p => p.Id);
             entity.HasIndex(p => p.Slug).IsUnique();
+            entity.Property(p => p.Content).HasColumnType("jsonb");
+        });
+
+        modelBuilder.Entity<NowItem>(entity =>
+        {
+            entity.HasKey(n => n.Id);
         });
 
         modelBuilder.Entity<ContactMessage>(entity =>
