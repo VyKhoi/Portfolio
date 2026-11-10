@@ -11,7 +11,7 @@ const SITE = 'https://dangvykhoi.com';
 const PAGES = { en: { path: '/', url: `${SITE}/` }, vi: { path: '/vi', url: `${SITE}/vi` } };
 
 const seo = JSON.parse(readFileSync(join(root, 'src/content/seo.json'), 'utf8'));
-const { render, PRIVACY, PRIVACY_PATH, PROJECTS, projectPath } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
+const { render, renderNotFound, PRIVACY, PRIVACY_PATH, PROJECTS, projectPath } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 
 const escapeAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -187,31 +187,21 @@ const appShell =replaceBetween(
   `<title>Đặng Vỹ Khôi</title>\n    <meta name="robots" content="noindex, nofollow" />`,
 );
 
-const notFound = `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="robots" content="noindex" />
-<title>404 | Đặng Vỹ Khôi</title>
-<link rel="icon" href="/favicon.ico?v=2" />
-<style>
-  html, body { height: 100%; margin: 0; background: #050505; color: #fff; font-family: system-ui, sans-serif; }
-  main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; box-sizing: border-box; text-align: center; }
-  h1 { font-size: 72px; margin: 0; color: #FF5C00; }
-  p { margin: 0; color: #a1a1aa; line-height: 1.6; }
-  a { color: #FF5C00; }
-</style>
-</head>
-<body>
-<main>
-  <h1>404</h1>
-  <p>This page does not exist. / <span lang="vi">Không tìm thấy trang này.</span></p>
-  <p><a href="/">Back to home</a> · <a href="/vi" lang="vi">Về trang chủ</a></p>
-</main>
-</body>
-</html>
-`;
+// 404: same look as the site, but static. Without the app bundle the router cannot redirect
+// the unknown URL away, so the visitor actually sees this page.
+function notFoundPage() {
+  const headHtml = [
+    `<title>404 | Đặng Vỹ Khôi</title>`,
+    `<meta name="robots" content="noindex" />`,
+    ...fonts.map((f) => `<link rel="preload" as="font" type="font/woff2" href="/assets/${f}" crossorigin />`),
+  ].join('\n    ');
+  let html = template.replace('<html lang="vi">', '<html lang="en">');
+  html = replaceBetween(html, 'head', headHtml);
+  html = replaceBetween(html, 'app', renderNotFound());
+  html = html.replace(/<script type="module"[^>]*><\/script>\s*/g, '').replace(/<link rel="modulepreload"[^>]*>\s*/g, '');
+  if (/<script type="module"/.test(html)) throw new Error('404 page still loads the app bundle');
+  return inlineCss(html);
+}
 
 writeFileSync(join(dist, 'app.html'), appShell);
 writeFileSync(join(dist, 'index.html'), page('en'));
@@ -229,6 +219,6 @@ for (const project of PROJECTS) {
     writeFileSync(join(dir, 'index.html'), projectPage(project, lang));
   }
 }
-writeFileSync(join(dist, '404.html'), notFound);
+writeFileSync(join(dist, '404.html'), notFoundPage());
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true });
 console.log(`Prerendered /, /vi, /privacy, /vi/privacy, ${PROJECTS.length * 2} project pages, app shell and 404`);

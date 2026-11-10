@@ -17,6 +17,7 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 | `content/portfolio.json`, `content/seo.json` | Nội dung dự phòng (vi + en), title/description từng ngôn ngữ |
 | `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định (cả mục Now: sửa chữ + ngày cập nhật ở `now`), `pick(item, key, lang)` chọn cột `...En`, `otherLangPath` cho nút EN/VI |
 | `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsSection → ProjectsBento (Experience) → NowSection → Contact → Footer |
+| `pages/public/NotFound.tsx` | Trang 404 cùng giao diện site. Prerender thành `dist/404.html` **không kèm bundle JS** (nếu có, router sẽ đưa URL lạ về trang chủ): chỉ dùng `<a>` thường, không hook |
 | `pages/public/ProjectPage.tsx` | Trang chi tiết project: tiêu đề, Năm / Trạng thái / Phần tôi làm, ảnh, 4 mục (vấn đề, ý tưởng, cách làm, điều rút ra), dự án tiếp theo + liên hệ |
 | `components/public/`, `components/admin/` | Xem hai mục cuối file này |
 | `components/ui/` | Badge, Button, Card, Input kiểu shadcn |
