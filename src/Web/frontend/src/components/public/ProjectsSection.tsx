@@ -42,7 +42,9 @@ export function ProjectsSection() {
                 >
                   <div className="relative aspect-[16/10] overflow-hidden border-b border-border bg-surface">
                     <img
-                      src={project.image[lang]}
+                      src={project.thumb[lang]}
+                      srcSet={`${project.thumb[lang]} 800w, ${project.image[lang]} 1200w`}
+                      sizes="(min-width: 1152px) 575px, (min-width: 768px) 50vw, 100vw"
                       alt={copy.imageAlt}
                       width={1200}
                       height={750}

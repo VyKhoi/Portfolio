@@ -142,10 +142,36 @@ function projectPage(project, lang) {
   const image = `${SITE}${project.ogImage[lang]}`;
   const breadcrumb = JSON.stringify({
     '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Đặng Vỹ Khôi', item: PAGES[lang].url },
-      { '@type': 'ListItem', position: 2, name: c.name, item: url(lang) },
+    '@graph': [
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Đặng Vỹ Khôi', item: PAGES[lang].url },
+          { '@type': 'ListItem', position: 2, name: c.name, item: url(lang) },
+        ],
+      },
+      {
+        '@type': 'WebPage',
+        '@id': `${url(lang)}#webpage`,
+        url: url(lang),
+        name: c.seoTitle,
+        description: c.seoDescription,
+        inLanguage: seo[lang].inLanguage,
+        isPartOf: { '@id': `${SITE}/#website` },
+        primaryImageOfPage: `${SITE}${project.image[lang].split('?')[0]}`,
+        about: { '@id': `${project.url.en}#product` },
+      },
+      {
+        '@type': project.schemaType,
+        '@id': `${project.url.en}#product`,
+        name: c.name,
+        url: project.url[lang],
+        description: c.summary,
+        author: { '@type': 'Person', '@id': `${SITE}/#person`, name: 'Đặng Vỹ Khôi', url: SITE },
+        ...(project.schemaType === 'WebApplication'
+          ? { applicationCategory: 'ProductivityApplication', operatingSystem: 'Web', isAccessibleForFree: true }
+          : {}),
+      },
     ],
   }).replace(/</g, '\\u003c');
   const headHtml = [
@@ -220,5 +246,28 @@ for (const project of PROJECTS) {
   }
 }
 writeFileSync(join(dist, '404.html'), notFoundPage());
+
+// Sitemap from the same page list, so a new page can never be forgotten; lastmod = this build (deploys only happen on changes)
+const today = new Date().toISOString().slice(0, 10);
+const pairs = [
+  { en: '/', vi: '/vi' },
+  { en: PRIVACY_PATH.en, vi: PRIVACY_PATH.vi },
+  ...PROJECTS.map((p) => ({ en: projectPath(p.slug, 'en'), vi: projectPath(p.slug, 'vi') })),
+];
+const sitemapUrl = (path, pair) => `  <url>
+    <loc>${SITE}${path}</loc>
+    <lastmod>${today}</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="${SITE}${pair.en}" />
+    <xhtml:link rel="alternate" hreflang="vi" href="${SITE}${pair.vi}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${pair.en}" />
+  </url>`;
+writeFileSync(
+  join(dist, 'sitemap.xml'),
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${pairs.flatMap((pair) => [sitemapUrl(pair.en, pair), sitemapUrl(pair.vi, pair)]).join('\n')}
+</urlset>
+`,
+);
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true });
-console.log(`Prerendered /, /vi, /privacy, /vi/privacy, ${PROJECTS.length * 2} project pages, app shell and 404`);
+console.log(`Prerendered /, /vi, /privacy, /vi/privacy, ${PROJECTS.length * 2} project pages, app shell, 404 and sitemap (${pairs.length * 2} urls)`);

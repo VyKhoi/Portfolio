@@ -1,6 +1,6 @@
 // Personal products shown in the Projects section and on /projects/<slug> (+ /vi/projects/<slug>).
 // Only things Khoi builds and runs himself. Tell the idea, not the tech stack.
-// Adding a slug: also add it to nginx.conf (projects location) and public/sitemap.xml.
+// Adding a slug: also add it to nginx.conf (projects location). The sitemap is built from this list.
 import type { Lang } from '../lib/i18n'
 
 export interface ProjectSection {
@@ -26,8 +26,12 @@ export interface Project {
   slug: string
   year: string
   url: Record<Lang, string>
+  // Screenshots: 1200px for the project page, 800px for the home cards. Bump ?v= when a file changes (served with a 30-day cache)
   image: Record<Lang, string>
+  thumb: Record<Lang, string>
   ogImage: Record<Lang, string>
+  // schema.org type of the product itself, for the project page JSON-LD
+  schemaType: 'WebApplication' | 'WebSite'
   copy: Record<Lang, ProjectCopy>
 }
 
@@ -36,7 +40,9 @@ export const PROJECTS: Project[] = [
     slug: 'chickennote',
     year: '2026',
     url: { en: 'https://note.dangvykhoi.com/en', vi: 'https://note.dangvykhoi.com/' },
-    image: { en: '/projects/chickennote-en.webp', vi: '/projects/chickennote-vi.webp' },
+    image: { en: '/projects/chickennote-en.webp?v=1', vi: '/projects/chickennote-vi.webp?v=1' },
+    thumb: { en: '/projects/chickennote-en-800.webp?v=1', vi: '/projects/chickennote-vi-800.webp?v=1' },
+    schemaType: 'WebApplication',
     ogImage: { en: '/projects/chickennote-en-og.jpg', vi: '/projects/chickennote-vi-og.jpg' },
     copy: {
       en: {
@@ -125,7 +131,9 @@ export const PROJECTS: Project[] = [
     slug: 'dangvykhoi-com',
     year: '2026',
     url: { en: 'https://dangvykhoi.com/', vi: 'https://dangvykhoi.com/vi' },
-    image: { en: '/projects/dangvykhoi-com-en.webp', vi: '/projects/dangvykhoi-com-vi.webp' },
+    image: { en: '/projects/dangvykhoi-com-en.webp?v=1', vi: '/projects/dangvykhoi-com-vi.webp?v=1' },
+    thumb: { en: '/projects/dangvykhoi-com-en-800.webp?v=1', vi: '/projects/dangvykhoi-com-vi-800.webp?v=1' },
+    schemaType: 'WebSite',
     ogImage: { en: '/projects/dangvykhoi-com-en-og.jpg', vi: '/projects/dangvykhoi-com-vi-og.jpg' },
     copy: {
       en: {
