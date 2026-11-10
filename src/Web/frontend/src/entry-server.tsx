@@ -14,3 +14,4 @@ export function render(url: string) {
 
 // Read by scripts/prerender.mjs for the privacy pages' <head>
 export { PRIVACY, PRIVACY_PATH } from './content/privacy'
+export { PROJECTS, projectPath } from './content/projects'

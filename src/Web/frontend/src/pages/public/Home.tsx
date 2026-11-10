@@ -2,6 +2,8 @@ import { useEffect } from "react"
 import { Navbar } from "../../components/public/Navbar"
 import { HeroSection } from "../../components/public/HeroSection"
 import { AboutSection } from "../../components/public/AboutSection"
+import { ProjectsSection } from "../../components/public/ProjectsSection"
+import { NowSection } from "../../components/public/NowSection"
 import { ProjectsBento } from "../../components/public/ProjectsBento"
 import { ContactSection } from "../../components/public/ContactSection"
 import { Footer } from "../../components/public/Footer"
@@ -26,7 +28,9 @@ export function Home() {
       <main id="main">
         <HeroSection />
         <AboutSection />
+        <ProjectsSection />
         <ProjectsBento />
+        <NowSection />
         <ContactSection />
       </main>
       <Footer />

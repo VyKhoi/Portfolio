@@ -1,5 +1,6 @@
 // Turns the Vite build into real HTML per language:
-//   dist/index.html (en), dist/vi/index.html (vi), dist/privacy/index.html + dist/vi/privacy/index.html, dist/app.html (login + admin shell), dist/404.html
+//   dist/index.html (en), dist/vi/index.html (vi), dist/privacy/index.html + dist/vi/privacy/index.html,
+//   dist/projects/<slug>/index.html + dist/vi/projects/<slug>/index.html, dist/app.html (login + admin shell), dist/404.html
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -10,7 +11,7 @@ const SITE = 'https://dangvykhoi.com';
 const PAGES = { en: { path: '/', url: `${SITE}/` }, vi: { path: '/vi', url: `${SITE}/vi` } };
 
 const seo = JSON.parse(readFileSync(join(root, 'src/content/seo.json'), 'utf8'));
-const { render, PRIVACY, PRIVACY_PATH } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
+const { render, PRIVACY, PRIVACY_PATH, PROJECTS, projectPath } = await import(pathToFileURL(join(root, 'dist-ssr/entry-server.js')).href);
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 
 const escapeAttr = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -134,7 +135,53 @@ function privacyPage(lang) {
   return inlineCss(html).replace('<div id="root">', '<div id="root" data-prerendered="true">');
 }
 
-const appShell = replaceBetween(
+// Project pages: own title, description, share image and breadcrumb
+function projectPage(project, lang) {
+  const c = project.copy[lang];
+  const url = (l) => `${SITE}${projectPath(project.slug, l)}`;
+  const image = `${SITE}${project.ogImage[lang]}`;
+  const breadcrumb = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Đặng Vỹ Khôi', item: PAGES[lang].url },
+      { '@type': 'ListItem', position: 2, name: c.name, item: url(lang) },
+    ],
+  }).replace(/</g, '\\u003c');
+  const headHtml = [
+    `<title>${escapeAttr(c.seoTitle)}</title>`,
+    `<meta name="description" content="${escapeAttr(c.seoDescription)}" />`,
+    `<meta name="author" content="Đặng Vỹ Khôi" />`,
+    `<link rel="canonical" href="${url(lang)}" />`,
+    `<link rel="alternate" hreflang="vi" href="${url('vi')}" />`,
+    `<link rel="alternate" hreflang="en" href="${url('en')}" />`,
+    `<link rel="alternate" hreflang="x-default" href="${url('en')}" />`,
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:site_name" content="Đặng Vỹ Khôi" />`,
+    `<meta property="og:url" content="${url(lang)}" />`,
+    `<meta property="og:title" content="${escapeAttr(c.seoTitle)}" />`,
+    `<meta property="og:description" content="${escapeAttr(c.seoDescription)}" />`,
+    `<meta property="og:image" content="${image}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${escapeAttr(c.imageAlt)}" />`,
+    `<meta property="og:locale" content="${seo[lang].locale}" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:title" content="${escapeAttr(c.seoTitle)}" />`,
+    `<meta name="twitter:description" content="${escapeAttr(c.seoDescription)}" />`,
+    `<meta name="twitter:image" content="${image}" />`,
+    `<link rel="preload" as="image" type="image/webp" href="${project.image[lang]}" fetchpriority="high" />`,
+    ...fonts.map((f) => `<link rel="preload" as="font" type="font/woff2" href="/assets/${f}" crossorigin />`),
+    `<script type="application/ld+json">${breadcrumb}</script>`,
+    `<noscript><style>#root [style*="opacity"] { opacity: 1 !important; transform: none !important; }</style></noscript>`,
+  ].join('\n    ');
+  let html = template.replace('<html lang="vi">', `<html lang="${lang}">`);
+  html = replaceBetween(html, 'head', headHtml);
+  html = replaceBetween(html, 'app', render(projectPath(project.slug, lang)));
+  return inlineCss(html).replace('<div id="root">', '<div id="root" data-prerendered="true">');
+}
+
+const appShell =replaceBetween(
   template,
   'head',
   `<title>Đặng Vỹ Khôi</title>\n    <meta name="robots" content="noindex, nofollow" />`,
@@ -175,6 +222,13 @@ for (const lang of ['en', 'vi']) {
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), privacyPage(lang));
 }
+for (const project of PROJECTS) {
+  for (const lang of ['en', 'vi']) {
+    const dir = join(dist, projectPath(project.slug, lang).slice(1));
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'index.html'), projectPage(project, lang));
+  }
+}
 writeFileSync(join(dist, '404.html'), notFound);
 rmSync(join(root, 'dist-ssr'), { recursive: true, force: true });
-console.log('Prerendered /, /vi, /privacy, /vi/privacy, app shell and 404');
+console.log(`Prerendered /, /vi, /privacy, /vi/privacy, ${PROJECTS.length * 2} project pages, app shell and 404`);

@@ -2,14 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://dangvykhoi.com/</loc>
-    <lastmod>2026-11-07</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/" />
     <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/" />
   </url>
   <url>
     <loc>https://dangvykhoi.com/vi</loc>
-    <lastmod>2026-11-07</lastmod>
+    <lastmod>2026-11-10</lastmod>
     <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/" />
     <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/" />
@@ -27,5 +27,33 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/privacy" />
     <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/privacy" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/privacy" />
+  </url>
+  <url>
+    <loc>https://dangvykhoi.com/projects/chickennote</loc>
+    <lastmod>2026-11-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/projects/chickennote" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/projects/chickennote" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/projects/chickennote" />
+  </url>
+  <url>
+    <loc>https://dangvykhoi.com/vi/projects/chickennote</loc>
+    <lastmod>2026-11-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/projects/chickennote" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/projects/chickennote" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/projects/chickennote" />
+  </url>
+  <url>
+    <loc>https://dangvykhoi.com/projects/dangvykhoi-com</loc>
+    <lastmod>2026-11-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/projects/dangvykhoi-com" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/projects/dangvykhoi-com" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/projects/dangvykhoi-com" />
+  </url>
+  <url>
+    <loc>https://dangvykhoi.com/vi/projects/dangvykhoi-com</loc>
+    <lastmod>2026-11-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://dangvykhoi.com/projects/dangvykhoi-com" />
+    <xhtml:link rel="alternate" hreflang="vi" href="https://dangvykhoi.com/vi/projects/dangvykhoi-com" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://dangvykhoi.com/projects/dangvykhoi-com" />
   </url>
 </urlset>

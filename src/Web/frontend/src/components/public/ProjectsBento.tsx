@@ -1,13 +1,16 @@
+import { Link } from "react-router-dom"
 import { Badge } from "../ui/Badge"
 import { m } from "framer-motion"
 import { useCachedContent } from '../../lib/contentCache';
 import { pick, useLang, useT } from '../../lib/i18n';
 import portfolio from '../../content/portfolio.json';
+import { projectPath } from '../../content/projects';
 
 const DEFAULT_EXPERIENCES = portfolio.experiences;
 
-const PROJECT_LINKS: Record<string, string> = {
-  ChickenNote: "https://note.dangvykhoi.com/"
+// Experience rows that have their own project page
+const PROJECT_PAGES: Record<string, string> = {
+  ChickenNote: "chickennote"
 };
 
 export function ProjectsBento() {
@@ -77,10 +80,10 @@ export function ProjectsBento() {
 
                       {projectName && (
                         <h4 className="text-base sm:text-xl font-bold font-heading mb-5 sm:mb-6 uppercase tracking-tighter text-primary">
-                          {PROJECT_LINKS[exp.projectName] ? (
-                            <a href={PROJECT_LINKS[exp.projectName]} target="_blank" rel="noopener" className="hover:underline">
+                          {PROJECT_PAGES[exp.projectName] ? (
+                            <Link to={projectPath(PROJECT_PAGES[exp.projectName], lang)} className="hover:underline">
                               [ {t.projectPrefix}: {projectName} → ]
-                            </a>
+                            </Link>
                           ) : (
                             <>[ {t.projectPrefix}: {projectName} ]</>
                           )}

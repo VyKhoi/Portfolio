@@ -1,8 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { LazyMotion, MotionConfig, domAnimation } from 'framer-motion'
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect, useRef, useState } from 'react'
 import { Home } from './pages/public/Home'
 import { Privacy } from './pages/public/Privacy'
+import { ProjectPage } from './pages/public/ProjectPage'
 
 // Login and admin stay out of the public bundle
 const AdminEntry = lazy(() => import('./components/admin/AdminEntry').then(m => ({ default: m.AdminEntry })))
@@ -33,6 +34,25 @@ function DeferredChatbot() {
   )
 }
 
+// In-app navigation: new page starts at the top; a link with #section scrolls to it
+function ScrollManager() {
+  const { pathname, hash } = useLocation()
+  const previous = useRef<string | null>(null)
+
+  useEffect(() => {
+    const from = previous.current
+    previous.current = pathname
+    if (from === null) return
+    // Jump straight there when the page changed; glide only within the same page
+    const behavior: ScrollBehavior = from === pathname ? 'smooth' : 'instant'
+    const target = hash ? document.getElementById(hash.slice(1)) : null
+    if (target) target.scrollIntoView({ behavior })
+    else if (from !== pathname) window.scrollTo({ top: 0, behavior })
+  }, [pathname, hash])
+
+  return null
+}
+
 export function AppRoutes() {
   return (
     <LazyMotion features={domAnimation} strict>
@@ -42,6 +62,8 @@ export function AppRoutes() {
           <Route path="/vi" element={<Home />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/vi/privacy" element={<Privacy />} />
+          <Route path="/projects/:slug" element={<ProjectPage />} />
+          <Route path="/vi/projects/:slug" element={<ProjectPage />} />
           <Route path="/login" element={
             <Suspense fallback={adminFallback}>
               <Login />
@@ -54,6 +76,7 @@ export function AppRoutes() {
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <ScrollManager />
         <DeferredChatbot />
       </MotionConfig>
     </LazyMotion>

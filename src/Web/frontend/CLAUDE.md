@@ -10,12 +10,14 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 | Đường dẫn | Việc |
 | :--- | :--- |
 | `main.tsx` | Trang đã prerender (`data-prerendered`) thì `hydrateRoot`, còn lại (app shell) `createRoot`; prefetch content; bắt `vite:preloadError`; tải `oneko.js` lúc rảnh, chỉ khi có chuột |
-| `App.tsx` | `AppRoutes`: `/`, `/vi` (Home), `/privacy`, `/vi/privacy` (Privacy), `/login`, `/dashboard/*` (lazy `AdminEntry`), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
-| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/` (en), `/vi`, `/privacy`, `/vi/privacy` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
+| `App.tsx` | `AppRoutes`: `/`, `/vi` (Home), `/privacy`, `/vi/privacy` (Privacy), `/projects/:slug`, `/vi/projects/:slug` (ProjectPage), `/login`, `/dashboard/*` (lazy `AdminEntry`), `ScrollManager` (đổi trang → lên đầu, link có `#mục` → cuộn tới mục), bọc `LazyMotion` + `MotionConfig reducedMotion="user"`. Dùng chung cho `main.tsx` và `entry-server.tsx`. Chỉ dùng `m.*`, không dùng `motion.*` (`strict`) |
+| `entry-server.tsx` + `scripts/prerender.mjs` | Lúc build render `/` (en), `/vi`, `/privacy`, `/vi/privacy`, `/projects/<slug>` + `/vi/projects/<slug>` thành HTML thật (head, JSON-LD, CSS inline), sinh `app.html` (login/admin, noindex) và `404.html`. Code chạy lúc render **không được** đụng `window`/`localStorage` ngoài effect |
 | `content/privacy.ts` | Chính sách quyền riêng tư vi + en, `PRIVACY_PATH`. Phải khớp hành vi backend (thời hạn giữ, thông báo) |
+| `content/projects.ts` | Sản phẩm riêng của Khôi (ChickenNote, dangvykhoi.com): chữ vi + en cho thẻ ở trang chủ và trang chi tiết, ảnh ở `public/projects/` (webp cho trang, jpg 1200×630 cho og:image). Kể ý tưởng, không liệt kê công nghệ; việc ở công ty không có trang riêng. Thêm slug thì thêm cả vào `nginx.conf` (location projects) và `public/sitemap.xml` |
 | `content/portfolio.json`, `content/seo.json` | Nội dung dự phòng (vi + en), title/description từng ngôn ngữ |
-| `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định, `pick(item, key, lang)` chọn cột `...En` |
-| `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsBento → Contact → Footer |
+| `lib/i18n.ts` | `useLang()` theo URL, `useT()` chữ cố định (cả mục Now: sửa chữ + ngày cập nhật ở `now`), `pick(item, key, lang)` chọn cột `...En`, `otherLangPath` cho nút EN/VI |
+| `pages/public/Home.tsx` | Navbar → Hero → About → ProjectsSection → ProjectsBento (Experience) → NowSection → Contact → Footer |
+| `pages/public/ProjectPage.tsx` | Trang chi tiết project: tiêu đề, Năm / Trạng thái / Phần tôi làm, ảnh, 4 mục (vấn đề, ý tưởng, cách làm, điều rút ra), dự án tiếp theo + liên hệ |
 | `components/public/`, `components/admin/` | Xem hai mục cuối file này |
 | `components/ui/` | Badge, Button, Card, Input kiểu shadcn |
 | `components/CatChatbot.tsx` | Widget chat: `sessionId` ở `localStorage['ai_chat_session_id']`, tải `/api/ai/history/{id}`, POST `/api/ai/chat/stream` kèm `lang`, đọc SSE `{token}` / `{notice}`. Mọi chữ lấy từ `t.chat` |
@@ -37,14 +39,16 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 
 | File | Hiển thị | Dữ liệu |
 | :--- | :--- | :--- |
-| `Navbar.tsx` | Thanh điều hướng, cuộn tới section | tĩnh |
+| `Navbar.tsx` | Thanh điều hướng; ở trang chủ là `#mục`, ở trang con là link về `/#mục` | tĩnh |
 | `HeroSection.tsx` | Tên, chức danh, avatar (`fetchPriority="high"` cho LCP) | `useCachedContent('profile')` |
 | `AboutSection.tsx` | Giới thiệu + nhóm kỹ năng | `useCachedContent('skills')` + danh sách fallback hardcode |
-| `ProjectsBento.tsx` | Lưới bento các dự án | `useCachedContent('experiences')` + fallback hardcode (bảng `Projects` trong DB hiện **không** được trang public dùng) |
+| `ProjectsSection.tsx` | Mục Projects: 2 thẻ sản phẩm riêng, bấm vào mở trang chi tiết | `content/projects.ts` |
+| `NowSection.tsx` | Mục Now: 4 dòng đang làm gì + ngày cập nhật | `t.now` trong `lib/i18n.ts` |
+| `ProjectsBento.tsx` | Mục Experience (timeline); dòng ChickenNote dẫn về trang chi tiết | `useCachedContent('experiences')` + fallback hardcode (bảng `Projects` trong DB hiện **không** được trang public dùng) |
 | `ContactSection.tsx` | Form liên hệ có honeypot `companyTrap` + ô đồng ý bắt buộc (link `/privacy`) | `ContactApi.submitMessage` |
 | `Footer.tsx` | Footer + link chính sách | tĩnh |
 
-Quy ước: luôn có fallback để trang không bao giờ trống khi API lỗi; style tối (`#0A0A0C`), màu nhấn `#DEFF9A`.
+Quy ước: luôn có fallback để trang không bao giờ trống khi API lỗi; chỉ dùng token theme (`obsidian`, `surface`, `border`, `primary` cam `#FF5C00`, `text-main`, `text-muted`), góc vuông, font Space Grotesk / JetBrains Mono / Urbanist.
 
 ## components/admin — admin console (`/dashboard`)
 

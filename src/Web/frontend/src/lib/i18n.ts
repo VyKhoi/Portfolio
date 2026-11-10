@@ -19,7 +19,7 @@ export function pick<T = string>(item: any, key: string, lang: Lang): T {
 export const STRINGS = {
   vi: {
     skipToContent: 'Bỏ qua, tới nội dung',
-    nav: { about: 'GIỚI THIỆU', experience: 'KINH NGHIỆM', contact: 'LIÊN HỆ' },
+    nav: { about: 'GIỚI THIỆU', projects: 'DỰ ÁN', experience: 'KINH NGHIỆM', contact: 'LIÊN HỆ' },
     downloadCv: 'TẢI CV',
     switchLabel: 'Xem bản tiếng Anh',
     openMenu: 'Mở menu điều hướng',
@@ -49,6 +49,31 @@ export const STRINGS = {
       Frontend: 'Frontend',
       'DevOps & Cloud': 'DevOps',
     } as Record<string, string>,
+    projects: {
+      title: 'Dự Án',
+      intro: 'Những thứ tôi tự làm và tự vận hành, ngoài giờ làm.',
+      personal: 'CÁ NHÂN',
+      live: 'ĐANG CHẠY',
+      view: 'XEM DỰ ÁN',
+      year: 'Năm',
+      status: 'Trạng thái',
+      role: 'Phần tôi làm',
+      all: 'TẤT CẢ DỰ ÁN',
+      next: 'DỰ ÁN TIẾP THEO',
+      visit: 'Ghé thăm',
+      contact: 'Có ý tưởng hay góp ý? Nhắn tôi nhé.',
+      contactButton: 'LIÊN HỆ',
+    },
+    now: {
+      title: 'Bây Giờ',
+      updated: 'Cập nhật 11/2026',
+      items: [
+        { label: 'Công việc', text: 'Làm backend .NET ở công việc chính.' },
+        { label: 'Buổi tối', text: 'Chăm chút ChickenNote và chính trang này.' },
+        { label: 'Home lab', text: 'Chạy mọi dự án của mình trên một chiếc laptop cũ ở nhà.' },
+        { label: 'Đang học', text: 'Cho model AI nhỏ chạy mượt trên máy cấu hình thấp.' },
+      ],
+    },
     experienceTitle: 'Kinh Nghiệm',
     projectPrefix: 'DỰ ÁN',
     contactTitle: ['BẮT ĐẦU', 'DỰ ÁN', 'MỚI.'],
@@ -87,7 +112,7 @@ export const STRINGS = {
   },
   en: {
     skipToContent: 'Skip to content',
-    nav: { about: 'ABOUT', experience: 'EXPERIENCE', contact: 'CONTACT' },
+    nav: { about: 'ABOUT', projects: 'PROJECTS', experience: 'EXPERIENCE', contact: 'CONTACT' },
     downloadCv: 'DOWNLOAD CV',
     switchLabel: 'Xem bản tiếng Việt',
     openMenu: 'Open navigation menu',
@@ -117,6 +142,31 @@ export const STRINGS = {
       Frontend: 'Frontend',
       'DevOps & Cloud': 'DevOps',
     } as Record<string, string>,
+    projects: {
+      title: 'Projects',
+      intro: 'Things I build and run myself, outside my day job.',
+      personal: 'PERSONAL',
+      live: 'LIVE',
+      view: 'VIEW PROJECT',
+      year: 'Year',
+      status: 'Status',
+      role: 'My part',
+      all: 'ALL PROJECTS',
+      next: 'NEXT PROJECT',
+      visit: 'Visit',
+      contact: 'Have an idea or some feedback? Send me a message.',
+      contactButton: 'CONTACT',
+    },
+    now: {
+      title: 'Now',
+      updated: 'Updated 11/2026',
+      items: [
+        { label: 'Work', text: 'Building .NET backends at my day job.' },
+        { label: 'Evenings', text: 'Polishing ChickenNote and this site.' },
+        { label: 'Home lab', text: 'Running all my projects on an old laptop at home.' },
+        { label: 'Learning', text: 'Getting small AI models to run well on modest hardware.' },
+      ],
+    },
     experienceTitle: 'Experience',
     projectPrefix: 'PROJECT',
     contactTitle: ['START', 'A NEW', 'PROJECT.'],
@@ -154,6 +204,16 @@ export const STRINGS = {
     },
   },
 };
+
+// Same page in the other language: /privacy <-> /vi/privacy, / <-> /vi
+export function otherLangPath(pathname: string, lang: Lang): string {
+  if (lang === 'vi') return pathname.replace(/^\/vi(?=\/|$)/, '') || '/';
+  return pathname === '/' ? '/vi' : `/vi${pathname}`;
+}
+
+export function homePath(lang: Lang) {
+  return lang === 'vi' ? '/vi' : '/';
+}
 
 export function useT() {
   return STRINGS[useLang()];

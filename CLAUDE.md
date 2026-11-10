@@ -1,6 +1,6 @@
 # Portfolio (dangvykhoi.com) — tóm tắt repo
 
-Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kinh nghiệm, kỹ năng, liên hệ), admin console `/dashboard` để sửa nội dung, và chatbot AI local "Sigma Cat".
+Trang cá nhân của Đặng Vỹ Khôi: trang public (profile, kỹ năng, dự án riêng + trang chi tiết, kinh nghiệm, Now, liên hệ), admin console `/dashboard` để sửa nội dung, và chatbot AI local "Sigma Cat".
 
 ## Stack
 .NET 9 Web API · PostgreSQL 16 (EF Core) · React 19 + Vite 8 + Tailwind 4 · Ollama (Qwen3 4B) · Docker Compose · Gmail SMTP + Telegram để thông báo.
@@ -50,6 +50,7 @@ Luồng request: `Gateway nginx (repo WebServer) → host:18122 → portfolio_fr
 - **Đổi dữ liệu bằng script:** thêm file mới đánh số trong `database/updates/` (`0002-ten.sql`), push. CI chạy `scripts/apply-db-updates.sh` sau khi backend healthy: mỗi file chạy đúng 1 lần trong 1 transaction, ghi vào bảng `applied_scripts`, rồi restart backend để xoá cache. Không sửa file đã chạy (bị chặn), không để secret trong đó (repo public).
 - **Đổi nội dung hiển thị thì sửa cả `src/Web/frontend/src/content/portfolio.json`**: file này là nội dung dự phòng và là HTML tĩnh cho Google. CI so API với file (`scripts/check-content.py`) và cảnh báo nếu lệch.
 - Viết mộc mạc, không buzzword; Masan chỉ nêu ngắn trong mục kinh nghiệm, không đưa lên bio hay SEO.
+- Mục **Projects** + trang `/projects/<slug>` chỉ cho sản phẩm riêng của Khôi (ChickenNote, dangvykhoi.com), nội dung ở `src/Web/frontend/src/content/projects.ts` (không dùng bảng `Projects` trong DB). Kể ý tưởng, không khoe công nghệ; ChickenNote ghi thẳng là vibe code. Mục **Now** sửa ở `lib/i18n.ts`.
 
 ## Chạy & kiểm tra
 ```bash
