@@ -55,6 +55,21 @@
     transform: none;
   }
 
+  :root {
+    color-scheme: dark;
+  }
+
+  /* Browser autofill paints inputs light blue; keep them on the dark page */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill {
+    -webkit-text-fill-color: var(--color-text-main);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-obsidian) inset;
+    caret-color: var(--color-text-main);
+    transition: background-color 9999s ease-out;
+  }
+
   body {
     background-color: var(--color-obsidian);
     color: var(--color-text-main);

@@ -48,7 +48,7 @@ export function Navbar() {
         </div>
 
         {/* Desktop Nav - 6 cols */}
-        <div className="hidden lg:flex lg:col-span-6 items-center justify-center space-x-12 border-r border-border h-full">
+        <div className="hidden lg:flex lg:col-span-6 items-center justify-center space-x-8 xl:space-x-12 border-r border-border h-full">
           {links.map((link) => (
             <a key={link.name} href={link.href} className="font-mono text-xs font-bold tracking-widest text-text-muted hover:text-primary transition-colors">
               {link.name}
@@ -59,9 +59,9 @@ export function Navbar() {
         {/* Desktop CTA - 3 cols */}
         <div className="hidden lg:flex lg:col-span-3 items-center justify-end gap-6 px-6 lg:px-8 h-full">
           {languageLink}
-          <a href="/cv.pdf" target="_blank" rel="noopener" className="font-mono text-xs font-bold tracking-widest text-primary hover:text-text-main transition-colors flex items-center group">
+          <a href="/cv.pdf" target="_blank" rel="noopener" className="font-mono text-xs font-bold tracking-widest text-primary hover:text-text-main transition-colors flex items-center group whitespace-nowrap">
             <span className="mr-2">&gt;</span> {t.downloadCv}
-            <div className="w-8 h-[1px] bg-primary ml-4 group-hover:w-12 transition-all duration-300" />
+            <div className="hidden xl:block w-8 h-[1px] bg-primary ml-4 group-hover:w-12 transition-all duration-300" />
           </a>
         </div>
 

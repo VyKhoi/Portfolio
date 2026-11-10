@@ -55,7 +55,7 @@ export function ContactSection() {
           <div className="absolute inset-0 bg-primary/5 z-0" />
 
           <div className="relative z-10">
-            <h2 className="text-[2.75rem] sm:text-[4rem] md:text-[5rem] lg:text-[7rem] font-bold font-heading uppercase leading-[0.88] tracking-tighter text-text-main mb-8 lg:mb-12 break-words">
+            <h2 className="text-[2.75rem] sm:text-[4rem] md:text-[5rem] lg:text-[4.5rem] xl:text-[6rem] font-bold font-heading uppercase leading-[0.88] tracking-tighter text-text-main mb-8 lg:mb-12">
               {t.contactTitle[0]}<br />
               <span className="text-outline-primary">{t.contactTitle[1]}</span><br />
               {t.contactTitle[2]}
@@ -65,14 +65,14 @@ export function ContactSection() {
               {t.contactIntro}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 font-mono text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6 sm:gap-8 font-mono text-sm">
               <div className="flex flex-col space-y-1.5 sm:space-y-2">
                 <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">{t.phone}</span>
                 <a href="tel:+84931314792" className="text-text-main hover:text-primary transition-colors">0931 314 792</a>
               </div>
               <div className="flex flex-col space-y-1.5 sm:space-y-2">
                 <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">Email</span>
-                <a href="mailto:dangvykhoi@gmail.com" className="text-text-main hover:text-primary transition-colors break-all">dangvykhoi@gmail.com</a>
+                <a href="mailto:dangvykhoi@gmail.com" className="text-text-main hover:text-primary transition-colors">dangvykhoi<wbr />@gmail.com</a>
               </div>
               <div className="flex flex-col space-y-1.5 sm:space-y-2">
                 <span className="text-primary font-bold tracking-widest uppercase text-xs sm:text-sm">LinkedIn</span>
@@ -105,50 +105,47 @@ export function ContactSection() {
               aria-hidden="true"
             />
 
-            <div className="relative">
+            <div className="group">
+              <label htmlFor="contact-name" className="block mb-2 text-xs font-mono font-bold uppercase tracking-widest text-text-muted transition-colors group-focus-within:text-primary">
+                {t.fullName}
+              </label>
               <Input
                 id="contact-name"
-                placeholder=" "
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
                 maxLength={100}
                 required
-                className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
+                className="h-12 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label htmlFor="contact-name" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
-                {t.fullName}
-              </label>
             </div>
 
-            <div className="relative">
+            <div className="group">
+              <label htmlFor="contact-email" className="block mb-2 text-xs font-mono font-bold uppercase tracking-widest text-text-muted transition-colors group-focus-within:text-primary">
+                Email
+              </label>
               <Input
                 id="contact-email"
                 type="email"
-                placeholder=" "
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 maxLength={100}
                 required
-                className="peer pt-6 pb-2 h-16 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
+                className="h-12 border-t-0 border-l-0 border-r-0 rounded-none bg-transparent focus-visible:border-primary px-0 text-text-main font-mono"
               />
-              <label htmlFor="contact-email" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
-                Email
-              </label>
             </div>
 
-            <div className="relative pt-4">
+            <div className="group">
+              <label htmlFor="contact-message" className="block mb-2 text-xs font-mono font-bold uppercase tracking-widest text-text-muted transition-colors group-focus-within:text-primary">
+                {t.message}
+              </label>
               <textarea
                 id="contact-message"
-                className="peer flex w-full border-b border-border bg-transparent py-2 text-sm text-text-main font-mono transition-colors focus-visible:outline-none focus-visible:border-primary min-h-[100px] resize-none"
-                placeholder=" "
+                className="flex w-full border-b border-border bg-transparent py-2 text-sm text-text-main font-mono transition-colors focus-visible:outline-none focus-visible:border-primary min-h-[100px] resize-none"
                 value={formData.message}
                 onChange={(e) => setFormData({...formData, message: e.target.value})}
                 maxLength={1000}
                 required
               />
-              <label htmlFor="contact-message" className="absolute left-0 top-6 text-xs sm:text-sm font-mono font-bold uppercase tracking-widest text-text-muted transition-all peer-focus:-top-2 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-2 peer-valid:text-xs peer-valid:text-primary pointer-events-none">
-                {t.message}
-              </label>
             </div>
 
             <label className="flex items-start gap-3 text-xs sm:text-sm text-text-muted font-body leading-relaxed cursor-pointer">
@@ -157,7 +154,7 @@ export function ContactSection() {
                 checked={consent}
                 onChange={(e) => { setConsent(e.target.checked); if (e.target.checked) setError(''); }}
                 required
-                className="mt-0.5 h-4 w-4 shrink-0 accent-[#DEFF9A] cursor-pointer"
+                className="mt-0.5 h-4 w-4 shrink-0 accent-primary cursor-pointer"
               />
               <span>
                 {t.consent[0]}

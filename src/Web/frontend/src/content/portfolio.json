@@ -26,6 +26,28 @@
       "order": 1
     },
     {
+      "role": "Full-stack Developer",
+      "roleEn": "Full-stack Developer",
+      "company": "Dự án cá nhân",
+      "companyEn": "Personal Project",
+      "period": "2026 - Hiện tại",
+      "periodEn": "2026 - Present",
+      "projectName": "ChickenNote",
+      "projectNameEn": "ChickenNote",
+      "highlights": [
+        "Trang ghi chú online không cần tài khoản: mở một cái tên, gõ, và chữ đồng bộ ngay giữa điện thoại với máy tính.",
+        "Vẫn dùng được khi mất mạng và tự gộp thay đổi khi có mạng lại.",
+        "Backend Go, frontend JavaScript thuần."
+      ],
+      "highlightsEn": [
+        "Online notes with no account: open a name, type, and it syncs between phone and PC right away.",
+        "Keeps working offline and merges the changes when the connection is back.",
+        "Go backend and plain JavaScript frontend."
+      ],
+      "techStack": ["Go", "JavaScript", "SSE", "Docker", "Linux"],
+      "order": 2
+    },
+    {
       "role": "Software Engineer (.NET)",
       "roleEn": "Software Engineer (.NET)",
       "company": "Team độc lập",
@@ -49,7 +71,7 @@
         "Synced dashboards, kiosks and mobile apps in real time with SignalR."
       ],
       "techStack": [".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI"],
-      "order": 2
+      "order": 3
     },
     {
       "role": "Backend Developer",
@@ -71,28 +93,6 @@
         "Helped refactor legacy server code and speed up SQL queries."
       ],
       "techStack": ["ASP.NET Core", "SQL Server", "Microservices"],
-      "order": 3
-    },
-    {
-      "role": "Full-stack Developer",
-      "roleEn": "Full-stack Developer",
-      "company": "Dự án cá nhân",
-      "companyEn": "Personal Project",
-      "period": "2026 - Hiện tại",
-      "periodEn": "2026 - Present",
-      "projectName": "ChickenNote",
-      "projectNameEn": "ChickenNote",
-      "highlights": [
-        "Trang ghi chú online không cần tài khoản: mở một cái tên, gõ, và chữ đồng bộ ngay giữa điện thoại với máy tính.",
-        "Vẫn dùng được khi mất mạng và tự gộp thay đổi khi có mạng lại.",
-        "Backend Go, frontend JavaScript thuần."
-      ],
-      "highlightsEn": [
-        "Online notes with no account: open a name, type, and it syncs between phone and PC right away.",
-        "Keeps working offline and merges the changes when the connection is back.",
-        "Go backend and plain JavaScript frontend."
-      ],
-      "techStack": ["Go", "JavaScript", "SSE", "Docker", "Linux"],
       "order": 4
     }
   ],

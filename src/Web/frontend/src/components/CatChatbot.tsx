@@ -245,10 +245,10 @@ export const CatChatbot: React.FC = () => {
               pointerEvents: 'none',
               opacity: 0
             }}
-            className="bg-white text-black text-xs font-bold px-3 py-2 rounded-lg shadow-lg max-w-[165px] text-center"
+            className="bg-surface text-text-main border border-primary font-mono text-xs font-bold px-3 py-2 rounded-none shadow-lg max-w-[165px] text-center"
           >
             {t.chat.bubble}
-            <div className="absolute -bottom-2 right-5 md:left-1/2 md:-translate-x-1/2 border-solid border-t-white border-t-8 border-x-transparent border-x-8 border-b-0"></div>
+            <div className="absolute -bottom-2 right-5 md:left-1/2 md:-translate-x-1/2 border-solid border-t-primary border-t-8 border-x-transparent border-x-8 border-b-0"></div>
           </m.div>
         )}
       </AnimatePresence>
@@ -266,7 +266,7 @@ export const CatChatbot: React.FC = () => {
               setIsOpen(true);
               setShowBubble(false);
             }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999] p-1 bg-[#121215] border-2 border-[#DEFF9A]/60 hover:border-[#DEFF9A] text-white rounded-full shadow-[0_0_25px_rgba(222,255,154,0.3)] transition-all group flex items-center justify-center cursor-pointer"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999] p-1 bg-surface border-2 border-primary/60 hover:border-primary text-white rounded-full shadow-[0_0_25px_rgba(255,92,0,0.3)] transition-all group flex items-center justify-center cursor-pointer"
             aria-label={t.chat.open}
           >
             <div className="relative">
@@ -276,9 +276,9 @@ export const CatChatbot: React.FC = () => {
                 width={44}
                 height={44}
                 decoding="async"
-                className="w-11 h-11 rounded-full object-cover border border-[#DEFF9A]"
+                className="w-11 h-11 rounded-full object-cover border border-primary"
               />
-              <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-[#DEFF9A] border-2 border-[#121215] animate-pulse"></span>
+              <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-primary border-2 border-surface animate-pulse"></span>
             </div>
           </m.button>
         )}
@@ -291,9 +291,9 @@ export const CatChatbot: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-3 right-3 left-3 sm:left-auto sm:bottom-6 sm:right-6 sm:w-[360px] h-[min(480px,calc(100dvh-24px))] bg-[#121215] border border-[#27272A] shadow-2xl rounded-xl z-[99999] font-mono overflow-hidden flex flex-col"
+            className="fixed bottom-3 right-3 left-3 sm:left-auto sm:bottom-6 sm:right-6 sm:w-[360px] h-[min(480px,calc(100dvh-24px))] bg-surface border border-border shadow-2xl rounded-none z-[99999] font-mono overflow-hidden flex flex-col"
           >
-            <div className="bg-[#18181C] border-b border-[#27272A] p-3.5 sm:p-4 flex justify-between items-center">
+            <div className="bg-obsidian border-b border-border p-3.5 sm:p-4 flex justify-between items-center">
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <img
@@ -302,30 +302,30 @@ export const CatChatbot: React.FC = () => {
                     width={40}
                     height={40}
                     decoding="async"
-                    className="w-10 h-10 rounded-full object-cover border-2 border-[#DEFF9A] shadow-[0_0_15px_rgba(222,255,154,0.3)]"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-primary shadow-[0_0_15px_rgba(255,92,0,0.3)]"
                   />
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#DEFF9A] border-2 border-[#18181C] rounded-full"></span>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-primary border-2 border-obsidian rounded-full"></span>
                 </div>
                 <div>
                   <h3 className="text-white font-bold text-sm flex items-center gap-1.5">
                     Sigma Cat <span className="text-xs">😼</span>
                   </h3>
-                  <p className="text-xs text-zinc-400">{t.chat.subtitle}</p>
+                  <p className="text-xs text-text-muted">{t.chat.subtitle}</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label={t.chat.close}
-                className="text-zinc-400 hover:text-white transition-colors text-2xl leading-none px-2"
+                className="text-text-muted hover:text-white transition-colors text-2xl leading-none px-2"
               >
                 &times;
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-[#27272A] scrollbar-track-transparent">
+            <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
               {messages.length === 0 && (
                 <div className="text-center mt-6">
-                  <div className="inline-block bg-[#18181C] border border-[#27272A] text-zinc-400 text-xs px-4 py-2 rounded-full">
+                  <div className="inline-block bg-obsidian border border-border text-text-muted text-xs px-4 py-2 rounded-full">
                     {t.chat.hint}
                   </div>
                 </div>
@@ -335,8 +335,8 @@ export const CatChatbot: React.FC = () => {
                   <div
                     className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${
                       m.role === 'user'
-                        ? 'bg-[#DEFF9A] text-black rounded-2xl rounded-tr-sm font-medium'
-                        : 'bg-[#27272A] text-zinc-200 rounded-2xl rounded-tl-sm'
+                        ? 'bg-primary text-black rounded-none font-medium'
+                        : 'bg-border text-text-main rounded-none'
                     }`}
                     dangerouslySetInnerHTML={{
                       __html: escapeHtml(m.content)
@@ -349,17 +349,17 @@ export const CatChatbot: React.FC = () => {
               ))}
               {loading && (
                 <div className="flex justify-start">
-                  <div className="bg-[#27272A] text-zinc-300 p-4 rounded-2xl rounded-tl-sm flex space-x-2">
-                    <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce"></span>
-                    <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
-                    <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
+                  <div className="bg-border text-text-main p-4 rounded-none flex space-x-2">
+                    <span className="w-2 h-2 bg-text-muted rounded-full animate-bounce"></span>
+                    <span className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                    <span className="w-2 h-2 bg-text-muted rounded-full animate-bounce" style={{animationDelay: '0.4s'}}></span>
                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSend} className="p-3 border-t border-[#27272A] bg-[#18181C] flex gap-2">
+            <form onSubmit={handleSend} className="p-3 border-t border-border bg-obsidian flex gap-2">
               <input
                 type="text"
                 name="website_trap"
@@ -378,13 +378,13 @@ export const CatChatbot: React.FC = () => {
                 maxLength={350}
                 placeholder={cooldown ? t.chat.cooling : t.chat.placeholder}
                 disabled={loading || cooldown}
-                className="flex-1 min-w-0 bg-[#0A0A0C] border border-[#27272A] text-white text-sm rounded-lg px-3.5 py-2.5 focus:border-[#DEFF9A] focus:ring-1 focus:ring-[#DEFF9A] outline-none transition-all placeholder:text-zinc-600 disabled:opacity-60"
+                className="flex-1 min-w-0 bg-obsidian border border-border text-white text-sm rounded-none px-3.5 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-text-muted disabled:opacity-60"
               />
               <button
                 type="submit"
                 disabled={loading || cooldown || !input.trim()}
                 aria-label={t.chat.send}
-                className="bg-[#DEFF9A] text-black px-4 py-2 rounded-lg font-bold disabled:opacity-50 hover:bg-[#c2f068] transition-colors flex items-center justify-center min-w-[44px] shrink-0"
+                className="bg-primary text-black px-4 py-2 rounded-none font-bold disabled:opacity-50 hover:bg-primary-hover transition-colors flex items-center justify-center min-w-[44px] shrink-0"
                 title={cooldown ? t.chat.wait : t.chat.send}
               >
                 {cooldown ? (
@@ -396,9 +396,9 @@ export const CatChatbot: React.FC = () => {
                 )}
               </button>
             </form>
-            <p className="px-3 pb-2.5 pt-0 bg-[#18181C] text-[11px] leading-snug text-zinc-500">
+            <p className="px-3 pb-2.5 pt-0 bg-obsidian text-[11px] leading-snug text-text-muted">
               {t.chat.notice}{' '}
-              <Link to={PRIVACY_PATH[lang]} className="underline underline-offset-2 hover:text-[#DEFF9A]">{t.chat.privacy}</Link>
+              <Link to={PRIVACY_PATH[lang]} className="underline underline-offset-2 hover:text-primary">{t.chat.privacy}</Link>
             </p>
           </m.div>
         )}

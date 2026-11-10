@@ -86,13 +86,12 @@ export function AboutSection() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-border border border-border">
             {SKILL_CATEGORIES.map((skillGroup, idx) => (
+              <div key={skillGroup.title} className="bg-obsidian p-6 sm:p-8 hover:bg-surface transition-colors">
               <m.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                key={skillGroup.title}
-                className="bg-obsidian p-6 sm:p-8 hover:bg-surface transition-colors"
               >
                 <h3 className="font-mono text-xs font-bold text-primary uppercase tracking-widest mb-4 sm:mb-6">
                   {skillGroup.title}
@@ -106,6 +105,7 @@ export function AboutSection() {
                   ))}
                 </ul>
               </m.div>
+              </div>
             ))}
           </div>
         </div>

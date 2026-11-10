@@ -20,7 +20,7 @@ export function Home() {
   }, [lang])
 
   return (
-    <div className="bg-[#0A0A0C] min-h-screen text-white selection:bg-[#DEFF9A] selection:text-black">
+    <div className="bg-obsidian min-h-screen text-white selection:bg-primary selection:text-black">
       <a href="#main" className="skip-link">{t.skipToContent}</a>
       <Navbar />
       <main id="main">

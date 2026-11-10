@@ -39,7 +39,7 @@ public static class SeedData
                 "Synced dashboards, kiosks and mobile apps in real time with SignalR."
             },
             TechStack = new List<string> { ".NET 8", "C#", "EF Core", "Dapper", "SignalR", "Hangfire", "MAUI" },
-            Order = 2
+            Order = 3
         },
         new Experience
         {
@@ -55,7 +55,7 @@ public static class SeedData
                 "Helped refactor legacy server code and speed up SQL queries."
             },
             TechStack = new List<string> { "ASP.NET Core", "SQL Server", "Microservices" },
-            Order = 3
+            Order = 4
         },
         new Experience
         {
@@ -71,7 +71,7 @@ public static class SeedData
                 "Go backend and plain JavaScript frontend, running on my home server."
             },
             TechStack = new List<string> { "Go", "JavaScript", "SSE", "Docker", "Linux" },
-            Order = 4
+            Order = 2
         }
     };
 
