@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLang, useT } from '../lib/i18n';
@@ -31,15 +31,31 @@ export const CatChatbot: React.FC = () => {
   const [showBubble, setShowBubble] = useState(true);
 
   const bubbleRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // Scroll the message list itself (not the page) so the latest message is in view
+  const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
+    const list = listRef.current;
+    if (list) list.scrollTo({ top: list.scrollHeight, behavior });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
+
+  // Opening the chat lands on the latest message, not the top of an old conversation:
+  // the list only exists while the window is open, so jump the moment it mounts
+  // (stable callback: a new function each render would re-run it and yank the list down on every keystroke)
+  const attachList = useCallback((el: HTMLDivElement | null) => {
+    listRef.current = el;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, []);
+
+  // Tapping the input: jump to the latest message, and again once a phone keyboard has resized the view
+  const handleInputFocus = () => {
+    scrollToBottom();
+    setTimeout(() => scrollToBottom(), 350);
+  };
 
   // Track the neko position and attach click listener
   useEffect(() => {
@@ -322,7 +338,7 @@ export const CatChatbot: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+            <div ref={attachList} className="flex-1 overflow-y-auto p-3.5 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
               {messages.length === 0 && (
                 <div className="text-center mt-6">
                   <div className="inline-block bg-obsidian border border-border text-text-muted text-xs px-4 py-2 rounded-full">
@@ -356,7 +372,6 @@ export const CatChatbot: React.FC = () => {
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
             </div>
 
             <form onSubmit={handleSend} className="p-3 border-t border-border bg-obsidian flex gap-2">
@@ -375,6 +390,7 @@ export const CatChatbot: React.FC = () => {
                 aria-label={t.chat.inputLabel}
                 value={input}
                 onChange={e => setInput(e.target.value)}
+                onFocus={handleInputFocus}
                 maxLength={350}
                 placeholder={cooldown ? t.chat.cooling : t.chat.placeholder}
                 disabled={loading || cooldown}

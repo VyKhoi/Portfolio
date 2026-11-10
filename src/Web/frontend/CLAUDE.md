@@ -21,7 +21,7 @@ Chatbot escape HTML trước khi đổi `**đậm**`/`*nghiêng*` (`escapeHtml` 
 | `pages/public/ProjectPage.tsx` | Trang chi tiết project: tiêu đề, Năm / Trạng thái / Phần tôi làm, ảnh, 4 mục (vấn đề, ý tưởng, cách làm, điều rút ra), dự án tiếp theo + liên hệ |
 | `components/public/`, `components/admin/` | Xem hai mục cuối file này |
 | `components/ui/` | Badge, Button, Card, Input kiểu shadcn |
-| `components/CatChatbot.tsx` | Widget chat: `sessionId` ở `localStorage['ai_chat_session_id']`, tải `/api/ai/history/{id}`, POST `/api/ai/chat/stream` kèm `lang`, đọc SSE `{token}` / `{notice}`. Mọi chữ lấy từ `t.chat` |
+| `components/CatChatbot.tsx` | Widget chat: `sessionId` ở `localStorage['ai_chat_session_id']`, tải `/api/ai/history/{id}`, POST `/api/ai/chat/stream` kèm `lang`, đọc SSE `{token}` / `{notice}`. Mọi chữ lấy từ `t.chat`. Mở chat (callback ref `attachList`) và bấm vào ô nhập → cuộn khung tin nhắn (không phải cả trang) xuống tin mới nhất |
 | `lib/api.ts` | `API_BASE_URL='/api'`, `ContentApi` (profile/experience/skills), `ContactApi` |
 | `lib/contentCache.ts` | Cache `localStorage` `content-cache:v3:*` + `useCachedContent(key, fallback, isValid)` |
 | `store/authStore.ts` | JWT ở `localStorage['token']` |
